@@ -20,7 +20,7 @@
 #include <map>
 #include <queue>
 #include <functional>
-#include <SSTREAM>
+#include <sstream>
 
 #pragma warning ( pop )
 
@@ -31,6 +31,20 @@ extern int split_string(const std::string & input, const std::string & delimiter
 
 namespace std
 {
+#if __cplusplus >= 201103L
+	template <typename _Arg, typename _Result>
+	struct unary_function {
+		typedef _Arg argument_type;
+		typedef _Result result_type;
+	};
+
+	template <typename _Arg1, typename _Arg2, typename _Result>
+	struct binary_function {
+		typedef _Arg1 first_argument_type;
+		typedef _Arg2 second_argument_type;
+		typedef _Result result_type;
+	};
+#endif
 	template <class _Ty>
 	class void_mem_fun_t
 		: public unary_function<_Ty *, void> {

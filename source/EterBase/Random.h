@@ -1,7 +1,7 @@
 #ifndef __INC_ETERBASE_RANDOM_H__
 #define __INC_ETERBASE_RANDOM_H__
 
-#if defined(__ANDROID__) || defined(__linux__)
+#if defined(__ANDROID__) || defined(__linux__) || defined(__APPLE__)
 #define random metin2_random
 #define srandom metin2_srandom
 #endif
