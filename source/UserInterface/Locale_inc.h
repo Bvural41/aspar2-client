@@ -181,7 +181,7 @@
 #define ENABLE_MULTI_FARM_BLOCK						//Farm Engel Sistemi
 #define ENABLE_COSTUME_SET_ITEM						//Kostüm Set Bonus Sistemi
 #define ENABLE_BOSS_DEDECTOR_SYSTEM					//Patron Dedektör Sistemi
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 #define CEF_BROWSER									//CEF Browser Modülü
 #endif
 #define ENABLE_USE_CLIP_MASK 						//Pencere SCROLL Modülü
@@ -203,9 +203,10 @@
 #define ENABLE_CHAT_STOP_SYSTEM						//Sohbet Durdurma Sistemi
 #define ENABLE_RENDER_TARGET						//Mob Önizleme Sistemi
 #define ENABLE_ATTRACT_RANGER_SYSYTEM				//Okçuları Yanına Çekme Sistemi
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 #define ENABLE_TRANSLATOR_GOOGLE_SYSTEM				//Otomatik Çeviri Sistemi
 #endif
+
 #define ENABLE_KILL_STATISTICS						//Oyuncu İstatistik Sistemi
 #define ENABLE_COINS_SYSTEM							//Ep Sistemi
 #define ENABLE_SALES_SYSTEM							//Fırsatı Yakala Sistemi

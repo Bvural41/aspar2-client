@@ -166,9 +166,10 @@ void CResourceManager::PruneUnusedResources(bool bForceAll)
 void CResourceManager::CleanMemory()
 {
 	PruneUnusedResources();
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
 #endif
+
 }
 
 void CResourceManager::__DestroyDeletingResourceMap()

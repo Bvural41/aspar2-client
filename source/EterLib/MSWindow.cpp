@@ -25,7 +25,7 @@ LRESULT CALLBACK MSWindowProcedure(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM 
 	if (pWnd)
 		return pWnd->WindowProcedure(hWnd, uiMsg, wParam, lParam);	
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (s_pOldSDLWndProc)
 		return CallWindowProc(s_pOldSDLWndProc, hWnd, uiMsg, wParam, lParam);
 #endif
@@ -46,7 +46,7 @@ LRESULT CMSWindow::WindowProcedure(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM 
 			break;
 	}
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (s_pOldSDLWndProc)
 		return CallWindowProc(s_pOldSDLWndProc, hWnd, uiMsg, wParam, lParam);
 #endif

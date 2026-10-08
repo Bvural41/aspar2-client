@@ -1061,17 +1061,18 @@ bool CPythonSystem::LoadConfig()
 			break;
 
 		if (!stricmp(command, "WIDTH"))
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 			m_Config.width		= atoi(value);
 #else
 			m_Config.width		= (g_nAndroidScreenWidth > 0) ? g_nAndroidScreenWidth : 1067;
 #endif
 		else if (!stricmp(command, "HEIGHT"))
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 			m_Config.height	= atoi(value);
 #else
 			m_Config.height	= (g_nAndroidScreenHeight > 0) ? g_nAndroidScreenHeight : 600;
 #endif
+
 		else if (!stricmp(command, "BPP"))
 			m_Config.bpp		= atoi(value);
 		else if (!stricmp(command, "FREQUENCY"))
@@ -1259,8 +1260,9 @@ bool CPythonSystem::LoadConfig()
 #endif
 	}
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (m_Config.bWindowed)
+
 	{
 		unsigned screen_width = GetSystemMetrics(SM_CXFULLSCREEN);
 		unsigned screen_height = GetSystemMetrics(SM_CYFULLSCREEN);

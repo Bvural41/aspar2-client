@@ -514,7 +514,7 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 	ms_hWnd		= hWnd;
 	ms_hDC		= GetDC(hWnd);
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (!ms_pSDLWindow)
 	{
 		TraceError("CGraphicDevice::Create - ms_pSDLWindow is null!");
@@ -537,9 +537,10 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 	SDL_GL_SetSwapInterval(0);
 #endif
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 	ms_hGLContext = (void*)1;
 #endif
+
 
 	if (!InitGLLoader())
 	{
@@ -557,9 +558,10 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	SDL_GL_SwapWindow(ms_pSDLWindow);
 #endif
+
 
 	m_pStateManager = new CStateManager(nullptr);
 	D3DXCreateMatrixStack(0, &ms_lpd3dMatStack);
@@ -1316,9 +1318,10 @@ void CGraphicDevice::Destroy()
 	}
 	if (ms_hGLContext)
 	{
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 		SDL_GL_DeleteContext((SDL_GLContext)ms_hGLContext);
 #endif
+
 		ms_hGLContext = nullptr;
 	}
 #endif

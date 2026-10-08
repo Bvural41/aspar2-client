@@ -754,7 +754,7 @@ extern RECT g_rcBrowser;
 void CScreen::Show(HWND hWnd) const
 {
 #if defined(USE_OPENGL_ES)
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (ms_pSDLWindow)
 		SDL_GL_SwapWindow(ms_pSDLWindow);
 #endif
@@ -785,7 +785,7 @@ void CScreen::Show(HWND hWnd) const
 void CScreen::Show(RECT * pSrcRect) const
 {
 #if defined(USE_OPENGL_ES)
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (ms_pSDLWindow)
 		SDL_GL_SwapWindow(ms_pSDLWindow);
 #endif
@@ -798,7 +798,7 @@ void CScreen::Show(RECT * pSrcRect) const
 void CScreen::Show(RECT * pSrcRect, HWND hWnd) const
 {
 #if defined(USE_OPENGL_ES)
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (ms_pSDLWindow)
 		SDL_GL_SwapWindow(ms_pSDLWindow);
 #endif

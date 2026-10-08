@@ -69,8 +69,9 @@ void CPythonApplication::SetCursorVisible(BOOL bFlag, bool bLiarCursorOn)
 	m_bCursorVisible = bFlag;
 	m_bLiarCursorOn = bLiarCursorOn;
 	
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (CURSOR_MODE_HARDWARE == m_iCursorMode)
+
 	{
 		int iShowNum;
 		if (FALSE == m_bCursorVisible)
@@ -140,8 +141,9 @@ BOOL CPythonApplication::SetCursorNum(int iCursorNum)
 		}
 	}
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (CURSOR_MODE_HARDWARE == m_iCursorMode)
+
 	{
 		TCursorHandleMap::iterator itor = m_CursorHandleMap.find(iCursorNum);
 		if (m_CursorHandleMap.end() == itor)

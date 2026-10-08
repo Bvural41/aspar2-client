@@ -381,10 +381,11 @@ void OpenLogFile(bool bUseLogFIle)
 
 void OpenConsoleWindow()
 {
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	AllocConsole();
 
 	freopen("CONOUT$", "a", stdout);
 	freopen("CONIN$", "r", stdin);
 #endif
+
 }

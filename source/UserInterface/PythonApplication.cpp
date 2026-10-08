@@ -4,13 +4,14 @@
 #include "../eterlib/AttributeInstance.h"
 #include "../gamelib/AreaTerrain.h"
 #include "../EterGrnLib/Material.h"
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 #ifdef CEF_BROWSER
 #include "CefWebBrowser.h"
 #else
 #include "../CWebBrowser/CWebBrowser.h"
 #endif
 #endif
+
 
 #include "resource.h"
 #include "PythonApplication.h"
@@ -62,9 +63,10 @@ CPythonApplication::CPythonApplication() :
 	SetEterExceptionHandler();
 #endif
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	CTimer::Instance().UseCustomTime();
 #endif
+
 	m_dwWidth = 800;
 	m_dwHeight = 600;
 
@@ -525,8 +527,9 @@ bool CPythonApplication::Process()
 	DWORD dwUpdateTime4=ELTimer_GetMSec();
 #endif
 	// Mouse
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	int mouseX = 0, mouseY = 0;
+
 	if (m_pSDLWindow)
 	{
 		SDL_GetMouseState(&mouseX, &mouseY);
@@ -901,8 +904,9 @@ bool CPythonApplication::Process()
 		}
 	}
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	int rest = s_uiNextFrameTime - ELTimer_GetMSec();
+
 
 	if (rest > 0 && !bCurrentLateUpdate)
 	{
@@ -1796,8 +1800,9 @@ void CPythonApplication::FlashApplication()
 
 void CPythonApplication::Destroy()
 {
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 #ifdef CEF_BROWSER
+
 	CefWebBrowser_Destroy();
 #else
 	WebBrowser_Destroy();

@@ -725,6 +725,7 @@ inline DWORD GetPrivateProfileString(LPCSTR, LPCSTR, LPCSTR, LPSTR lpReturnedStr
 inline int LoadString(HINSTANCE, UINT, LPSTR lpBuffer, int nBufferMax) { if (nBufferMax) lpBuffer[0] = 0; return 0; }
 inline UINT GetDriveType(LPCSTR) { return 0; }
 inline HANDLE GetCurrentProcess() { return (HANDLE)1; }
+inline BOOL SetProcessWorkingSetSize(HANDLE, SIZE_T, SIZE_T) { return TRUE; }
 
 inline BOOL SetWindowPos(HWND, HWND, int, int, int, int, UINT) { return TRUE; }
 inline LRESULT SendMessage(HWND, UINT, WPARAM, LPARAM) { return 0; }
