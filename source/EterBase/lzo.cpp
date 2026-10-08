@@ -121,9 +121,9 @@ void CLZObject::BeginCompress(const void * pvIn, UINT uiInLen)
     m_pbIn = (const BYTE *) pvIn;
 	
     // sizeof(SHeader) +
-    // ¾ÏÈ£È­¸¦ À§ÇÑ fourCC 4¹ÙÀÌÆ®
-    // ¾ÐÃàµÈ ÈÄ ¸¸µé¾îÁú ¼ö ÀÖ´Â ÃÖ´ë ¿ë·® +
-    // ¾ÏÈ£È­¸¦ À§ÇÑ 8 ¹ÙÀÌÆ®
+    // ì•”í˜¸í™”ë¥¼ ìœ„í•œ fourCC 4ë°”ì´íŠ¸
+    // ì••ì¶•ëœ í›„ ë§Œë“¤ì–´ì§ˆ ìˆ˜ ìžˆëŠ” ìµœëŒ€ ìš©ëŸ‰ +
+    // ì•”í˜¸í™”ë¥¼ ìœ„í•œ 8 ë°”ì´íŠ¸
     m_dwBufferSize = sizeof(THeader) + sizeof(DWORD) + (uiInLen + uiInLen / 64 + 16 + 3) + 8;
 	
     m_pbBuffer = gs_freeMemMgr.Alloc(m_dwBufferSize);
@@ -140,9 +140,9 @@ void CLZObject::BeginCompressInBuffer(const void * pvIn, UINT uiInLen, void * /*
     m_pbIn = (const BYTE *) pvIn;
 	
     // sizeof(SHeader) +
-    // ¾ÏÈ£È­¸¦ À§ÇÑ fourCC 4¹ÙÀÌÆ®
-    // ¾ÐÃàµÈ ÈÄ ¸¸µé¾îÁú ¼ö ÀÖ´Â ÃÖ´ë ¿ë·® +
-    // ¾ÏÈ£È­¸¦ À§ÇÑ 8 ¹ÙÀÌÆ®
+    // ì•”í˜¸í™”ë¥¼ ìœ„í•œ fourCC 4ë°”ì´íŠ¸
+    // ì••ì¶•ëœ í›„ ë§Œë“¤ì–´ì§ˆ ìˆ˜ ìžˆëŠ” ìµœëŒ€ ìš©ëŸ‰ +
+    // ì•”í˜¸í™”ë¥¼ ìœ„í•œ 8 ë°”ì´íŠ¸
     m_dwBufferSize = sizeof(THeader) + sizeof(DWORD) + (uiInLen + uiInLen / 64 + 16 + 3) + 8;
 	
     m_pbBuffer = gs_freeMemMgr.Alloc(m_dwBufferSize);
@@ -224,7 +224,7 @@ public:
 		sum += size;
 		count++;
 
-		maxSize = max(size, maxSize);
+		maxSize = (size > maxSize) ? size : maxSize;
 		if (size >= LOCAL_BUF_SIZE)
 		{
 			m_buf = new char[size];

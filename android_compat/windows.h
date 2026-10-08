@@ -209,7 +209,11 @@ typedef wchar_t WCHAR;
 #define _T(x) x
 #define TEXT(x) x
 
+#if defined(__APPLE__)
+#include <objc/objc.h>
+#else
 typedef int BOOL;
+#endif
 typedef int16_t SHORT;
 typedef int32_t LONG;
 typedef uint32_t ULONG;
@@ -394,8 +398,12 @@ typedef UINT_PTR WPARAM;
 
 typedef LRESULT (*WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 
+#ifndef TRUE
 #define TRUE 1
+#endif
+#ifndef FALSE
 #define FALSE 0
+#endif
 
 #define S_OK 0
 #define S_FALSE 1
