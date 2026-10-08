@@ -1,0 +1,516 @@
+#include "StdAfx.h"
+#include "GameType.h"
+
+std::string g_strResourcePath = "d:/ymir work/";
+std::string g_strImagePath = "d:/ymir work/ui/";
+
+std::string g_strGuildSymbolPathName = "mark/10/";
+
+// DEFAULT_FONT
+static std::string gs_strDefaultFontName = "±¼¸²Ã¼:12.fnt";
+static std::string gs_strDefaultItalicFontName = "±¼¸²Ã¼:12i.fnt";
+static CResource* gs_pkDefaultFont = NULL;
+static CResource* gs_pkDefaultItalicFont = NULL;
+
+static bool gs_isReloadDefaultFont = false;
+
+void DefaultFont_Startup()
+{
+	gs_pkDefaultFont = NULL;
+}
+
+void DefaultFont_Cleanup()
+{
+	if (gs_pkDefaultFont)
+		gs_pkDefaultFont->Release();
+}
+
+void DefaultFont_SetName(const char * c_szFontName)
+{
+	gs_strDefaultFontName = c_szFontName;
+	gs_strDefaultFontName += ".fnt";
+
+	gs_strDefaultItalicFontName = c_szFontName;
+	if(strchr(c_szFontName, ':'))
+		gs_strDefaultItalicFontName += "i";
+	gs_strDefaultItalicFontName += ".fnt";
+
+	gs_isReloadDefaultFont = true;
+}
+
+bool ReloadDefaultFonts()
+{
+	CResourceManager& rkResMgr = CResourceManager::Instance();
+
+	gs_isReloadDefaultFont = false;
+
+	CResource* pkNewFont = rkResMgr.GetResourcePointer(gs_strDefaultFontName.c_str());
+	pkNewFont->AddReference();
+	if (gs_pkDefaultFont)
+		gs_pkDefaultFont->Release();
+	gs_pkDefaultFont = pkNewFont;
+
+	CResource* pkNewItalicFont = rkResMgr.GetResourcePointer(gs_strDefaultItalicFontName.c_str());
+	pkNewItalicFont->AddReference();
+	if (gs_pkDefaultItalicFont)
+		gs_pkDefaultItalicFont->Release();
+	gs_pkDefaultItalicFont = pkNewItalicFont;
+
+	return true;
+}
+
+CResource* DefaultFont_GetResource()
+{	
+	if (!gs_pkDefaultFont || gs_isReloadDefaultFont)
+		ReloadDefaultFonts();
+	return gs_pkDefaultFont;
+}
+
+CResource* DefaultItalicFont_GetResource()
+{	
+	if (!gs_pkDefaultItalicFont || gs_isReloadDefaultFont)
+		ReloadDefaultFonts();
+	return gs_pkDefaultItalicFont;
+}
+
+// END_OF_DEFAULT_FONT
+
+void SetGuildSymbolPath(const char * c_szPathName)
+{
+	g_strGuildSymbolPathName = "mark/";
+	g_strGuildSymbolPathName += c_szPathName;
+	g_strGuildSymbolPathName += "/";
+}
+
+const char * GetGuildSymbolFileName(DWORD dwGuildID)
+{
+	return _getf("%s%03d.jpg", g_strGuildSymbolPathName.c_str(), dwGuildID);
+}
+
+BYTE c_aSlotTypeToInvenType[SLOT_TYPE_MAX] =
+{
+	RESERVED_WINDOW,		// SLOT_TYPE_NONE
+	INVENTORY,				// SLOT_TYPE_INVENTORY
+	RESERVED_WINDOW,		// SLOT_TYPE_SKILL
+	RESERVED_WINDOW,		// SLOT_TYPE_EMOTION
+	RESERVED_WINDOW,		// SLOT_TYPE_SHOP
+	RESERVED_WINDOW,		// SLOT_TYPE_EXCHANGE_OWNER
+	RESERVED_WINDOW,		// SLOT_TYPE_EXCHANGE_TARGET
+	RESERVED_WINDOW,		// SLOT_TYPE_QUICK_SLOT
+	RESERVED_WINDOW,		// SLOT_TYPE_SAFEBOX	<- SAFEBOX, MALL
+	RESERVED_WINDOW,		// SLOT_TYPE_PRIVATE_SHOP
+	RESERVED_WINDOW,		// SLOT_TYPE_MALL		<- SAFEBOX, MALL
+	DRAGON_SOUL_INVENTORY,	// SLOT_TYPE_DRAGON_SOUL_INVENTORY
+	BELT_INVENTORY,			// SLOT_TYPE_BELT_INVENTORY
+#ifdef ENABLE_SPLIT_INVENTORY_SYSTEM
+	INVENTORY,				// SLOT_TYPE_SKILL_BOOK_INVENTORY
+	INVENTORY,				// SLOT_TYPE_UPGRADE_ITEM_INVENTORY
+	INVENTORY,				// SLOT_TYPE_STONE_INVENTORY
+	INVENTORY,				// SLOT_TYPE_BOX_INVENTORY
+	INVENTORY,				// SLOT_TYPE_EFSUN_INVENTORY
+	INVENTORY,				// SLOT_TYPE_CICEK_INVENTORY
+#endif
+#ifdef ENABLE_SWITCHBOT
+	SWITCHBOT,				// SLOT_TYPE_SWITCHBOT
+#endif
+};
+
+BYTE SlotTypeToInvenType(BYTE bSlotType)
+{
+	if (bSlotType >= SLOT_TYPE_MAX)
+		return RESERVED_WINDOW;
+	else
+		return c_aSlotTypeToInvenType[bSlotType];
+}
+
+#include "Packet.h"
+typedef struct SApplyInfo
+{
+	BYTE	bPointType;		// APPLY -> POINT
+} TApplyInfo;
+
+const TApplyInfo aApplyInfo[CItemData::MAX_APPLY_NUM] =
+{
+	{ POINT_NONE,						},	// APPLY_NONE,					
+	{ POINT_MAX_HP,		        		},	// APPLY_MAX_HP,				
+	{ POINT_MAX_SP,		        		},	// APPLY_MAX_SP,				
+	{ POINT_HT,			        		},	// APPLY_CON,					
+	{ POINT_IQ,			        		},	// APPLY_INT,					
+	{ POINT_ST,			        		},	// APPLY_STR,					
+	{ POINT_DX,			        		},	// APPLY_DEX,					
+	{ POINT_ATT_SPEED,		    		},	// APPLY_ATT_SPEED,				
+	{ POINT_MOV_SPEED,		    		},	// APPLY_MOV_SPEED,				
+	{ POINT_CASTING_SPEED,	    		},	// APPLY_CAST_SPEED,			
+	{ POINT_HP_REGEN,					},	// APPLY_HP_REGEN,				
+	{ POINT_SP_REGEN,					},	// APPLY_SP_REGEN,				
+	{ POINT_POISON_PCT,		    		},	// APPLY_POISON_PCT,			
+	{ POINT_STUN_PCT,		    		},	// APPLY_STUN_PCT,				
+	{ POINT_SLOW_PCT,		    		},	// APPLY_SLOW_PCT,				
+	{ POINT_CRITICAL_PCT,				},	// APPLY_CRITICAL_PCT,			
+	{ POINT_PENETRATE_PCT,				},	// APPLY_PENETRATE_PCT,			
+	{ POINT_ATTBONUS_HUMAN,				},	// APPLY_ATTBONUS_HUMAN,		
+	{ POINT_ATTBONUS_ANIMAL,			},	// APPLY_ATTBONUS_ANIMAL,		
+	{ POINT_ATTBONUS_ORC,				},	// APPLY_ATTBONUS_ORC,			
+	{ POINT_ATTBONUS_MILGYO,			},	// APPLY_ATTBONUS_MILGYO,		
+	{ POINT_ATTBONUS_UNDEAD,			},	// APPLY_ATTBONUS_UNDEAD,		
+	{ POINT_ATTBONUS_DEVIL,				},	// APPLY_ATTBONUS_DEVIL,		
+	{ POINT_STEAL_HP,					},	// APPLY_STEAL_HP,				
+	{ POINT_STEAL_SP,					},	// APPLY_STEAL_SP,				
+	{ POINT_MANA_BURN_PCT,				},	// APPLY_MANA_BURN_PCT,			
+	{ POINT_DAMAGE_SP_RECOVER,			},	// APPLY_DAMAGE_SP_RECOVER,		
+	{ POINT_BLOCK,		        		},	// APPLY_BLOCK,					
+	{ POINT_DODGE,		        		},	// APPLY_DODGE,					
+	{ POINT_RESIST_SWORD,				},	// APPLY_RESIST_SWORD,			
+	{ POINT_RESIST_TWOHAND,				},	// APPLY_RESIST_TWOHAND,		
+	{ POINT_RESIST_DAGGER,				},	// APPLY_RESIST_DAGGER,			
+	{ POINT_RESIST_BELL,				},	// APPLY_RESIST_BELL,			
+	{ POINT_RESIST_FAN,					},	// APPLY_RESIST_FAN,			
+	{ POINT_RESIST_BOW,					},	// APPLY_RESIST_BOW,			
+	{ POINT_RESIST_FIRE,				},	// APPLY_RESIST_FIRE,			
+	{ POINT_RESIST_ELEC,				},	// APPLY_RESIST_ELEC,			
+	{ POINT_RESIST_MAGIC,				},	// APPLY_RESIST_MAGIC,			
+	{ POINT_RESIST_WIND,				},	// APPLY_RESIST_WIND,			
+	{ POINT_REFLECT_MELEE,				},	// APPLY_REFLECT_MELEE,			
+	{ POINT_REFLECT_CURSE,				},	// APPLY_REFLECT_CURSE,			
+	{ POINT_POISON_REDUCE,				},	// APPLY_POISON_REDUCE,			
+	{ POINT_KILL_SP_RECOVER,			},	// APPLY_KILL_SP_RECOVER,		
+	{ POINT_EXP_DOUBLE_BONUS,			},	// APPLY_EXP_DOUBLE_BONUS,		
+	{ POINT_GOLD_DOUBLE_BONUS,			},	// APPLY_GOLD_DOUBLE_BONUS,		
+	{ POINT_ITEM_DROP_BONUS,			},	// APPLY_ITEM_DROP_BONUS,		
+	{ POINT_POTION_BONUS,				},	// APPLY_POTION_BONUS,			
+	{ POINT_KILL_HP_RECOVERY,			},	// APPLY_KILL_HP_RECOVER,		
+	{ POINT_IMMUNE_STUN,				},	// APPLY_IMMUNE_STUN,			
+	{ POINT_IMMUNE_SLOW,				},	// APPLY_IMMUNE_SLOW,			
+	{ POINT_IMMUNE_FALL,				},	// APPLY_IMMUNE_FALL,			
+	{ POINT_NONE,						},	// APPLY_SKILL,					
+	{ POINT_BOW_DISTANCE,				},	// APPLY_BOW_DISTANCE,			
+	{ POINT_ATT_GRADE_BONUS,			},	// APPLY_ATT_GRADE,				
+	{ POINT_DEF_GRADE_BONUS,			},	// APPLY_DEF_GRADE,				
+	{ POINT_MAGIC_ATT_GRADE_BONUS,		},	// APPLY_MAGIC_ATT_GRADE,		
+	{ POINT_MAGIC_DEF_GRADE_BONUS,		},	// APPLY_MAGIC_DEF_GRADE,		
+	{ POINT_CURSE_PCT,					},	// APPLY_CURSE_PCT,				
+	{ POINT_MAX_STAMINA					},	// APPLY_MAX_STAMINA			
+	{ POINT_ATTBONUS_UNUSED1,			},	// APPLY_ATTBONUS_WARRIOR  		
+	{ POINT_ATTBONUS_UNUSED2,			},	// APPLY_ATTBONUS_ASSASSIN 		
+	{ POINT_ATTBONUS_UNUSED3,			},	// APPLY_ATTBONUS_SURA    		
+	{ POINT_ATTBONUS_UNUSED4,			},	// APPLY_ATTBONUS_SHAMAN 
+	{ POINT_ATTBONUS_UNUSED0,			},	// APPLY_ATTBONUS_MONSTER
+	{ POINT_ATT_BONUS					},	// APPLY_MALL_ATTBONUS
+	{ POINT_MALL_DEFBONUS				},	// APPLY_MALL_DEFBONUS
+	{ POINT_MALL_EXPBONUS				},	// APPLY_MALL_EXPBONUS
+	{ POINT_MALL_ITEMBONUS				},	// APPLY_MALL_ITEMBONUS
+	{ POINT_MALL_GOLDBONUS				},	// APPLY_MALL_GOLDBONUS
+	{ POINT_MAX_HP_PCT					},	// APPLY_MAX_HP_PCT
+	{ POINT_MAX_SP_PCT					},	// APPLY_MAX_SP_PCT
+	{ POINT_SKILL_DAMAGE_BONUS			},	// APPLY_SKILL_DAMAGE_BONUS
+	{ POINT_NORMAL_HIT_DAMAGE_BONUS		},	// APPLY_NORMAL_HIT_DAMAGE_BONUS
+	{ POINT_SKILL_DEFEND_BONUS			},	// APPLY_SKILL_DEFEND_BONUS
+	{ POINT_NORMAL_HIT_DEFEND_BONUS		},	// APPLY_NORMAL_HIT_DEFEND_BONUS
+	{ POINT_PC_BANG_EXP_BONUS			},	// APPLY_PC_BANG_EXP_BONUS
+	{ POINT_PC_BANG_DROP_BONUS			},	// APPLY_PC_BANG_DROP_BONUS
+	{ POINT_NONE,						},	// APPLY_EXTRACT_HP_PCT
+	{ POINT_ATTBONUS_UNUSED6,			},	// APPLY_RESIST_WARRIOR
+	{ POINT_ATTBONUS_UNUSED7,			},	// APPLY_RESIST_ASSASSIN
+	{ POINT_ATTBONUS_UNUSED8,			},	// APPLY_RESIST_SURA
+	{ POINT_ATTBONUS_UNUSED9,			},	// APPLY_RESIST_SHAMAN
+	{ POINT_ENERGY						},	// APPLY_ENERGY
+	{ POINT_DEF_GRADE					},	// APPLY_DEF_GRADE
+	{ POINT_COSTUME_ATTR_BONUS			},	// APPLY_COSTUME_ATTR_BONUS
+	{ POINT_MAGIC_ATT_BONUS_PER 		},	// APPLY_MAGIC_ATTBONUS_PER
+	{ POINT_MELEE_MAGIC_ATT_BONUS_PER	},	// APPLY_MELEE_MAGIC_ATTBONUS_PER
+	{ POINT_RESIST_ICE,					},	// APPLY_RESIST_ICE
+	{ POINT_RESIST_EARTH,				},	// APPLY_RESIST_EARTH
+	{ POINT_RESIST_DARK,				},	// APPLY_RESIST_DARK
+	{ POINT_RESIST_CRITICAL,			},	// APPLY_ANTI_CRITICAL_PCT
+	{ POINT_RESIST_PENETRATE,			},	// APPLY_ANTI_PENETRATE_PCT
+	{ POINT_BLEEDING_PCT,				},	// point_value = 138
+	{ POINT_BLEEDING_REDUCE,			},	// point_value = 139
+	{ POINT_ATTBONUS_WOLFMAN,			},	// point_value = 140
+	{ POINT_RESIST_WOLFMAN,				},	// point_value = 141
+	{ POINT_RESIST_CLAW,				},	// point_value = 142
+#ifdef ENABLE_ANTI_RESIST_MAGIC_BONUS_SYSTEM
+	{ POINT_ANTI_RESIST_MAGIC,			},	// point_value = 143
+#endif
+#ifdef ENABLE_ENABLE_ELEMENT_NEW_BONUSES
+	{ POINT_ENCHANT_DARK,},					// point_value = 144 //packet.h üzerinden deðerleri alýyor.
+	{ APPLY_ENCHANT_EARTH,},				// point_value = 145
+	{ APPLY_ENCHANT_ELECT,},				// point_value = 146
+	{ APPLY_ENCHANT_FIRE,},					// point_value = 147
+	{ APPLY_ENCHANT_ICE,},					// point_value = 148
+	{ APPLY_ENCHANT_WIND,},					// point_value = 149
+#endif
+#ifdef ENABLE_PENDANT
+	{ POINT_ATTBONUS_SWORD,},				// point_value = 150
+	{ POINT_ATTBONUS_TWOHAND,},				// point_value = 151
+	{ POINT_ATTBONUS_DAGGER,},				// point_value = 152
+	{ POINT_ATTBONUS_BELL,},				// point_value = 153
+	{ POINT_ATTBONUS_FAN,},					// point_value = 154
+	{ POINT_ATTBONUS_BOW,},					// point_value = 155
+	{ POINT_ATTBONUS_CLAW,},				// point_value = 156
+	{ POINT_RESIST_HUMAN,},					// point_value = 157
+	{ POINT_ATTBONUS_BOCEK,},				// point_value = 158
+	{ POINT_ATTBONUS_COL,},					// point_value = 159
+	{ POINT_ATTBONUS_CZ,},					// point_value = 160
+	{ POINT_RESIST_DUSUS,},					// point_value = 161
+#endif
+#ifdef ENABLE_STONE_BOSS_BONUS
+	{ POINT_ATTBONUS_BOSS,},				// point_value = 162
+	{ POINT_ATTBONUS_METIN,},				// point_value = 163
+#endif
+#ifdef ENABLE_CONQUEROR_LEVEL
+	{ POINT_SUNGMA_STR,},					// point_value = 172
+	{ POINT_SUNGMA_HP,},					// point_value = 173
+	{ POINT_SUNGMA_MOVE,},					// point_value = 174
+	{ POINT_SUNGMA_INMUNE,},				// point_value = 175
+	{ POINT_CONQUEROR_POINT,},				// point_value = 175
+#endif
+#ifdef ENABLE_GLOVE_SYSTEM
+	{ POINT_RANDOM,},						// point_value = 175
+#endif
+#ifdef ENABLE_ELEMENT_ALL_BONUSES
+	{ POINT_ELEMENT_ALL,},					// point_value = 184
+#endif
+#ifdef ENABLE_CONQUEROR_LEVEL
+	{ POINT_HIT_PCT,},						// point_value = 185
+#endif
+	{ POINT_RESIST_MOUNT_FALL,},
+	{ POINT_NORMAL_HIT_DEFEND_BONUS_BOSS_OR_MORE,},
+	{ POINT_SKILL_DEFEND_BONUS_BOSS_OR_MORE,},
+	{ POINT_NORMAL_HIT_DAMAGE_BONUS_BOSS_OR_MORE,},
+	{ POINT_SKILL_DAMAGE_BONUS_BOSS_OR_MORE,},
+	{ POINT_HIT_BUFF_ENCHANT_FIRE,},
+	{ POINT_HIT_BUFF_ENCHANT_ICE,},
+	{ POINT_HIT_BUFF_ENCHANT_ELEC,},
+	{ POINT_HIT_BUFF_ENCHANT_WIND,},
+	{ POINT_HIT_BUFF_ENCHANT_DARK,},
+	{ POINT_HIT_BUFF_ENCHANT_EARTH,},
+	{ POINT_HIT_BUFF_RESIST_FIRE,},
+	{ POINT_HIT_BUFF_RESIST_ICE,},
+	{ POINT_HIT_BUFF_RESIST_ELEC,},
+	{ POINT_HIT_BUFF_RESIST_WIND,},
+	{ POINT_HIT_BUFF_RESIST_DARK,},
+	{ POINT_HIT_BUFF_RESIST_EARTH,},
+	{ POINT_SKILL_DURATION_INCREASE_EUNHYUNG,},
+	{ POINT_SKILL_DURATION_INCREASE_GYEONGGONG,},
+	{ POINT_SKILL_DURATION_INCREASE_GEOMKYUNG,},
+	{ POINT_SKILL_DURATION_INCREASE_JEOKRANG,},
+	{ POINT_USE_SKILL_AMSEOP_HP_ABSORB,},
+	{ POINT_USE_SKILL_PABEOB_STUN,},
+	{ POINT_DAMAGE_HP_RECOVERY,},
+	{ POINT_DAMAGE_SP_RECOVERY,},
+	{ POINT_ALIGNMENT_DAMAGE_BONUS,},
+	{ POINT_NORMAL_DAMAGE_GUARD,},
+	{ POINT_MORE_THEN_HP90_DAMAGE_REDUCE,},
+	{ POINT_ATTBONUS_PER_HUMAN,},
+	{ POINT_ATTBONUS_PER_ANIMAL,},
+	{ POINT_ATTBONUS_PER_ORC,},
+	{ POINT_ATTBONUS_PER_MILGYO,},
+	{ POINT_ATTBONUS_PER_UNDEAD,},
+	{ POINT_ATTBONUS_PER_DEVIL,},
+	{ POINT_ENCHANT_PER_ELECT,},
+	{ POINT_ENCHANT_PER_FIRE,},
+	{ POINT_ENCHANT_PER_ICE,},
+	{ POINT_ENCHANT_PER_WIND,},
+	{ POINT_ENCHANT_PER_EARTH,},
+	{ POINT_ENCHANT_PER_DARK,},
+	{ POINT_ATTBONUS_PER_CZ,},
+	{ POINT_ATTBONUS_PER_INSECT,},
+	{ POINT_ATTBONUS_PER_DESERT,},
+	{ POINT_ATTBONUS_PER_STONE,},
+	{ POINT_ATTBONUS_PER_MONSTER,},
+	{ POINT_RESIST_PER_HUMAN,},
+	{ POINT_RESIST_PER_ICE,},
+	{ POINT_RESIST_PER_DARK,},
+	{ POINT_RESIST_PER_EARTH,},
+	{ POINT_RESIST_PER_FIRE,},
+	{ POINT_RESIST_PER_ELEC,},
+	{ POINT_RESIST_PER_MAGIC,},
+	{ POINT_RESIST_PER_WIND,},
+	{ POINT_MOB_HIT_MOB_AGGRESSIVE,},
+	{ POINT_MOUNT_NO_KNOCKBACK,},
+	{ POINT_SUNGMA_PER_STR,},
+	{ POINT_SUNGMA_PER_HP,},
+	{ POINT_SUNGMA_PER_MOVE,},
+	{ POINT_SUNGMA_PER_IMMUNE,},
+#ifdef ENABLE_MYSTERY_DUNGEON
+	{ POINT_MYSTERY,},
+#endif
+#ifdef ENABLE_GREEDY_ROOM
+	{ POINT_ATTBONUS_MOON,},
+#endif
+};
+
+BYTE ApplyTypeToPointType(BYTE bApplyType)
+{
+	if (bApplyType >= CItemData::MAX_APPLY_NUM)
+		return POINT_NONE;
+	else
+		return aApplyInfo[bApplyType].bPointType;
+}
+
+#define __UNKNOWN__
+#ifdef ENABLE_FLOWER_EVENT
+typedef struct SPointInfo
+{
+	//@fixme436
+	uint16_t wApplyType; // POINT -> APPLY
+} TPointInfo;
+
+const TPointInfo aPointInfo[POINT_MAX_NUM] =
+{
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_MAX_HP,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_MAX_SP,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_MAX_STAMINA,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_ATT_SPEED,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_MOV_SPEED,
+	CItemData::APPLY_DEF_GRADE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_MAGIC_ATT_GRADE,
+	CItemData::APPLY_MAGIC_DEF_GRADE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_SKILL,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_HP_REGEN,
+	CItemData::APPLY_SP_REGEN,
+	CItemData::APPLY_BOW_DISTANCE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_POISON_PCT,
+	CItemData::APPLY_STUN_PCT,
+	CItemData::APPLY_SLOW_PCT,
+	CItemData::APPLY_CRITICAL_PCT,
+	CItemData::APPLY_PENETRATE_PCT,
+	CItemData::APPLY_CURSE_PCT,
+	CItemData::APPLY_ATTBONUS_HUMAN,
+	CItemData::APPLY_ATTBONUS_ANIMAL,
+	CItemData::APPLY_ATTBONUS_ORC,
+	CItemData::APPLY_ATTBONUS_MILGYO,
+	CItemData::APPLY_ATTBONUS_UNDEAD,
+	CItemData::APPLY_ATTBONUS_DEVIL,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_ATT_BONUS_TO_MONSTER,
+	CItemData::APPLY_ATT_BONUS_TO_WARRIOR,
+	CItemData::APPLY_ATT_BONUS_TO_ASSASSIN,
+	CItemData::APPLY_ATT_BONUS_TO_SURA,
+	CItemData::APPLY_ATT_BONUS_TO_SHAMAN,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_RESIST_WARRIOR,
+	CItemData::APPLY_RESIST_ASSASSIN,
+	CItemData::APPLY_RESIST_SURA,
+	CItemData::APPLY_RESIST_SHAMAN,
+	CItemData::APPLY_STEAL_HP,
+	CItemData::APPLY_STEAL_SP,
+	CItemData::APPLY_MANA_BURN_PCT,
+	CItemData::APPLY_DAMAGE_SP_RECOVER,
+	CItemData::APPLY_BLOCK,
+	CItemData::APPLY_DODGE,
+	CItemData::APPLY_RESIST_SWORD,
+	CItemData::APPLY_RESIST_TWOHAND,
+	CItemData::APPLY_RESIST_DAGGER,
+	CItemData::APPLY_RESIST_BELL,
+	CItemData::APPLY_RESIST_FAN,
+	CItemData::APPLY_RESIST_BOW,
+	CItemData::APPLY_RESIST_FIRE,
+	CItemData::APPLY_RESIST_ELEC,
+	CItemData::APPLY_RESIST_MAGIC,
+	CItemData::APPLY_RESIST_WIND,
+	CItemData::APPLY_REFLECT_MELEE,
+	CItemData::APPLY_REFLECT_CURSE,
+	CItemData::APPLY_POISON_REDUCE,
+	CItemData::APPLY_KILL_SP_RECOVER,
+	CItemData::APPLY_EXP_DOUBLE_BONUS,
+	CItemData::APPLY_GOLD_DOUBLE_BONUS,
+	CItemData::APPLY_ITEM_DROP_BONUS,
+	CItemData::APPLY_POTION_BONUS,
+	CItemData::APPLY_KILL_HP_RECOVER,
+	CItemData::APPLY_IMMUNE_STUN,
+	CItemData::APPLY_IMMUNE_SLOW,
+	CItemData::APPLY_IMMUNE_FALL,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_MALL_ATTBONUS,
+	CItemData::APPLY_MALL_DEFBONUS,
+	CItemData::APPLY_ATT_GRADE_BONUS,
+	CItemData::APPLY_DEF_GRADE_BONUS,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_MALL_ATTBONUS,
+	CItemData::APPLY_MALL_DEFBONUS,
+	CItemData::APPLY_MALL_EXPBONUS,
+	CItemData::APPLY_MALL_ITEMBONUS,
+	CItemData::APPLY_MALL_GOLDBONUS,
+	CItemData::APPLY_MAX_HP_PCT,
+	CItemData::APPLY_MAX_SP_PCT,
+	CItemData::APPLY_SKILL_DAMAGE_BONUS,
+	CItemData::APPLY_NORMAL_HIT_DAMAGE_BONUS,
+	CItemData::APPLY_SKILL_DEFEND_BONUS,
+	CItemData::APPLY_NORMAL_HIT_DEFEND_BONUS,
+	CItemData::APPLY_PC_BANG_EXP_BONUS,
+	CItemData::APPLY_PC_BANG_DROP_BONUS,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_ENERGY,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_COSTUME_ATTR_BONUS,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_RESIST_ICE,
+	CItemData::APPLY_RESIST_EARTH,
+	CItemData::APPLY_RESIST_DARK,
+	CItemData::APPLY_CRITICAL_PCT,
+	CItemData::APPLY_ANTI_PENETRATE_PCT,
+#ifdef ENABLE_FLOWER_EVENT
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+	CItemData::APPLY_NONE,
+#endif
+};
+
+uint16_t PointTypeToApplyType(uint16_t wPointType) // @fixme-WL001
+{
+	if (wPointType >= POINT_MAX_NUM)
+		return CItemData::APPLY_NONE;
+	else
+		return aPointInfo[wPointType].wApplyType;
+}
+#endif

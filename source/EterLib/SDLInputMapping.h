@@ -1,0 +1,143 @@
+#pragma once
+
+#ifndef SDL_MAIN_HANDLED
+#define SDL_MAIN_HANDLED
+#endif
+#include <SDL2/SDL.h>
+#include "DIK_Codes.h"
+
+inline BYTE SDL_ScancodeToDIK(SDL_Scancode scancode)
+{
+	static BYTE s_scancodeToDIK[SDL_NUM_SCANCODES] = { 0 };
+	static bool s_bInitialized = false;
+
+	if (!s_bInitialized)
+	{
+		// Letters
+		s_scancodeToDIK[SDL_SCANCODE_A] = DIK_A;
+		s_scancodeToDIK[SDL_SCANCODE_B] = DIK_B;
+		s_scancodeToDIK[SDL_SCANCODE_C] = DIK_C;
+		s_scancodeToDIK[SDL_SCANCODE_D] = DIK_D;
+		s_scancodeToDIK[SDL_SCANCODE_E] = DIK_E;
+		s_scancodeToDIK[SDL_SCANCODE_F] = DIK_F;
+		s_scancodeToDIK[SDL_SCANCODE_G] = DIK_G;
+		s_scancodeToDIK[SDL_SCANCODE_H] = DIK_H;
+		s_scancodeToDIK[SDL_SCANCODE_I] = DIK_I;
+		s_scancodeToDIK[SDL_SCANCODE_J] = DIK_J;
+		s_scancodeToDIK[SDL_SCANCODE_K] = DIK_K;
+		s_scancodeToDIK[SDL_SCANCODE_L] = DIK_L;
+		s_scancodeToDIK[SDL_SCANCODE_M] = DIK_M;
+		s_scancodeToDIK[SDL_SCANCODE_N] = DIK_N;
+		s_scancodeToDIK[SDL_SCANCODE_O] = DIK_O;
+		s_scancodeToDIK[SDL_SCANCODE_P] = DIK_P;
+		s_scancodeToDIK[SDL_SCANCODE_Q] = DIK_Q;
+		s_scancodeToDIK[SDL_SCANCODE_R] = DIK_R;
+		s_scancodeToDIK[SDL_SCANCODE_S] = DIK_S;
+		s_scancodeToDIK[SDL_SCANCODE_T] = DIK_T;
+		s_scancodeToDIK[SDL_SCANCODE_U] = DIK_U;
+		s_scancodeToDIK[SDL_SCANCODE_V] = DIK_V;
+		s_scancodeToDIK[SDL_SCANCODE_W] = DIK_W;
+		s_scancodeToDIK[SDL_SCANCODE_X] = DIK_X;
+		s_scancodeToDIK[SDL_SCANCODE_Y] = DIK_Y;
+		s_scancodeToDIK[SDL_SCANCODE_Z] = DIK_Z;
+
+		// Numbers
+		s_scancodeToDIK[SDL_SCANCODE_1] = DIK_1;
+		s_scancodeToDIK[SDL_SCANCODE_2] = DIK_2;
+		s_scancodeToDIK[SDL_SCANCODE_3] = DIK_3;
+		s_scancodeToDIK[SDL_SCANCODE_4] = DIK_4;
+		s_scancodeToDIK[SDL_SCANCODE_5] = DIK_5;
+		s_scancodeToDIK[SDL_SCANCODE_6] = DIK_6;
+		s_scancodeToDIK[SDL_SCANCODE_7] = DIK_7;
+		s_scancodeToDIK[SDL_SCANCODE_8] = DIK_8;
+		s_scancodeToDIK[SDL_SCANCODE_9] = DIK_9;
+		s_scancodeToDIK[SDL_SCANCODE_0] = DIK_0;
+
+		// Function Keys
+		s_scancodeToDIK[SDL_SCANCODE_RETURN] = DIK_RETURN;
+		s_scancodeToDIK[SDL_SCANCODE_ESCAPE] = DIK_ESCAPE;
+		s_scancodeToDIK[SDL_SCANCODE_BACKSPACE] = DIK_BACK;
+		s_scancodeToDIK[SDL_SCANCODE_TAB] = DIK_TAB;
+		s_scancodeToDIK[SDL_SCANCODE_SPACE] = DIK_SPACE;
+		s_scancodeToDIK[SDL_SCANCODE_MINUS] = DIK_MINUS;
+		s_scancodeToDIK[SDL_SCANCODE_EQUALS] = DIK_EQUALS;
+		s_scancodeToDIK[SDL_SCANCODE_LEFTBRACKET] = DIK_LBRACKET;
+		s_scancodeToDIK[SDL_SCANCODE_RIGHTBRACKET] = DIK_RBRACKET;
+		s_scancodeToDIK[SDL_SCANCODE_BACKSLASH] = DIK_BACKSLASH;
+		s_scancodeToDIK[SDL_SCANCODE_SEMICOLON] = DIK_SEMICOLON;
+		s_scancodeToDIK[SDL_SCANCODE_APOSTROPHE] = DIK_APOSTROPHE;
+		s_scancodeToDIK[SDL_SCANCODE_GRAVE] = DIK_GRAVE;
+		s_scancodeToDIK[SDL_SCANCODE_COMMA] = DIK_COMMA;
+		s_scancodeToDIK[SDL_SCANCODE_PERIOD] = DIK_PERIOD;
+		s_scancodeToDIK[SDL_SCANCODE_SLASH] = DIK_SLASH;
+		s_scancodeToDIK[SDL_SCANCODE_CAPSLOCK] = DIK_CAPITAL;
+
+		s_scancodeToDIK[SDL_SCANCODE_F1] = DIK_F1;
+		s_scancodeToDIK[SDL_SCANCODE_F2] = DIK_F2;
+		s_scancodeToDIK[SDL_SCANCODE_F3] = DIK_F3;
+		s_scancodeToDIK[SDL_SCANCODE_F4] = DIK_F4;
+		s_scancodeToDIK[SDL_SCANCODE_F5] = DIK_F5;
+		s_scancodeToDIK[SDL_SCANCODE_F6] = DIK_F6;
+		s_scancodeToDIK[SDL_SCANCODE_F7] = DIK_F7;
+		s_scancodeToDIK[SDL_SCANCODE_F8] = DIK_F8;
+		s_scancodeToDIK[SDL_SCANCODE_F9] = DIK_F9;
+		s_scancodeToDIK[SDL_SCANCODE_F10] = DIK_F10;
+		s_scancodeToDIK[SDL_SCANCODE_F11] = DIK_F11;
+		s_scancodeToDIK[SDL_SCANCODE_F12] = DIK_F12;
+
+		s_scancodeToDIK[SDL_SCANCODE_PRINTSCREEN] = DIK_SYSRQ;
+		s_scancodeToDIK[SDL_SCANCODE_SCROLLLOCK] = DIK_SCROLL;
+		s_scancodeToDIK[SDL_SCANCODE_PAUSE] = DIK_PAUSE;
+		s_scancodeToDIK[SDL_SCANCODE_INSERT] = DIK_INSERT;
+		s_scancodeToDIK[SDL_SCANCODE_HOME] = DIK_HOME;
+		s_scancodeToDIK[SDL_SCANCODE_PAGEUP] = DIK_PRIOR;
+		s_scancodeToDIK[SDL_SCANCODE_DELETE] = DIK_DELETE;
+		s_scancodeToDIK[SDL_SCANCODE_END] = DIK_END;
+		s_scancodeToDIK[SDL_SCANCODE_PAGEDOWN] = DIK_NEXT;
+		s_scancodeToDIK[SDL_SCANCODE_RIGHT] = DIK_RIGHT;
+		s_scancodeToDIK[SDL_SCANCODE_LEFT] = DIK_LEFT;
+		s_scancodeToDIK[SDL_SCANCODE_DOWN] = DIK_DOWN;
+		s_scancodeToDIK[SDL_SCANCODE_UP] = DIK_UP;
+
+		// Keypad
+		s_scancodeToDIK[SDL_SCANCODE_NUMLOCKCLEAR] = DIK_NUMLOCK;
+		s_scancodeToDIK[SDL_SCANCODE_KP_DIVIDE] = DIK_DIVIDE;
+		s_scancodeToDIK[SDL_SCANCODE_KP_MULTIPLY] = DIK_MULTIPLY;
+		s_scancodeToDIK[SDL_SCANCODE_KP_MINUS] = DIK_SUBTRACT;
+		s_scancodeToDIK[SDL_SCANCODE_KP_PLUS] = DIK_ADD;
+		s_scancodeToDIK[SDL_SCANCODE_KP_ENTER] = DIK_NUMPADENTER;
+		s_scancodeToDIK[SDL_SCANCODE_KP_1] = DIK_NUMPAD1;
+		s_scancodeToDIK[SDL_SCANCODE_KP_2] = DIK_NUMPAD2;
+		s_scancodeToDIK[SDL_SCANCODE_KP_3] = DIK_NUMPAD3;
+		s_scancodeToDIK[SDL_SCANCODE_KP_4] = DIK_NUMPAD4;
+		s_scancodeToDIK[SDL_SCANCODE_KP_5] = DIK_NUMPAD5;
+		s_scancodeToDIK[SDL_SCANCODE_KP_6] = DIK_NUMPAD6;
+		s_scancodeToDIK[SDL_SCANCODE_KP_7] = DIK_NUMPAD7;
+		s_scancodeToDIK[SDL_SCANCODE_KP_8] = DIK_NUMPAD8;
+		s_scancodeToDIK[SDL_SCANCODE_KP_9] = DIK_NUMPAD9;
+		s_scancodeToDIK[SDL_SCANCODE_KP_0] = DIK_NUMPAD0;
+		s_scancodeToDIK[SDL_SCANCODE_KP_PERIOD] = DIK_DECIMAL;
+
+		// Modifiers & System
+		s_scancodeToDIK[SDL_SCANCODE_LCTRL] = DIK_LCONTROL;
+		s_scancodeToDIK[SDL_SCANCODE_LSHIFT] = DIK_LSHIFT;
+		s_scancodeToDIK[SDL_SCANCODE_LALT] = DIK_LMENU;
+		s_scancodeToDIK[SDL_SCANCODE_LGUI] = DIK_LWIN;
+		s_scancodeToDIK[SDL_SCANCODE_RCTRL] = DIK_RCONTROL;
+		s_scancodeToDIK[SDL_SCANCODE_RSHIFT] = DIK_RSHIFT;
+		s_scancodeToDIK[SDL_SCANCODE_RALT] = DIK_RMENU;
+		s_scancodeToDIK[SDL_SCANCODE_RGUI] = DIK_RWIN;
+		s_scancodeToDIK[SDL_SCANCODE_APPLICATION] = DIK_APPS;
+		s_scancodeToDIK[SDL_SCANCODE_NONUSBACKSLASH] = DIK_OEM_102;
+		s_scancodeToDIK[SDL_SCANCODE_MUTE] = DIK_MUTE;
+		s_scancodeToDIK[SDL_SCANCODE_VOLUMEUP] = DIK_VOLUMEUP;
+		s_scancodeToDIK[SDL_SCANCODE_VOLUMEDOWN] = DIK_VOLUMEDOWN;
+
+		s_bInitialized = true;
+	}
+
+	if (scancode >= 0 && scancode < SDL_NUM_SCANCODES)
+		return s_scancodeToDIK[scancode];
+
+	return 0;
+}

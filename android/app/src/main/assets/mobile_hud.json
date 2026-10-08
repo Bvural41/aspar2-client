@@ -1,0 +1,141 @@
+{
+    "version": 2,
+    "screen_width": 1067,
+    "screen_height": 600,
+    "menu": {
+        "pos": [
+            577,
+            10
+        ],
+        "scale": 1.0
+    },
+    "zoom": {
+        "pos": [
+            120,
+            168
+        ],
+        "scale": 0.75
+    },
+    "joystick": {
+        "pos": [
+            0,
+            406
+        ],
+        "scale": 1.0
+    },
+    "status_gauge": {
+        "pos": [
+            0,
+            330
+        ],
+        "scale": 0.60
+    },
+    "expanded_taskbar": {
+        "pos": [
+            199,
+            535
+        ],
+        "scale": 0.90
+    },
+    "chat": {
+        "pos": [
+            198,
+            465
+        ],
+        "scale": 0.90
+    },
+    "auto_metin": {
+        "pos": [
+            1007,
+            192
+        ],
+        "scale": 0.80
+    },
+    "mount": {
+        "pos": [
+            1007,
+            253
+        ],
+        "scale": 0.80
+    },
+    "attack": {
+        "pos": [
+            888,
+            422
+        ],
+        "scale": 1.0
+    },
+    "pickup": {
+        "pos": [
+            719,
+            538
+        ],
+        "scale": 0.85
+    },
+    "slots": [
+        {
+            "index": 0,
+            "pos": [
+                1000,
+                312
+            ],
+            "scale": 1.0
+        },
+        {
+            "index": 1,
+            "pos": [
+                925,
+                317
+            ],
+            "scale": 1.0
+        },
+        {
+            "index": 2,
+            "pos": [
+                857,
+                342
+            ],
+            "scale": 1.0
+        },
+        {
+            "index": 3,
+            "pos": [
+                806,
+                394
+            ],
+            "scale": 1.0
+        },
+        {
+            "index": 4,
+            "pos": [
+                779,
+                461
+            ],
+            "scale": 1.0
+        },
+        {
+            "index": 5,
+            "pos": [
+                802,
+                532
+            ],
+            "scale": 1.0
+        },
+        {
+            "index": 6,
+            "pos": [
+                728,
+                405
+            ],
+            "scale": 0.85
+        },
+        {
+            "index": 7,
+            "pos": [
+                710,
+                475
+            ],
+            "scale": 0.85
+        }
+    ]
+}

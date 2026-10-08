@@ -1,0 +1,35 @@
+# Android build artifacts
+.gradle/
+build/
+app/build/
+.cxx/
+local.properties
+*.apk
+*.aab
+*.so
+
+# Visual Studio / Windows build artifacts
+Debug/
+Release/
+*.obj
+*.ilk
+*.pdb
+*.tlog
+*.idb
+*.ipch
+*.log
+.vs/
+*.opensdf
+*.sdf
+*.suo
+*.user
+
+# Large Windows debug libraries (exceeds GitHub 100MB limit and not used for mobile)
+extern/include/cryptopp/Win32/Output/
+extern/library/*_debug.lib
+extern/library/*Debug.lib
+extern/library/Cryptopp_lib_debug.lib
+
+# OS metadata
+.DS_Store
+Thumbs.db

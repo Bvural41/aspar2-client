@@ -1,0 +1,90 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace "com.metin2.client"
+    compileSdkVersion 33
+    buildToolsVersion "35.0.0"
+    ndkVersion "25.2.9519653"
+
+    defaultConfig {
+        ndk {
+            abiFilters 'arm64-v8a', 'x86_64'
+        }
+
+        applicationId "com.aspar2.client"
+        minSdkVersion 24
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17 -O3 -fomit-frame-pointer -frtti -fexceptions -fdeclspec -fms-extensions -fno-strict-aliasing -Wno-invalid-source-encoding -Wno-register -D_GNU_SOURCE"
+                arguments "-DANDROID_STL=c++_shared", "-DANDROID_TOOLCHAIN=clang"
+                abiFilters 'arm64-v8a', 'x86_64'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            jniDebuggable true
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file("../../CMakeLists.txt")
+        }
+    }
+
+    packagingOptions {
+        pickFirst 'lib/armeabi-v7a/libmetin2_mobile.so'
+        pickFirst 'lib/arm64-v8a/libmetin2_mobile.so'
+        pickFirst 'lib/x86/libmetin2_mobile.so'
+        pickFirst 'lib/x86_64/libmetin2_mobile.so'
+    }
+
+    aaptOptions {
+        noCompress 'data', 'index', 'epk', 'eix', 'raw', 'dat'
+    }
+
+    compileOptions {
+        encoding = 'UTF-8'
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            if (variant.buildType.name == "release") {
+                outputFileName = "Aspar2.apk"
+            } else {
+                outputFileName = "Aspar2-${variant.name}.apk"
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+}
