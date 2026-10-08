@@ -9,4 +9,18 @@
 #  error "Unsupported architecture for Python"
 #endif
 
+#if defined(__APPLE__)
+#  undef HAVE_ASM_TYPES_H
+#  undef HAVE_SYS_SYSMACROS_H
+#  undef HAVE_LINUX_NETLINK_H
+#  undef HAVE_NETPACKET_PACKET_H
+#  undef HAVE_SYS_EPOLL_H
+#  undef HAVE_LINUX_TIPC_H
+#  undef HAVE_SEM_TIMEDWAIT
+#  undef HAVE_GETHOSTBYNAME_R
+#  undef HAVE_GETHOSTBYNAME_R_3_ARG
+#  undef HAVE_GETHOSTBYNAME_R_5_ARG
+#  undef HAVE_GETHOSTBYNAME_R_6_ARG
+#endif
+
 #endif /* Py_CONFIG_H */

@@ -38,6 +38,13 @@ typedef int socklen_t;
 # undef AF_UNIX
 #endif
 
+#if defined(__APPLE__)
+# undef HAVE_LINUX_NETLINK_H
+# undef HAVE_ASM_TYPES_H
+# undef HAVE_NETPACKET_PACKET_H
+# undef HAVE_LINUX_TIPC_H
+#endif
+
 #ifdef HAVE_LINUX_NETLINK_H
 # ifdef HAVE_ASM_TYPES_H
 #  include <asm/types.h>
