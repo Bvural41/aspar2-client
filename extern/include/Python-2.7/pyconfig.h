@@ -1,15 +1,10 @@
 #ifndef Py_CONFIG_H
 #define Py_CONFIG_H
 
-#ifdef __ANDROID__
-#  if defined(__aarch64__)
-#    include "../../Python-2.7.18/android_arm64/pyconfig/pyconfig.h"
-#  elif defined(__x86_64__)
-#    include "../../Python-2.7.18/android_x86_64/pyconfig/pyconfig.h"
-#  elif defined(__arm__)
-#    include "../../Python-2.7.18/android_arm/pyconfig/pyconfig.h"
-#  endif
+#if defined(__ANDROID__) || defined(__APPLE__)
+#  include "../../Python-2.7.18/Include/pyconfig.h"
 #else
+
 
 /* pyconfig.h.  NOT Generated automatically by configure.
 

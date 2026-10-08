@@ -27,9 +27,10 @@
 #endif
 
 #include <dshow.h>
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 #include <qedit.h>
 #endif
+
 
 #include "Locale.h"
 

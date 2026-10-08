@@ -21,7 +21,7 @@
 #include <Python-2.7/eval.h>
 #include <Python-2.7/marshal.h>
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 #undef snprintf
 #undef vsnprintf
 #undef _snprintf
@@ -29,6 +29,7 @@
 #define _snprintf snprintf
 #define _vsnprintf vsnprintf
 #endif
+
 
 #include "PythonUtils.h"
 #include "PythonLauncher.h"
