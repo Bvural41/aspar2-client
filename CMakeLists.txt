@@ -362,6 +362,7 @@ if(ANDROID)
     )
 elseif(APPLE)
     enable_language(OBJC OBJCXX)
+    add_definitions(-DGRANNY_IPHONE)
 
     file(GLOB IOS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.mm
