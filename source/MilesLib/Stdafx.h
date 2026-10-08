@@ -10,6 +10,9 @@
 #pragma warning(disable:4201)
 
 #include <windows.h>
+#ifdef interface
+#undef interface
+#endif
 #include <miniaudio.h>
 
 #ifndef min

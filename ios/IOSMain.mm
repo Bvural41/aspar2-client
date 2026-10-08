@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "UserInterface/StdAfx.h"
 #include "PythonApplication.h"
 #include "PythonPlayer.h"
 #include "PythonNetworkStream.h"
