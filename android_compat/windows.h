@@ -1151,6 +1151,31 @@ inline BOOL SetThreadPriority(HANDLE, int) { return TRUE; }
 #define WAIT_TIMEOUT 258
 #define WAIT_FAILED 0xFFFFFFFF
 
+#if defined(__APPLE__)
+#include <dispatch/dispatch.h>
+
+inline HANDLE CreateSemaphore(LPSECURITY_ATTRIBUTES, LONG lInitialCount, LONG lMaximumCount, LPCSTR) {
+    dispatch_semaphore_t sem = dispatch_semaphore_create(lInitialCount);
+    return (HANDLE)(uintptr_t)sem;
+}
+inline BOOL ReleaseSemaphore(HANDLE hSemaphore, LONG lReleaseCount, LPLONG lpPreviousCount) {
+    if (hSemaphore) {
+        dispatch_semaphore_t sem = (dispatch_semaphore_t)(uintptr_t)hSemaphore;
+        for (LONG i = 0; i < lReleaseCount; ++i) {
+            dispatch_semaphore_signal(sem);
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+inline DWORD WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds) {
+    if (!hHandle) return WAIT_FAILED;
+    dispatch_semaphore_t sem = (dispatch_semaphore_t)(uintptr_t)hHandle;
+    dispatch_time_t timeout = (dwMilliseconds == INFINITE) ? DISPATCH_TIME_FOREVER : dispatch_time(DISPATCH_TIME_NOW, (int64_t)dwMilliseconds * NSEC_PER_MSEC);
+    intptr_t res = dispatch_semaphore_wait(sem, timeout);
+    return (res == 0) ? WAIT_OBJECT_0 : WAIT_TIMEOUT;
+}
+#else
 inline HANDLE CreateSemaphore(LPSECURITY_ATTRIBUTES, LONG lInitialCount, LONG lMaximumCount, LPCSTR) {
     sem_t* sem = (sem_t*)malloc(sizeof(sem_t));
     if (sem) sem_init(sem, 0, (unsigned int)lInitialCount);
@@ -1178,6 +1203,7 @@ inline DWORD WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds) {
         return WAIT_TIMEOUT;
     }
 }
+#endif
 
 typedef unsigned (__stdcall *PTHREAD_START_ROUTINE)(void*);
 typedef PTHREAD_START_ROUTINE LPTHREAD_START_ROUTINE;
