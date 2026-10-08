@@ -1,21 +1,33 @@
 #include "StdAfx.h"
 #include "PythonApplication.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 extern "C" {
+#ifdef __ANDROID__
 void Android_ShowWebPage(const char* url);
 void Android_HideWebPage();
 bool Android_IsWebShowing();
+#define Platform_ShowWebPage Android_ShowWebPage
+#define Platform_HideWebPage Android_HideWebPage
+#define Platform_IsWebShowing Android_IsWebShowing
+#else
+void IOS_ShowWebPage(const char* url);
+void IOS_HideWebPage();
+bool IOS_IsWebShowing();
+#define Platform_ShowWebPage IOS_ShowWebPage
+#define Platform_HideWebPage IOS_HideWebPage
+#define Platform_IsWebShowing IOS_IsWebShowing
+#endif
 }
 
 bool CPythonApplication::IsWebPageMode()
 {
-	return Android_IsWebShowing();
+	return Platform_IsWebShowing();
 }
 
 void CPythonApplication::ShowWebPage(const char* c_szURL, const RECT& c_rcWebPage)
 {
-	Android_ShowWebPage(c_szURL);
+	Platform_ShowWebPage(c_szURL);
 }
 
 void CPythonApplication::MoveWebPage(const RECT& c_rcWebPage)
@@ -24,7 +36,7 @@ void CPythonApplication::MoveWebPage(const RECT& c_rcWebPage)
 
 void CPythonApplication::HideWebPage()
 {
-	Android_HideWebPage();
+	Platform_HideWebPage();
 }
 #else
 #ifdef CEF_BROWSER

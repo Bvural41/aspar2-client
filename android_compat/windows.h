@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __ANDROID__
-  #error "This windows.h is only for Android!"
+#if !defined(__ANDROID__) && !defined(__APPLE__)
+  #error "This windows.h is only for Android and Apple iOS!"
 #endif
 
 // Complete stub for Windows Win32, D3D and COM types for Android Clang build.
@@ -724,7 +724,9 @@ inline LRESULT SendMessage(HWND, UINT, WPARAM, LPARAM) { return 0; }
 #include <sys/mman.h>
 #include <errno.h>
 #include <pthread.h>
+#ifdef __ANDROID__
 #include <android/log.h>
+#endif
 
 #define INVALID_FILE_SIZE   ((DWORD)0xFFFFFFFF)
 #define INVALID_SET_FILE_POINTER ((DWORD)-1)

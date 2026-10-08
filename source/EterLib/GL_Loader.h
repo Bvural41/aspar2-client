@@ -5,6 +5,9 @@
 #ifdef __ANDROID__
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
+#elif defined(__APPLE__)
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
 #else
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengles2.h>
@@ -135,7 +138,7 @@ typedef GLboolean (GL_APIENTRYP PFNGLISVERTEXARRAYPROC) (GLuint array);
 	X(PFNGLVERTEXATTRIBPOINTERPROC, glVertexAttribPointer) \
 	X(PFNGLVIEWPORTPROC, glViewport)
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 // Declare extern pointers
 #define X(type, name) extern type gles_##name;
 GLES_FUNCTIONS
@@ -241,7 +244,7 @@ GLES_FUNCTIONS
 #define glVertexAttrib4f gles_glVertexAttrib4f
 #define glVertexAttribPointer gles_glVertexAttribPointer
 #define glViewport gles_glViewport
-#endif // !__ANDROID__
+#endif // !__ANDROID__ && !__APPLE__
 
 bool InitGLLoader();
 

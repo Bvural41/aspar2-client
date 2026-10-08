@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.10.2)
-project("Metin2Mobile")
+project("Metin2Mobile" C CXX)
 
-add_definitions(-D__ANDROID__)
-add_definitions(-D_GNU_SOURCE)
+if(APPLE)
+    add_definitions(-D__APPLE__)
+    add_definitions(-D__IOS__)
+    add_definitions(-D_DARWIN_C_SOURCE)
+elseif(ANDROID)
+    add_definitions(-D__ANDROID__)
+    add_definitions(-D_GNU_SOURCE)
+endif()
+
 add_definitions(-DUSE_OPENGL_ES)
 add_definitions(-DENABLE_OPENGL)
 add_definitions(-DENABLE_MOBILE_CONTROLS)
@@ -26,7 +33,7 @@ add_definitions(-DCRYPTOPP_DISABLE_X86ASM)
 add_definitions(-DCRYPTOPP_DISABLE_SSE2)
 add_definitions(-DCRYPTOPP_DISABLE_SSSE3)
 
-if(ANDROID)
+if(ANDROID OR APPLE)
     add_definitions(-DGRANNY_ONLY_TYPES)
 endif()
 
@@ -75,15 +82,24 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/include
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/include/Python-2.7
     ${CMAKE_CURRENT_SOURCE_DIR}/source/lzo
-    ${ANDROID_NDK}/sources/android/cpufeatures
 )
+
+if(ANDROID)
+    include_directories(${ANDROID_NDK}/sources/android/cpufeatures)
+elseif(APPLE)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ios)
+endif()
 
 file(GLOB ETER_BASE_SOURCES source/EterBase/*.cpp source/EterBase/Poly/*.cpp)
 file(GLOB ETER_LIB_SOURCES source/EterLib/*.cpp)
 file(GLOB ETER_IMAGE_LIB_SOURCES source/EterImageLib/*.cpp)
 file(GLOB GAME_LIB_SOURCES source/GameLib/*.cpp)
 file(GLOB USER_INTERFACE_SOURCES source/UserInterface/*.cpp)
-list(FILTER USER_INTERFACE_SOURCES EXCLUDE REGEX ".*(UserInterface\\.cpp|Cef|HackShield|NProtect|WiseLogicXTrap|Process|MovieMan|CheckLatestFiles|Logo|PythonTitleSystem).*")
+if(APPLE)
+    list(FILTER USER_INTERFACE_SOURCES EXCLUDE REGEX ".*(UserInterface\\.cpp|AndroidMain\\.cpp|Cef|HackShield|NProtect|WiseLogicXTrap|Process|MovieMan|CheckLatestFiles|Logo|PythonTitleSystem).*")
+else()
+    list(FILTER USER_INTERFACE_SOURCES EXCLUDE REGEX ".*(UserInterface\\.cpp|Cef|HackShield|NProtect|WiseLogicXTrap|Process|MovieMan|CheckLatestFiles|Logo|PythonTitleSystem).*")
+endif()
 # Android touch controls included in USER_INTERFACE_SOURCES
 
 file(GLOB ETER_PACK_SOURCES source/EterPack/*.cpp source/EterPack/*.c)
@@ -271,7 +287,11 @@ set(PYTHON_SOURCES
     extern/Python-2.7.18/Modules/_json.c
     extern/Python-2.7.18/Modules/zlibmodule.c
 )
-set_source_files_properties(${PYTHON_SOURCES} PROPERTIES COMPILE_DEFINITIONS "Py_BUILD_CORE;PLATFORM=\"linux2\";DUSE_ZLIB_CRC32")
+if(APPLE)
+    set_source_files_properties(${PYTHON_SOURCES} PROPERTIES COMPILE_DEFINITIONS "Py_BUILD_CORE;PLATFORM=\"darwin\";DUSE_ZLIB_CRC32")
+else()
+    set_source_files_properties(${PYTHON_SOURCES} PROPERTIES COMPILE_DEFINITIONS "Py_BUILD_CORE;PLATFORM=\"linux2\";DUSE_ZLIB_CRC32")
+endif()
 
 file(GLOB GRANNY_CPP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/GrannySource/source/granny_*.cpp
@@ -301,45 +321,104 @@ set(GRANNY_ALL_SOURCES
 )
 set_source_files_properties(${GRANNY_ALL_SOURCES} PROPERTIES COMPILE_DEFINITIONS "BUILDING_GRANNY_STATIC=1;BUILDING_GRANNY=1;RAD_NO_LOWERCASE_TYPES=0;_HAS_ITERATOR_DEBUGGING=0")
 
-add_library(metin2_mobile SHARED
-    ${USER_INTERFACE_SOURCES}
-    ${ETER_BASE_SOURCES}
-    ${ETER_LIB_SOURCES}
-    ${ETER_IMAGE_LIB_SOURCES}
-    ${GAME_LIB_SOURCES}
-    ${ETER_PACK_SOURCES}
-    ${ETER_GRN_LIB_SOURCES}
-    ${EFFECT_LIB_SOURCES}
-    ${ETER_PYTHON_LIB_SOURCES}
-    ${SCRIPT_LIB_SOURCES}
-    ${SPHERE_LIB_SOURCES}
-    ${MILES_LIB_SOURCES}
-    ${SPEED_TREE_LIB_SOURCES}
-    ${PR_TERRAIN_LIB_SOURCES}
-    ${ETER_LOCALE_SOURCES}
-    ${CRYPTOPP_SOURCES}
-    ${LZO_SOURCES}
-    ${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/d3dx9math_impl.cpp
-    ${PYTHON_SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/android_engine_stubs.cpp
-    ${GRANNY_ALL_SOURCES}
-)
+if(ANDROID)
+    add_library(metin2_mobile SHARED
+        ${USER_INTERFACE_SOURCES}
+        ${ETER_BASE_SOURCES}
+        ${ETER_LIB_SOURCES}
+        ${ETER_IMAGE_LIB_SOURCES}
+        ${GAME_LIB_SOURCES}
+        ${ETER_PACK_SOURCES}
+        ${ETER_GRN_LIB_SOURCES}
+        ${EFFECT_LIB_SOURCES}
+        ${ETER_PYTHON_LIB_SOURCES}
+        ${SCRIPT_LIB_SOURCES}
+        ${SPHERE_LIB_SOURCES}
+        ${MILES_LIB_SOURCES}
+        ${SPEED_TREE_LIB_SOURCES}
+        ${PR_TERRAIN_LIB_SOURCES}
+        ${ETER_LOCALE_SOURCES}
+        ${CRYPTOPP_SOURCES}
+        ${LZO_SOURCES}
+        ${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/d3dx9math_impl.cpp
+        ${PYTHON_SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/android_engine_stubs.cpp
+        ${GRANNY_ALL_SOURCES}
+    )
 
-find_library(log-lib log)
-find_library(android-lib android)
-find_library(gles3-lib GLESv3)
+    find_library(log-lib log)
+    find_library(android-lib android)
+    find_library(gles3-lib GLESv3)
 
-target_link_libraries(metin2_mobile
-    ${log-lib}
-    ${android-lib}
-    ${gles3-lib}
-    z
-    m
-)
+    target_link_libraries(metin2_mobile
+        ${log-lib}
+        ${android-lib}
+        ${gles3-lib}
+        z
+        m
+    )
 
-target_link_options(metin2_mobile PRIVATE
-    "-Wl,--no-dependent-libraries"
-    "-Wl,--no-undefined"
-    "-Wl,--error-limit=0"
-)
+    target_link_options(metin2_mobile PRIVATE
+        "-Wl,--no-dependent-libraries"
+        "-Wl,--no-undefined"
+        "-Wl,--error-limit=0"
+    )
+elseif(APPLE)
+    enable_language(OBJC OBJCXX)
+
+    file(GLOB IOS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.mm
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.m
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.h
+    )
+
+    add_executable(Aspar2 MACOSX_BUNDLE
+        ${USER_INTERFACE_SOURCES}
+        ${IOS_SOURCES}
+        ${ETER_BASE_SOURCES}
+        ${ETER_LIB_SOURCES}
+        ${ETER_IMAGE_LIB_SOURCES}
+        ${GAME_LIB_SOURCES}
+        ${ETER_PACK_SOURCES}
+        ${ETER_GRN_LIB_SOURCES}
+        ${EFFECT_LIB_SOURCES}
+        ${ETER_PYTHON_LIB_SOURCES}
+        ${SCRIPT_LIB_SOURCES}
+        ${SPHERE_LIB_SOURCES}
+        ${MILES_LIB_SOURCES}
+        ${SPEED_TREE_LIB_SOURCES}
+        ${PR_TERRAIN_LIB_SOURCES}
+        ${ETER_LOCALE_SOURCES}
+        ${CRYPTOPP_SOURCES}
+        ${LZO_SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/d3dx9math_impl.cpp
+        ${PYTHON_SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/android_engine_stubs.cpp
+        ${GRANNY_ALL_SOURCES}
+    )
+
+    target_link_libraries(Aspar2
+        "-framework Foundation"
+        "-framework UIKit"
+        "-framework OpenGLES"
+        "-framework CoreGraphics"
+        "-framework QuartzCore"
+        "-framework AudioToolbox"
+        "-framework CoreAudio"
+        "-framework WebKit"
+        "-framework AVFoundation"
+        z
+        m
+    )
+
+    set_target_properties(Aspar2 PROPERTIES
+        MACOSX_BUNDLE YES
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.aspar2.client"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+        XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC "YES"
+        XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "14.0"
+        XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
+    )
+endif()

@@ -115,8 +115,18 @@ void CIME::EnableIME(bool bEnable) { ms_bImeEnabled = bEnable; }
 void CIME::DisableIME() { ms_bImeEnabled = false; }
 
 extern "C" {
+#ifdef __ANDROID__
 void Android_ShowKeyboard(const char* initialText);
 void Android_HideKeyboard();
+#elif defined(__APPLE__)
+void IOS_ShowKeyboard(const char* initialText);
+void IOS_HideKeyboard();
+#define Android_ShowKeyboard IOS_ShowKeyboard
+#define Android_HideKeyboard IOS_HideKeyboard
+#else
+void Android_ShowKeyboard(const char* initialText) {}
+void Android_HideKeyboard() {}
+#endif
 }
 
 void CIME::EnableCaptureInput() {

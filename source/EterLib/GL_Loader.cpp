@@ -4,7 +4,7 @@
 
 #if defined(USE_OPENGL_ES)
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 bool InitGLLoader()
 {
 	const char* szVersion = (const char*)glGetString(GL_VERSION);
@@ -53,6 +53,6 @@ bool InitGLLoader()
 
 	return (loadedCount > 0);
 }
-#endif // !__ANDROID__
+#endif // !__ANDROID__ && !__APPLE__
 
 #endif // USE_OPENGL_ES
