@@ -39,7 +39,12 @@
 #include <math.h>
 #include <time.h>
 #include <direct.h>
+#if !defined(__APPLE__)
 #include <malloc.h>
+#else
+#include <stdlib.h>
+#include <malloc/malloc.h>
+#endif
 
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "d3d9.lib")
