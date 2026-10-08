@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || !defined(_WIN32)
 void SetEterExceptionHandler() {}
 #else
 
@@ -150,7 +150,7 @@ LONG __stdcall EterExceptionFilter(_EXCEPTION_POINTERS* pExceptionInfo)
 		//WinExec()
 		/*CreateProcess("cmd.exe",NULL,NULL,NULL,FALSE,
 			CREATE_NEW_PROCESS_GROUP|DETACHED_PROCESS,NULL,NULL,NULL,NULL);
-		MessageBox(NULL,"°ÔÀÓ ½ÇÇà¿¡ Ä¡¸íÀûÀÎ ¹®Á¦°¡ ¹ß»ýÇÏ¿´½À´Ï´Ù.\n°ÔÀÓÀ» Á¾·áÇÏ°í ¿¡·¯ ·Î±×¸¦ ³²±é´Ï´Ù.\n¿¡·¯ ·Î±×¸¦ ¼­¹ö¿¡ º¸³»½Ã°Ú½À´Ï±î?","¿¡·¯ ¹ß»ý!",MB_YESNO);*/
+		MessageBox(NULL,"ê²Œìž„ ì‹¤í–‰ì— ì¹˜ëª…ì ì¸ ë¬¸ì œê°€ ë°œìƒí•˜ì˜€ìŠµë‹ˆë‹¤.\nê²Œìž„ì„ ì¢…ë£Œí•˜ê³  ì—ëŸ¬ ë¡œê·¸ë¥¼ ë‚¨ê¹ë‹ˆë‹¤.\nì—ëŸ¬ ë¡œê·¸ë¥¼ ì„œë²„ì— ë³´ë‚´ì‹œê² ìŠµë‹ˆê¹Œ?","ì—ëŸ¬ ë°œìƒ!",MB_YESNO);*/
 
 		/*
 		__l.BeginCompressInBuffer(__msg,__idx,__cmsg);
