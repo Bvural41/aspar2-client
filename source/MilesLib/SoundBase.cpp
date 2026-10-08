@@ -1,5 +1,9 @@
 #include "Stdafx.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 

@@ -12,6 +12,10 @@
 #include "../ScriptLib/PythonLauncher.h"
 #include "PythonExceptionSender.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #import "IOSMain.h"
 #import "GameViewController.h"
 

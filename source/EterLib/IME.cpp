@@ -3,7 +3,7 @@
 #include "TextTag.h"
 #include "../eterBase/Utils.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 
 int CIME::ms_compLen = 0;
 int CIME::ms_curpos = 0;
