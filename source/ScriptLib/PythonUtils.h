@@ -16,7 +16,12 @@ bool PyTuple_GetFloat(PyObject* poArgs, int pos, float* ret);
 bool PyTuple_GetDouble(PyObject* poArgs, int pos, double* ret);
 bool PyTuple_GetObject(PyObject* poArgs, int pos, PyObject** ret);
 bool PyTuple_GetBoolean(PyObject* poArgs, int pos, bool* ret);
+inline bool PyTuple_GetInteger(PyObject* poArgs, int pos, bool* ret)
+{
+	return PyTuple_GetBoolean(poArgs, pos, ret);
+}
 bool PyTuple_GetPointer(PyObject* poArgs, int pos, void** ret);
+
 template <typename T>
 inline bool PyTuple_GetPointer(PyObject* poArgs, int pos, T** ret)
 {
