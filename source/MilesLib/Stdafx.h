@@ -12,8 +12,16 @@
 #include <windows.h>
 #include <miniaudio.h>
 
+#ifndef min
+#define min(a,b) (((a)<(b))?(a):(b))
+#endif
+#ifndef max
+#define max(a,b) (((a)>(b))?(a):(b))
+#endif
+
 #include "../eterBase/CRC32.h"
 #include "../eterBase/Utils.h"
 #include "../eterBase/Debug.h"
+
 
 #endif
