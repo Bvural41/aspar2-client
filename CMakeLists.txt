@@ -372,7 +372,15 @@ elseif(APPLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.h
     )
 
+    set_source_files_properties(
+        ${CMAKE_CURRENT_SOURCE_DIR}/source/MilesLib/SoundBase.cpp
+        PROPERTIES
+        COMPILE_FLAGS "-x objective-c++"
+        XCODE_EXPLICIT_FILE_TYPE "sourcecode.cpp.objcpp"
+    )
+
     add_executable(Aspar2 MACOSX_BUNDLE
+
         ${USER_INTERFACE_SOURCES}
         ${IOS_SOURCES}
         ${ETER_BASE_SOURCES}
