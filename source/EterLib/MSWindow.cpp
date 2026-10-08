@@ -94,7 +94,7 @@ void CMSWindow::Destroy()
 
 bool CMSWindow::Create(const char* c_szName, int brush, DWORD cs, DWORD ws, HICON hIcon, int iCursorResource, int width, int height)
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 	m_hWnd = (HWND)1;
 	m_isVisible = true;
 	m_isActive = true;

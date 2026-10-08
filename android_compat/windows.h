@@ -1391,6 +1391,8 @@ inline int memcpy_s(void* dst, size_t dstsz, const void* src, size_t count) {
 }
 
 #define GWL_USERDATA (-21)
+#define GWL_EXSTYLE (-20)
+#define GWL_STYLE (-16)
 #define GWL_WNDPROC (-4)
 #define WM_SIZE 0x0005
 #define WM_ACTIVATEAPP 0x001C
@@ -1449,6 +1451,7 @@ inline BOOL AdjustWindowRectEx(LPRECT, DWORD, BOOL, DWORD) { return TRUE; }
 #define SWP_NOSIZE 0x0001
 #define SWP_NOMOVE 0x0002
 #define SWP_NOZORDER 0x0004
+#define SWP_FRAMECHANGED 0x0020
 #define IDI_APPLICATION ((LPCSTR)32512)
 #define IDC_ARROW ((LPCSTR)32512)
 
