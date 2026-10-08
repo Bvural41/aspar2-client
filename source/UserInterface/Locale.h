@@ -6,7 +6,18 @@
 
 #ifdef __cplusplus
 
-#if defined(__ANDROID__) || !defined(_WIN32)
+#if defined(__APPLE__)
+#include <objc/objc.h>
+#ifndef LPCSTR
+typedef const char* LPCSTR;
+#endif
+#ifndef BYTE
+typedef unsigned char BYTE;
+#endif
+#ifndef HINSTANCE
+typedef void* HINSTANCE;
+#endif
+#elif defined(__ANDROID__) || !defined(_WIN32)
 #ifndef BOOL
 typedef int BOOL;
 #endif
