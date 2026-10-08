@@ -17,25 +17,9 @@
 #include <math.h>
 
 #ifdef __cplusplus
-#include <functional>
-namespace std {
-#ifndef _STL_UNARY_FUNCTION_DEFINED
-#define _STL_UNARY_FUNCTION_DEFINED
-    template <class _Arg, class _Result>
-    struct unary_function {
-        typedef _Arg argument_type;
-        typedef _Result result_type;
-    };
-    template <class _Arg1, class _Arg2, class _Result>
-    struct binary_function {
-        typedef _Arg1 first_argument_type;
-        typedef _Arg2 second_argument_type;
-        typedef _Result result_type;
-    };
-#endif
-}
 #define EXTERN_C extern "C"
 extern "C" {
+
 #else
 #define EXTERN_C extern
 #endif
