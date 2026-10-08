@@ -42,6 +42,10 @@
 
 
 
+#ifndef interface
+#define interface struct
+#endif
+
 // Includes
 #include "d3d9.h"
 #include "d3dx9math.h"
@@ -73,11 +77,6 @@ enum _D3DXERR {
 	D3DXERR_CANNOTREMOVELASTITEM		= MAKE_DDHRESULT(2908),
 };
 
-
-#if defined(__DEFINED_INTERFACE_IN_D3D9)
-#undef interface
-#undef __DEFINED_INTERFACE_IN_D3D9
-#endif
 
 #endif //__D3DX9_H__
 
