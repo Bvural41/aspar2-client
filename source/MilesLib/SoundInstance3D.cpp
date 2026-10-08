@@ -152,7 +152,8 @@ void CSoundInstance3D::SetVolume(float volume) const
 {
 	if (m_bSoundInitialized)
 	{
-		volume = max(0.0f, min(1.0f, volume));
+		if (volume < 0.0f) volume = 0.0f;
+		else if (volume > 1.0f) volume = 1.0f;
 		ma_sound_set_volume(&m_sound, volume);
 	}
 }

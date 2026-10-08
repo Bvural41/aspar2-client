@@ -165,9 +165,9 @@ float CSpeedGrassWrapper::Color(float fX, float fY, const float* pNormal, float*
 			pTopColor[1] /= fLargest;
 			pTopColor[2] /= fLargest;
 		}
-		pTopColor[0] = max(0.0f, pTopColor[0]);
-		pTopColor[1] = max(0.0f, pTopColor[1]);
-		pTopColor[2] = max(0.0f, pTopColor[2]);
+		if (pTopColor[0] < 0.0f) pTopColor[0] = 0.0f;
+		if (pTopColor[1] < 0.0f) pTopColor[1] = 0.0f;
+		if (pTopColor[2] < 0.0f) pTopColor[2] = 0.0f;
 	}
 
 	return afLowColor[3];
