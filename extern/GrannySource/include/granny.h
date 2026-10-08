@@ -181,15 +181,23 @@
   #undef  GRANNY_LITTLE_ENDIAN
   #define GRANNY_LITTLE_ENDIAN 1
   #define GRANNY_64BIT_TYPE long long
-#elif defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) || defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
+#elif defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) || defined(__IPHONE_OS_VERSION_MIN_REQUIRED) || defined(TARGET_OS_TV) || defined(GRANNY_IPHONE)
   #define GRANNY_IPHONE_EXT 1
   #define GRANNY_DYNIMP(ret) ret
   #define GRANNY_DYNEXP(ret) ret
   #define GRANNY_CALLBACK(ret) ret
   #define GRANNY_DYNIMPDATA(type) type
   #define GRANNY_DYNEXPDATA(type) type
-  #undef  GRANNY_32BIT_PTR
-  #define GRANNY_32BIT_PTR 1
+  #if defined(__x86_64__)
+    #undef  GRANNY_64BIT_PTR
+    #define GRANNY_64BIT_PTR 1
+  #elif defined(__arm64__) || defined(__aarch64__)
+    #undef  GRANNY_64BIT_PTR
+    #define GRANNY_64BIT_PTR 1
+  #else
+    #undef  GRANNY_32BIT_PTR
+    #define GRANNY_32BIT_PTR 1
+  #endif
   #undef  GRANNY_LITTLE_ENDIAN
   #define GRANNY_LITTLE_ENDIAN 1
   #define GRANNY_64BIT_TYPE long long
