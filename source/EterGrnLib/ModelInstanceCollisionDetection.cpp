@@ -2,6 +2,14 @@
 #include "ModelInstance.h"
 #include "Model.h"
 
+#include <algorithm>
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+
 void CGrannyModelInstance::MakeBoundBox(TBoundBox* pBoundBox,
 										 const float* mat,
 										 const float* OBBMin,
