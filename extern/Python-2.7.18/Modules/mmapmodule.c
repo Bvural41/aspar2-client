@@ -502,6 +502,9 @@ mmap_resize_method(mmap_object *self,
 #endif /* MS_WINDOWS */
 
 #ifdef UNIX
+#if defined(__APPLE__)
+#undef HAVE_MREMAP
+#endif
 #ifndef HAVE_MREMAP
         PyErr_SetString(PyExc_SystemError,
                         "mmap: resizing not available--no mremap()");

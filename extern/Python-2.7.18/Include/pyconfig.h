@@ -27,6 +27,7 @@
 #  undef HAVE_SETRESGID
 #  undef HAVE_GETRESUID
 #  undef HAVE_GETRESGID
+#  undef HAVE_MREMAP
 #endif
 
 #endif /* Py_CONFIG_H */
