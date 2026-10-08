@@ -1,6 +1,12 @@
 #pragma once
 
+#ifdef BYTE_SIZE
+#undef BYTE_SIZE
+#endif
+
+
 class CAffectFlagContainer
+
 {
 	public:
 		enum

@@ -1,9 +1,10 @@
-#ifndef Py_CONFIG_H
-#define Py_CONFIG_H
-
 #if defined(__ANDROID__) || defined(__APPLE__)
 #  include "../../Python-2.7.18/Include/pyconfig.h"
 #else
+
+#ifndef Py_CONFIG_H
+#define Py_CONFIG_H
+
 
 
 /* pyconfig.h.  NOT Generated automatically by configure.
@@ -761,5 +762,6 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
    least significant byte first */
 #define DOUBLE_IS_LITTLE_ENDIAN_IEEE754 1
 
-#endif /* !__ANDROID__ */
 #endif /* !Py_CONFIG_H */
+#endif /* !defined(__ANDROID__) && !defined(__APPLE__) */
+
