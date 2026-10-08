@@ -186,7 +186,7 @@ LRESULT CPythonApplication::WindowProcedure(HWND hWnd, UINT uiMsg, WPARAM wParam
 
 
 		case WM_MOUSEWHEEL:
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 			if (false)
 #elif defined(CEF_BROWSER)
 			if (CefWebBrowser_IsVisible())
