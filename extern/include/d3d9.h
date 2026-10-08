@@ -171,6 +171,7 @@ DEFINE_GUID(IID_IDirect3DCryptoSession9, 0xfa0ab799, 0x7a9c, 0x48ca, 0x8c, 0x5b,
 #else
 #define DECLSPEC_UUID(x)
 #endif
+#endif
 #ifndef interface
 #define interface struct
 #define __DEFINED_INTERFACE_IN_D3D9
