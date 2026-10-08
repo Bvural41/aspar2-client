@@ -422,10 +422,16 @@ bool CRaceMotionData::LoadMotionData(const char * c_szFileName)
 			{
 				m_iLoopCount = -1;
 			}
-			if (!rkTextFileLoader.GetTokenInteger("loopcancelenable", &m_bCancelEnableSkill))
+			int iCancelEnable = 0;
+			if (rkTextFileLoader.GetTokenInteger("loopcancelenable", &iCancelEnable))
+			{
+				m_bCancelEnableSkill = iCancelEnable ? TRUE : FALSE;
+			}
+			else
 			{
 				m_bCancelEnableSkill = FALSE;
 			}
+
 			if (!rkTextFileLoader.GetTokenFloat("loopstarttime", &m_fLoopStartTime))
 				return false;
 			if (!rkTextFileLoader.GetTokenFloat("loopendtime", &m_fLoopEndTime))
