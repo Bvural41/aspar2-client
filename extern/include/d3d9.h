@@ -171,6 +171,9 @@ DEFINE_GUID(IID_IDirect3DCryptoSession9, 0xfa0ab799, 0x7a9c, 0x48ca, 0x8c, 0x5b,
 #else
 #define DECLSPEC_UUID(x)
 #endif
+#ifndef interface
+#define interface struct
+#define __DEFINED_INTERFACE_IN_D3D9
 #endif
 
 interface DECLSPEC_UUID("81BDCBCA-64D4-426d-AE8D-AD0147F4275C") IDirect3D9;
@@ -2784,6 +2787,9 @@ typedef struct IDirect3DCryptoSession9 *LPDIRECT3DCRYPTOSESSION9, *PDIRECT3DCRYP
 
 #ifdef __cplusplus
 };
+#ifdef __DEFINED_INTERFACE_IN_D3D9
+#undef interface
+#undef __DEFINED_INTERFACE_IN_D3D9
 #endif
 
 #endif /* (DIRECT3D_VERSION >= 0x0900) */

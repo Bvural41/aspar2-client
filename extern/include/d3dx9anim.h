@@ -109,6 +109,10 @@ typedef struct _D3DXFRAME
 // mesh container objects. Methods on this are called during loading and
 // destroying frame hierarchies
 //----------------------------------------------------------------------------
+#ifndef interface
+#define interface struct
+#define __DEFINED_INTERFACE_IN_D3DX9ANIM
+#endif
 typedef interface ID3DXAllocateHierarchy ID3DXAllocateHierarchy;
 typedef interface ID3DXAllocateHierarchy *LPD3DXALLOCATEHIERARCHY;
 
@@ -1108,6 +1112,11 @@ D3DXCreateAnimationController
 #ifdef __cplusplus
 }
 #endif //__cplusplus
+
+#ifdef __DEFINED_INTERFACE_IN_D3DX9ANIM
+#undef interface
+#undef __DEFINED_INTERFACE_IN_D3DX9ANIM
+#endif
 
 #endif //__D3DX9ANIM_H__
 
