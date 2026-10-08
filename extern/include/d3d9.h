@@ -2787,6 +2787,8 @@ typedef struct IDirect3DCryptoSession9 *LPDIRECT3DCRYPTOSESSION9, *PDIRECT3DCRYP
 
 #ifdef __cplusplus
 };
+#endif
+
 #ifdef __DEFINED_INTERFACE_IN_D3D9
 #undef interface
 #undef __DEFINED_INTERFACE_IN_D3D9
