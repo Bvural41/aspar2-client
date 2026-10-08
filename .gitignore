@@ -9,8 +9,11 @@ local.properties
 *.so
 
 # Visual Studio / Windows build artifacts
-Debug/
-Release/
+/Debug/
+/Release/
+bin/
+!extern/include/**
+
 *.obj
 *.ilk
 *.pdb
@@ -25,7 +28,7 @@ Release/
 *.user
 
 # Large Windows debug libraries (exceeds GitHub 100MB limit and not used for mobile)
-extern/include/cryptopp/Win32/Output/
+extern/include/cryptopp/Win32/
 extern/library/*_debug.lib
 extern/library/*Debug.lib
 extern/library/Cryptopp_lib_debug.lib
