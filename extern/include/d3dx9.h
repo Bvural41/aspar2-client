@@ -74,5 +74,10 @@ enum _D3DXERR {
 };
 
 
+#if defined(__DEFINED_INTERFACE_IN_D3D9)
+#undef interface
+#undef __DEFINED_INTERFACE_IN_D3D9
+#endif
+
 #endif //__D3DX9_H__
 
