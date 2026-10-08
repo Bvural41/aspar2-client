@@ -29,6 +29,13 @@
 
 #pragma warning ( pop )
 
+#ifndef max
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 #if _MSC_VER >= 1400
 #define stricmp _stricmp
 #define strnicmp _strnicmp
