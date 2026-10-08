@@ -493,8 +493,9 @@ typedef const CLSID& REFCLSID;
 #define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
     static const GUID name = { l, w1, w2, { (unsigned char)(b1), (unsigned char)(b2), (unsigned char)(b3), (unsigned char)(b4), (unsigned char)(b5), (unsigned char)(b6), (unsigned char)(b7), (unsigned char)(b8) } }
 #endif
-
+#ifndef __OBJC__
 #define interface struct
+#endif
 #define PURE = 0
 #define THIS_
 #define THIS void
