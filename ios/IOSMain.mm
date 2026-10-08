@@ -15,6 +15,9 @@
 #ifdef interface
 #undef interface
 #endif
+#ifdef now
+#undef now
+#endif
 
 #import "IOSMain.h"
 #import "GameViewController.h"

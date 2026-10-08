@@ -115,3 +115,7 @@ private:
 	std::map<std::string, std::shared_ptr<HandlerEventInfo>> EventInfoMap;
 #endif
 };
+
+#ifdef now
+#undef now
+#endif
