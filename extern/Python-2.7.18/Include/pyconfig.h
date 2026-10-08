@@ -21,6 +21,12 @@
 #  undef HAVE_GETHOSTBYNAME_R_3_ARG
 #  undef HAVE_GETHOSTBYNAME_R_5_ARG
 #  undef HAVE_GETHOSTBYNAME_R_6_ARG
+#  undef HAVE_CHROOT
+#  undef HAVE_SYSTEM
+#  undef HAVE_SETRESUID
+#  undef HAVE_SETRESGID
+#  undef HAVE_GETRESUID
+#  undef HAVE_GETRESGID
 #endif
 
 #endif /* Py_CONFIG_H */

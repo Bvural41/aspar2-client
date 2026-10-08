@@ -164,8 +164,16 @@ corresponding Unix manual entries for more information on calls.");
 #endif  /* PYOS_OS2 && PYCC_GCC && __VMS */
 #endif  /* _MSC_VER */
 #endif  /* __BORLANDC__ */
-#endif  /* ! __WATCOMC__ || __QNX__ */
 #endif /* ! __IBMC__ */
+
+#if defined(__APPLE__)
+# undef HAVE_SYSTEM
+# undef HAVE_CHROOT
+# undef HAVE_SETRESUID
+# undef HAVE_SETRESGID
+# undef HAVE_GETRESUID
+# undef HAVE_GETRESGID
+#endif
 
 #ifndef _MSC_VER
 
