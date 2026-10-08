@@ -12,8 +12,13 @@
 #include <windows.h>
 #ifdef interface
 #undef interface
+#define __RESTORE_INTERFACE
 #endif
 #include <miniaudio.h>
+#ifdef __RESTORE_INTERFACE
+#define interface struct
+#undef __RESTORE_INTERFACE
+#endif
 
 #ifndef min
 #define min(a,b) (((a)<(b))?(a):(b))

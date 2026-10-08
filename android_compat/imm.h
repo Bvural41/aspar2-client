@@ -1,6 +1,9 @@
 #pragma once
 #include "windows.h"
 
+struct INPUTCONTEXT;
+typedef struct INPUTCONTEXT INPUTCONTEXT;
+
 typedef void* HIMC;
 typedef void* HIMCC;
 

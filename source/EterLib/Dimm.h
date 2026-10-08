@@ -1,5 +1,7 @@
 
 
+#if !defined(__ANDROID__) && !defined(__APPLE__)
+
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
@@ -6575,5 +6577,7 @@ CActiveIMM;
 #endif
 
 #endif
+
+#endif // !defined(__ANDROID__) && !defined(__APPLE__)
 
 

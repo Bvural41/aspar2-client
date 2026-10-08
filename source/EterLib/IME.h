@@ -4,7 +4,9 @@
 
 #pragma comment(lib, "imm32.lib")
 
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 #include "DIMM.h"
+#endif
 
 class IIMEEventSink
 {
