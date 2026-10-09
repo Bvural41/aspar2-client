@@ -235,7 +235,7 @@ void TraceError(const char* c_szFormat, ...)
 #if defined(__ANDROID__)
 	__android_log_print(ANDROID_LOG_ERROR, "Metin2SysErr", "%s", szBuf);
 #elif defined(__APPLE__) || defined(__IOS__)
-	extern void IOS_WriteSysErr(const char* msg);
+	extern "C" void IOS_WriteSysErr(const char* msg);
 	IOS_WriteSysErr(szBuf + 8);
 #endif
 	static FILE* s_pSysErrFile = nullptr;
