@@ -258,16 +258,6 @@ bool CEterPack::Create(CEterFileDict& rkFileDict, const char * dbname, const cha
 
 	m_stDataFileName = dbname;
 	m_stDataFileName += ".data";
-
-	if (access(m_indexFileName, R_OK) != 0)
-	{
-		std::string altIndex = std::string(dbname) + ".eix";
-		if (access(altIndex.c_str(), R_OK) == 0)
-		{
-			strncpy(m_indexFileName, altIndex.c_str(), MAX_PATH);
-			m_stDataFileName = std::string(dbname) + ".epk";
-		}
-	}
 	
 	m_bReadOnly = bReadOnly;
 

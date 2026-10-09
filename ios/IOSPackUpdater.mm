@@ -201,23 +201,22 @@ static NSString * const kPackDirName   = @"mobile_pack/";
             });
         };
 
-        // Check if local pack/aspar2 directory already exists (.index/.data or .eix/.epk)
+        // Check if local pack directory already exists (.index and .data)
         NSString *aspar2PackDir = [[docsPath stringByAppendingPathComponent:@"aspar2"] stringByAppendingPathComponent:@"pack"];
         
-        BOOL hasRootIndex = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.index"]] ||
-                            [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.eix"]];
-        BOOL hasRootData  = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.data"]] ||
-                            [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.epk"]];
-        BOOL hasLocalDocsPack = hasRootIndex && hasRootData;
-
-        BOOL hasAspar2RootIndex = [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.index"]] ||
-                                  [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.eix"]];
-        BOOL hasAspar2RootData  = [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.data"]] ||
-                                  [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.epk"]];
-        BOOL hasLocalAspar2Pack = hasAspar2RootIndex && hasAspar2RootData;
+        BOOL hasLocalDocsPack = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.index"]] &&
+                                [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.data"]];
+        BOOL hasLocalAspar2Pack = [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.index"]] &&
+                                  [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.data"]];
 
         NSArray *packFiles = [fm contentsOfDirectoryAtPath:self->_packDir error:nil];
-        BOOL hasGenericPacks = (packFiles.count >= 4);
+        BOOL hasGenericPacks = NO;
+        for (NSString *fName in packFiles) {
+            if ([fName hasSuffix:@".index"] || [fName hasSuffix:@".data"]) {
+                hasGenericPacks = YES;
+                break;
+            }
+        }
         
         if (hasLocalDocsPack || hasLocalAspar2Pack || hasGenericPacks) {
             reportStatus(@"Yerel paketler bulundu! Oyuna giriliyor...");
