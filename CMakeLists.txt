@@ -415,6 +415,7 @@ elseif(APPLE)
         "-framework CoreAudio"
         "-framework WebKit"
         "-framework AVFoundation"
+        "-Wl,-no_fixup_chains"
         z
         m
     )
@@ -428,6 +429,7 @@ elseif(APPLE)
         XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "14.0"
         XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+        XCODE_ATTRIBUTE_OTHER_LDFLAGS "-Wl,-no_fixup_chains"
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
     )

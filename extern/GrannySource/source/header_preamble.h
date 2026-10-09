@@ -13,14 +13,10 @@
 #include "granny_compiler.h"
 #endif
 
-// Structure packing explicitly set to 4 (32-bit) or 8 (64-bit)
-#if COMPILER_MSVC || defined(__x86_64__) || defined(__aarch64__) || defined(__arm64__) || defined(_WIN64)
+// Structure packing explicitly set to 4
+#if COMPILER_MSVC || defined(__x86_64__) || defined(__aarch64__) || defined(__arm64__)
 
 #pragma pack(push)
-#if defined(__x86_64__) || defined(__aarch64__) || defined(__arm64__) || defined(_WIN64) || defined(__RAD64__)
-#pragma pack(8)
-#else
 #pragma pack(4)
-#endif
 
 #endif
