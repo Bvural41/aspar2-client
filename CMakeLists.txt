@@ -436,4 +436,11 @@ elseif(APPLE)
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
         XCODE_ATTRIBUTE_SKIP_INSTALL "NO"
     )
+
+    install(TARGETS Aspar2 BUNDLE DESTINATION Applications RUNTIME DESTINATION Applications)
+
+    add_custom_command(TARGET Aspar2 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications
+        COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:Aspar2> ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications/Aspar2.app
+    )
 endif()
