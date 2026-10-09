@@ -443,6 +443,16 @@ elseif(APPLE)
 
     add_custom_command(TARGET Aspar2 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/android/app/src/main/assets $<TARGET_BUNDLE_DIR:Aspar2>
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon@3x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon-60@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon-76@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon-1024.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/Icon-60.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/Icon-76.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/bg_loading.jpg $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/logo.png $<TARGET_BUNDLE_DIR:Aspar2>/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications
         COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:Aspar2> ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications/Aspar2.app
     )

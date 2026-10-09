@@ -7,7 +7,7 @@
     <key>CFBundleDisplayName</key>
     <string>Aspar2</string>
     <key>CFBundleExecutable</key>
-    <string>$(EXECUTABLE_NAME)</string>
+    <string>Aspar2</string>
     <key>CFBundleIconFiles</key>
     <array>
         <string>AppIcon</string>
@@ -32,11 +32,11 @@
         </dict>
     </dict>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.aspar2.client</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>$(PRODUCT_NAME)</string>
+    <string>Aspar2</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
