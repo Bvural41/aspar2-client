@@ -403,7 +403,7 @@ bool CGraphicDevice::__IsInDriverBlackList(D3D_CAdapterInfo& rkD3DAdapterInfo) c
 
 	char szSrcDriver[256];
 	strncpy(szSrcDriver, rkD3DAdapterIdentifier.Driver, sizeof(szSrcDriver)-1);
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 	const DWORD dwSrcHighVersion = rkD3DAdapterIdentifier.DriverVersionHighPart;
 	const DWORD dwSrcLowVersion = rkD3DAdapterIdentifier.DriverVersionLowPart;
 #else
