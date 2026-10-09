@@ -65,7 +65,7 @@ struct PackCrcEntry {
     if (!url) return NO;
     
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30.0];
-    [req setValue:@"Aspar2iOS" forHTTPHeaderField:@"User-Agent"];
+    [req setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148" forHTTPHeaderField:@"User-Agent"];
     
     dispatch_semaphore_t sema = dispatch_semaphore_create(0);
     __block BOOL success = NO;
@@ -77,10 +77,20 @@ struct PackCrcEntry {
         
         if (!error && location && httpCode == 200) {
             NSFileManager *fm = [NSFileManager defaultManager];
+            NSString *parentDir = [destPath stringByDeletingLastPathComponent];
+            if (![fm fileExistsAtPath:parentDir]) {
+                [fm createDirectoryAtPath:parentDir withIntermediateDirectories:YES attributes:nil error:nil];
+            }
             if ([fm fileExistsAtPath:destPath]) [fm removeItemAtPath:destPath error:nil];
-            NSError *mvErr = nil;
-            if ([fm moveItemAtURL:location toURL:[NSURL fileURLWithPath:destPath] error:&mvErr]) {
+            
+            NSError *cpErr = nil;
+            if ([fm copyItemAtURL:location toURL:[NSURL fileURLWithPath:destPath] error:&cpErr]) {
                 success = YES;
+            } else {
+                NSData *data = [NSData dataWithContentsOfURL:location];
+                if (data && data.length > 0) {
+                    success = [data writeToFile:destPath atomically:YES];
+                }
             }
         }
         dispatch_semaphore_signal(sema);

@@ -782,7 +782,7 @@ bool CPythonApplication::Process()
 
 				OnUIRender();
 				OnMouseRender();
-#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+#if defined(__ANDROID__)
 				m_kTouchControls.Render();
 #endif
 				/////////////////////
