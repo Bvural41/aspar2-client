@@ -782,7 +782,7 @@ bool CPythonApplication::Process()
 
 				OnUIRender();
 				OnMouseRender();
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 				m_kTouchControls.Render();
 #endif
 				/////////////////////
@@ -869,7 +869,7 @@ bool CPythonApplication::Process()
 
 					m_fFaceSpd = (m_dwFaceAccTime > 0) ? (float)m_dwFaceAccCount / (float)m_dwFaceAccTime : 0.0f;
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 					m_pyBackground.SetViewDistanceSet(0, 20000.0f);
 #else
 					// 거리 자동 조절
@@ -1548,7 +1548,7 @@ bool CPythonApplication::Create(PyObject * poSelf, const char * c_szName, int wi
 			GRAPHICS_CAPS_SOFTWARE_TILING = m_pySystem.IsSoftwareTiling();
 
 		// Device
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 		if (!CreateDevice(width, height, Windowed, 32, 60))
 			return false;
 		m_pySystem.SetResolution(width, height);
@@ -1592,7 +1592,7 @@ bool CPythonApplication::Create(PyObject * poSelf, const char * c_szName, int wi
 		}
 
 		SetVisibleMode(true);
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 		m_isActive = true;
 		m_isActivateWnd = true;
 #endif
