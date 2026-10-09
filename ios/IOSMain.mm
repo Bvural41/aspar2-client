@@ -259,6 +259,12 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 				NSLog(@"[Aspar2 iOS] RegisterPack (DOCS) %s: %s", docPack.c_str(), ok ? "OK" : "FAILED");
 				if (ok) return true;
 			}
+			std::string docAspar2Pack = g_strDocsPath + "/aspar2/pack/" + baseName;
+			if (access((docAspar2Pack + ".index").c_str(), R_OK) == 0) {
+				bool ok = CEterPackManager::Instance().RegisterPack(docAspar2Pack.c_str(), dirPrefix);
+				NSLog(@"[Aspar2 iOS] RegisterPack (ASPAR2 DOCS) %s: %s", docAspar2Pack.c_str(), ok ? "OK" : "FAILED");
+				if (ok) return true;
+			}
 		}
 
 		// 2. Fallback to app bundle
@@ -272,6 +278,10 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		std::string docRoot = g_strDocsPath + "/pack/root";
 		CEterPackManager::Instance().RegisterRootPack(docRoot.c_str());
 		NSLog(@"[Aspar2 iOS] RegisterRootPack (DOCS): OK");
+	} else if (!g_strDocsPath.empty() && access((g_strDocsPath + "/aspar2/pack/root.index").c_str(), R_OK) == 0) {
+		std::string docRoot = g_strDocsPath + "/aspar2/pack/root";
+		CEterPackManager::Instance().RegisterRootPack(docRoot.c_str());
+		NSLog(@"[Aspar2 iOS] RegisterRootPack (ASPAR2 DOCS): OK");
 	} else {
 		CEterPackManager::Instance().RegisterRootPack("pack/root");
 		NSLog(@"[Aspar2 iOS] RegisterRootPack (BUNDLE): OK");

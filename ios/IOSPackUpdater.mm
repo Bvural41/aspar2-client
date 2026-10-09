@@ -93,7 +93,20 @@ struct PackCrcEntry {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (progressBlock) progressBlock(fileName, index, count, percent, speed);
             });
-        };
+        // Check if local pack/aspar2 directory already exists
+        NSString *aspar2PackDir = [[docsPath stringByAppendingPathComponent:@"aspar2"] stringByAppendingPathComponent:@"pack"];
+        BOOL hasLocalDocsPack = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.index"]] &&
+                                [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.data"]];
+        BOOL hasLocalAspar2Pack = [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.index"]] &&
+                                  [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.data"]];
+        
+        if (hasLocalDocsPack || hasLocalAspar2Pack) {
+            reportStatus(@"Yerel paketler bulundu! Oyuna giriliyor...");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (completionBlock) completionBlock(YES, nil);
+            });
+            return;
+        }
 
         reportStatus(@"Sunucuya bağlanılıyor...");
         
