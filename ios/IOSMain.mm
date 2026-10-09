@@ -26,26 +26,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-extern "C" void IOS_WriteSysErr(const char* msg) {
-	@autoreleasepool {
-		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-		NSString *docsPath = paths.firstObject;
-		if (docsPath && msg) {
-			NSString *syserrPath = [docsPath stringByAppendingPathComponent:@"syserr.txt"];
-			FILE* f = fopen([syserrPath UTF8String], "a");
-			if (f) {
-				time_t tNow = time(0);
-				struct tm tmNow = *localtime(&tNow);
-				fprintf(f, "%02d%02d %02d:%02d:%02d :: %s\n",
-						tmNow.tm_mon + 1, tmNow.tm_mday, tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec,
-						msg);
-				fflush(f);
-				fclose(f);
-			}
-		}
-	}
-}
-
 extern void initpack();
 extern void initdbg();
 extern void initime();
