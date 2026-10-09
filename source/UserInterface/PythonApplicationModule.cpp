@@ -443,7 +443,7 @@ PyObject* appCreate(PyObject* poSelf, PyObject* poArgs)
 		return Py_BuildException();
 
 	CPythonApplication& rkApp=CPythonApplication::Instance();
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	(void)szName;
 	return Py_BuildNone();
 #else
@@ -459,7 +459,7 @@ PyObject* appCreate(PyObject* poSelf, PyObject* poArgs)
 
 PyObject* appLoop(PyObject* poSelf, PyObject* poArgs)
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	PyRun_SimpleString(
 		"import __builtin__, sys, dbg\n"
 		"try:\n"
@@ -2955,7 +2955,7 @@ void initapp()
 	PyModule_AddIntConstant(poModule, "ENABLE_QUICKSLOT_IMPROVE", 0);
 #endif
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	PyModule_AddIntConstant(poModule, "IS_MOBILE", 1);
 #else
 	PyModule_AddIntConstant(poModule, "IS_MOBILE", 0);

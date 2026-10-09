@@ -3461,7 +3461,7 @@ DWORD CInstanceBase::GetVirtualNumber()
 
 bool CInstanceBase::__IsInViewFrustum()
 {
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	return true;
 #else
 	return m_GraphicThingInstance.isShow();
@@ -3475,7 +3475,7 @@ bool CInstanceBase::__CanRender()
 		return true;
 	}
 
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) && !defined(__APPLE__) && !defined(__IOS__)
 	if (!__IsInViewFrustum())
 		return false;
 #endif

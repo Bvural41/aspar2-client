@@ -736,7 +736,7 @@ bool CPythonApplication::Process()
 		DWORD dwRenderStartTime = ELTimer_GetMSec();
 		bool canRender = true;
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 		canRender = true;
 #else
 		if (m_isMinimizedWnd || IsIconic(GetWindowHandle()))
@@ -771,7 +771,7 @@ bool CPythonApplication::Process()
 
 				m_pyGraphic.ClearDepthBuffer();
 
-#if defined(_DEBUG) || defined(__ANDROID__)
+#if defined(_DEBUG) || defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 				m_pyGraphic.SetClearColor(0.0f, 0.0f, 0.0f);
 				m_pyGraphic.Clear();
 #endif
@@ -782,7 +782,7 @@ bool CPythonApplication::Process()
 
 				OnUIRender();
 				OnMouseRender();
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 				m_kTouchControls.Render();
 #endif
 				/////////////////////

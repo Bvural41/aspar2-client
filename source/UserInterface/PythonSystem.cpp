@@ -479,7 +479,7 @@ void CPythonSystem::SetDefaultConfig()
 {
 	memset(&m_Config, 0, sizeof(m_Config));
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	m_Config.width				= (g_nAndroidScreenWidth > 0) ? g_nAndroidScreenWidth : 1067;
 	m_Config.height				= (g_nAndroidScreenHeight > 0) ? g_nAndroidScreenHeight : 600;
 #else

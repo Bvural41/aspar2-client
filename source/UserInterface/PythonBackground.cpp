@@ -329,7 +329,7 @@ CPythonBackground::CPythonBackground()
 #ifdef ENABLE_LOADING_TIP_INFO
 	l_WarpMapIndex = 0;
 #endif
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	SetViewDistanceSet(4, 18000.0f);
 	SetViewDistanceSet(3, 16000.0f);
 	SetViewDistanceSet(2, 14000.0f);
@@ -375,7 +375,7 @@ void CPythonBackground::__CreateProperty()
 	}
 	else
 	{
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 		CEterPack* pPack = CEterPackManager::Instance().FindPackByName("property");
 		if (pPack)
 		{
