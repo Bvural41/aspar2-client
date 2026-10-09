@@ -107,6 +107,16 @@ float fbm2d(vec2 p)
     return value;
 }
 
+vec4 getSkyColor(int idx)
+{
+    vec4 c = u_skyColors[0];
+    for (int i = 0; i < 16; i++)
+    {
+        if (i == idx) { c = u_skyColors[i]; break; }
+    }
+    return c;
+}
+
 void main()
 {
     if (u_skyMode == 0)
@@ -118,7 +128,7 @@ void main()
             int seg = min(int(t), u_skyColorCount - 2);
             float f = t - float(seg);
             f = f * f * (3.0 - 2.0 * f);
-            color = mix(u_skyColors[seg], u_skyColors[seg + 1], f);
+            color = mix(getSkyColor(seg), getSkyColor(seg + 1), f);
         }
 
         vec3 viewDir = normalize(v_worldPos - u_cameraPos);

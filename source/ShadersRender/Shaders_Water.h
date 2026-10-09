@@ -5,6 +5,7 @@ namespace ShadersRender
 static const char* s_waterVS = R"(#version 300 es
 #ifdef GL_ES
 precision highp float;
+precision highp int;
 #endif
 
 layout(location = 0) in vec3 a_position;
@@ -37,6 +38,7 @@ void main()
 static const char* s_waterFS = R"(#version 300 es
 #ifdef GL_ES
 precision highp float;
+precision highp int;
 #endif
 
 uniform sampler2D u_texture;

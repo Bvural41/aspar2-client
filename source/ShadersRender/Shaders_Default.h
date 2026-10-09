@@ -35,7 +35,8 @@ void main() {
 
 static const char* s_defaultFS = R"(#version 300 es
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
+precision highp int;
 #endif
 
 in vec4 vColor;

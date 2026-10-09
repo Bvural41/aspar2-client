@@ -641,6 +641,13 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 			return 0;
 		}
 		GLuint prog = glCreateProgram();
+		if (!prog)
+		{
+			TraceError("glCreateProgram() failed for %s", debugName);
+			glDeleteShader(vs);
+			glDeleteShader(fs);
+			return 0;
+		}
 		glAttachShader(prog, vs);
 		glAttachShader(prog, fs);
 		TraceError("[GLES] Linking shader program: %s (prog=%u, vs=%u, fs=%u)", debugName, prog, vs, fs);

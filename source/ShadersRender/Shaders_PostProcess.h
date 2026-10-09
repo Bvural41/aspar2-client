@@ -5,6 +5,7 @@ namespace ShadersRender
 static const char* s_bloomBrightFS = R"(#version 300 es
 #ifdef GL_ES
 precision highp float;
+precision highp int;
 #endif
 
 in vec2 v_texCoord;
@@ -35,6 +36,7 @@ void main()
 static const char* s_bloomBlurFS = R"(#version 300 es
 #ifdef GL_ES
 precision highp float;
+precision highp int;
 #endif
 
 in vec2 v_texCoord;
@@ -66,6 +68,7 @@ void main()
 static const char* s_bloomCompositeFS = R"(#version 300 es
 #ifdef GL_ES
 precision highp float;
+precision highp int;
 #endif
 
 in vec2 v_texCoord;

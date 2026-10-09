@@ -74,29 +74,33 @@ void main()
     vec4 finalColor;
     finalColor.a = texColor.a * v_color.a;
 
-    switch (u_colorOp)
+    if (u_colorOp == 1)
     {
-    case 1:
         discard;
-        break;
-    case 2:
+    }
+    else if (u_colorOp == 2)
+    {
         finalColor.rgb = v_color.rgb;
-        break;
-    case 3:
+    }
+    else if (u_colorOp == 3)
+    {
         finalColor.rgb = texColor.rgb;
-        break;
-    case 5:
+    }
+    else if (u_colorOp == 5)
+    {
         finalColor.rgb = clamp(texColor.rgb * v_color.rgb * 2.0, 0.0, 1.0);
-        break;
-    case 6:
+    }
+    else if (u_colorOp == 6)
+    {
         finalColor.rgb = clamp(texColor.rgb * v_color.rgb * 4.0, 0.0, 1.0);
-        break;
-    case 7:
+    }
+    else if (u_colorOp == 7)
+    {
         finalColor.rgb = clamp(texColor.rgb + v_color.rgb, 0.0, 1.0);
-        break;
-    default:
+    }
+    else
+    {
         finalColor.rgb = texColor.rgb * v_color.rgb;
-        break;
     }
 
     if (finalColor.a < 0.004)

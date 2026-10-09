@@ -119,30 +119,33 @@ void main()
             shadow = texture(u_texture2, chrUV).rgb;
         }
         fragColor = vec4(shadow, 1.0);
-        return;
     }
-
-    vec4 texColor = (u_useTexture != 0) ? texture(u_texture, v_texCoord) : vec4(1.0);
-    if (u_useTexture2 != 0)
+    else
     {
-        vec4 tex2 = texture(u_texture2, v_texCoord2);
-        texColor *= tex2;
+        vec4 texColor = vec4(1.0);
+        if (u_useTexture != 0)
+            texColor = texture(u_texture, v_texCoord);
+        if (u_useTexture2 != 0)
+        {
+            vec4 tex2 = texture(u_texture2, v_texCoord2);
+            texColor *= tex2;
+        }
+        if (u_alphaTest != 0 && texColor.a < u_alphaRef)
+            discard;
+        vec3 N = normalize(v_worldNormal);
+        float NdotL = max(dot(N, u_lightDir), 0.0);
+        vec3 lighting = (u_isDungeonMap != 0 || u_useTexture2 != 0) ? vec3(1.0) : (u_ambientColor + u_lightColor * NdotL);
+        vec3 litColor = texColor.rgb * lighting;
+        vec3 finalColor = ApplyModernFog(litColor, v_fogDist, u_fogRange, u_fogEnable, u_fogColor);
+        float outAlpha = (u_useTexture != 0) ? texColor.a : 1.0;
+        if (u_isPCBlockerPass != 0)
+        {
+            vec2 bUV = clamp(v_blockerUV, 0.0, 1.0);
+            float blockerAlpha = texture(u_texture2, bUV).a;
+            outAlpha *= blockerAlpha;
+        }
+        fragColor = vec4(finalColor, outAlpha);
     }
-    if (u_alphaTest != 0 && texColor.a < u_alphaRef)
-        discard;
-    vec3 N = normalize(v_worldNormal);
-    float NdotL = max(dot(N, u_lightDir), 0.0);
-    vec3 lighting = (u_isDungeonMap != 0 || u_useTexture2 != 0) ? vec3(1.0) : (u_ambientColor + u_lightColor * NdotL);
-    vec3 litColor = texColor.rgb * lighting;
-    vec3 finalColor = ApplyModernFog(litColor, v_fogDist, u_fogRange, u_fogEnable, u_fogColor);
-    float outAlpha = (u_useTexture != 0) ? texColor.a : 1.0;
-    if (u_isPCBlockerPass != 0)
-    {
-        vec2 bUV = clamp(v_blockerUV, 0.0, 1.0);
-        float blockerAlpha = texture(u_texture2, bUV).a;
-        outAlpha *= blockerAlpha;
-    }
-    fragColor = vec4(finalColor, outAlpha);
 }
 )";
 

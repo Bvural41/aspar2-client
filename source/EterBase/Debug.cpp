@@ -234,18 +234,19 @@ void TraceError(const char* c_szFormat, ...)
 #if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 #if defined(__ANDROID__)
 	__android_log_print(ANDROID_LOG_ERROR, "Metin2SysErr", "%s", szBuf);
-#elif defined(__OBJC__)
-	NSLog(@"[Aspar2 iOS SYSERR] %s", szBuf);
+#elif defined(__APPLE__) || defined(__IOS__)
+	extern void IOS_WriteSysErr(const char* msg);
+	IOS_WriteSysErr(szBuf + 8);
 #endif
 	static FILE* s_pSysErrFile = nullptr;
 	if (!s_pSysErrFile)
 	{
-#ifdef __OBJC__
-		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-		NSString *docsPath = paths.firstObject;
-		if (docsPath) {
-			NSString *syserrPath = [docsPath stringByAppendingPathComponent:@"syserr.txt"];
-			s_pSysErrFile = fopen([syserrPath UTF8String], "a");
+#if defined(__APPLE__) || defined(__IOS__)
+		const char* home = getenv("HOME");
+		if (home) {
+			char docPath[1024];
+			snprintf(docPath, sizeof(docPath), "%s/Documents/syserr.txt", home);
+			s_pSysErrFile = fopen(docPath, "a");
 		}
 #endif
 		if (!s_pSysErrFile)

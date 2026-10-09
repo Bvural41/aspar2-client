@@ -5,6 +5,7 @@ namespace ShadersRender
 static const char* s_shadowVS = R"(#version 300 es
 #ifdef GL_ES
 precision highp float;
+precision highp int;
 #endif
 
 layout(location = 0) in vec3 a_position;
@@ -28,6 +29,7 @@ void main()
 static const char* s_shadowFS = R"(#version 300 es
 #ifdef GL_ES
 precision highp float;
+precision highp int;
 #endif
 
 in vec2 v_texCoord;
