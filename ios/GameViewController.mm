@@ -159,14 +159,25 @@ static GameViewController *s_sharedInstance = nil;
         [_otopatchContainer addSubview:bgView];
     }
     
-    // Title / Logo Label
-    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, bounds.size.height * 0.25f, bounds.size.width - 40, 48)];
-    titleLabel.text = @"ASPAR2 MOBILE";
-    titleLabel.textColor = [UIColor colorWithRed:0.95 green:0.75 blue:0.25 alpha:1.0];
-    titleLabel.font = [UIFont boldSystemFontOfSize:32.0];
-    titleLabel.textAlignment = NSTextAlignmentCenter;
-    titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-    [_otopatchContainer addSubview:titleLabel];
+    // Title / Logo
+    UIImage *logoImg = [UIImage imageNamed:@"logo.png"];
+    if (logoImg && logoImg.size.width > 0) {
+        CGFloat logoW = MIN(bounds.size.width * 0.45f, 340);
+        CGFloat logoH = logoW * (logoImg.size.height / logoImg.size.width);
+        UIImageView *logoView = [[UIImageView alloc] initWithFrame:CGRectMake((bounds.size.width - logoW) / 2.0f, bounds.size.height * 0.15f, logoW, logoH)];
+        logoView.image = logoImg;
+        logoView.contentMode = UIViewContentModeScaleAspectFit;
+        logoView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+        [_otopatchContainer addSubview:logoView];
+    } else {
+        UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, bounds.size.height * 0.25f, bounds.size.width - 40, 48)];
+        titleLabel.text = @"ASPAR2 MOBILE";
+        titleLabel.textColor = [UIColor colorWithRed:0.95 green:0.75 blue:0.25 alpha:1.0];
+        titleLabel.font = [UIFont boldSystemFontOfSize:32.0];
+        titleLabel.textAlignment = NSTextAlignmentCenter;
+        titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        [_otopatchContainer addSubview:titleLabel];
+    }
     
     // Status Label
     _otopatchStatusLabel = [[UILabel alloc] initWithFrame:CGRectMake(40, bounds.size.height * 0.58f, bounds.size.width - 80, 28)];
