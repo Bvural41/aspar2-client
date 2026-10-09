@@ -207,7 +207,13 @@
 
 
 #if !defined(SIZEOF_SIZE_T)
-#  define SIZEOF_SIZE_T				SIZEOF_UNSIGNED
+#  if defined(__SIZEOF_SIZE_T__)
+#    define SIZEOF_SIZE_T				__SIZEOF_SIZE_T__
+#  elif defined(_WIN64) || defined(__LP64__) || defined(_LP64) || defined(__x86_64__) || defined(__aarch64__)
+#    define SIZEOF_SIZE_T				8
+#  else
+#    define SIZEOF_SIZE_T				SIZEOF_UNSIGNED
+#  endif
 #endif
 #if !defined(SIZE_T_MAX)
 #  define SIZE_T_MAX				LZO_UTYPE_MAX(SIZEOF_SIZE_T)
