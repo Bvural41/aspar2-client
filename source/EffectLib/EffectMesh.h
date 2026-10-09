@@ -128,7 +128,7 @@ class CEffectMeshScript : public CEffectElementBase
 		BOOL GetTimeTableAlphaPointer(DWORD dwMeshIndex, TTimeEventTableFloat ** pTimeEventAlpha);
 
 		BOOL isMeshAnimationLoop();
-		BOOL GetMeshAnimationLoopCount();
+		int GetMeshAnimationLoopCount();
 		float GetMeshAnimationFrameDelay();
 		BOOL isTextureAnimationLoop(DWORD dwMeshIndex);
 		float GetTextureAnimationFrameDelay(DWORD dwMeshIndex);
