@@ -421,6 +421,8 @@ elseif(APPLE)
     )
 
     set_target_properties(Aspar2 PROPERTIES
+        OUTPUT_NAME "Aspar2"
+        XCODE_ATTRIBUTE_PRODUCT_NAME "Aspar2"
         MACOSX_BUNDLE YES
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist
         XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.aspar2.client"
