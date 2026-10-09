@@ -305,6 +305,10 @@ static GameViewController *s_sharedInstance = nil;
                 
                 // Allow UIKit to render "%100" and "Oyun başlatılıyor..." before executing engine init
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [EAGLContext setCurrentContext:self->_context];
+                    glBindFramebuffer(GL_FRAMEBUFFER, self->_defaultFramebuffer);
+                    glViewport(0, 0, self->_framebufferWidth, self->_framebufferHeight);
+
                     NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
                     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
                     NSString *docsPath = paths.firstObject;
@@ -344,6 +348,10 @@ static GameViewController *s_sharedInstance = nil;
 }
 
 - (void)onOtopatchContinueClicked {
+    [EAGLContext setCurrentContext:_context];
+    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFramebuffer);
+    glViewport(0, 0, _framebufferWidth, _framebufferHeight);
+
     NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *docsPath = paths.firstObject;
@@ -394,14 +402,31 @@ static GameViewController *s_sharedInstance = nil;
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_framebufferWidth);
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_framebufferHeight);
 
+    if (_framebufferWidth <= 0 || _framebufferHeight <= 0) {
+        CGSize sz = self.view.bounds.size;
+        CGFloat scale = [UIScreen mainScreen].scale;
+        _framebufferWidth = (GLint)(sz.width * scale);
+        _framebufferHeight = (GLint)(sz.height * scale);
+    }
+
     glGenRenderbuffers(1, &_depthRenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _framebufferWidth, _framebufferHeight);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        NSLog(@"[Aspar2 iOS] Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    NSLog(@"[Aspar2 iOS] Framebuffer dimensions: %dx%d, status: 0x%x", _framebufferWidth, _framebufferHeight, status);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        NSLog(@"[Aspar2 iOS] Failed to make complete framebuffer object 0x%x", status);
+    }
+}
+
+- (void)makeCurrentGLContext {
+    if (_context) {
+        [EAGLContext setCurrentContext:_context];
+        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFramebuffer);
+        glViewport(0, 0, _framebufferWidth, _framebufferHeight);
     }
 }
 
@@ -430,9 +455,7 @@ static GameViewController *s_sharedInstance = nil;
         return;
     }
 
-    [EAGLContext setCurrentContext:_context];
-    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFramebuffer);
-    glViewport(0, 0, _framebufferWidth, _framebufferHeight);
+    [self makeCurrentGLContext];
 
     IOS_Render();
 

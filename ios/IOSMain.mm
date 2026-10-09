@@ -225,6 +225,10 @@ int g_nAndroidMouseY = 0;
 bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int height) {
 	NSLog(@"[Aspar2 iOS] Initializing Engine (%dx%d)", width, height);
 
+	if ([GameViewController sharedInstance]) {
+		[[GameViewController sharedInstance] makeCurrentGLContext];
+	}
+
 	if (bundlePath) g_strBundlePath = bundlePath;
 	if (docsPath) g_strDocsPath = docsPath;
 
@@ -346,6 +350,10 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	NSLog(@"[Aspar2 iOS] Locale: %s (%s)", LocaleService_GetLocaleName(), LocaleService_GetLocalePath());
 
 	static CPythonApplication app;
+
+	if ([GameViewController sharedInstance]) {
+		[[GameViewController sharedInstance] makeCurrentGLContext];
+	}
 
 	if (!app.Create(NULL, "Aspar2", width, height, 1)) {
 		NSLog(@"[Aspar2 iOS] CPythonApplication::Create failed!");

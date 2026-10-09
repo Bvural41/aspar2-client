@@ -639,7 +639,7 @@ bool CPythonApplication::Process()
 	if (m_isFrameSkipDisable)
 		s_bFrameSkip = false;
 
-#if defined(__VTUNE__) || defined(__ANDROID__)
+#if defined(__VTUNE__) || defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	s_bFrameSkip = false;
 #endif
 	/*

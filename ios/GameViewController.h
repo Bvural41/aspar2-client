@@ -14,5 +14,6 @@
 - (BOOL)isWebShowing;
 
 - (void)setJoystickZoneWithX:(float)x y:(float)y width:(float)width height:(float)height;
+- (void)makeCurrentGLContext;
 
 @end
