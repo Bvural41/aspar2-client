@@ -29,10 +29,13 @@
 
     // Otopatch Downloader UI
     UIView *_otopatchContainer;
+    UIView *_otopatchPanel;
     UIProgressView *_otopatchProgress;
     UILabel *_otopatchStatusLabel;
+    UILabel *_otopatchPercentLabel;
     UILabel *_otopatchDetailLabel;
     UIButton *_otopatchRetryBtn;
+    UIButton *_otopatchContinueBtn;
     BOOL _otopatchDone;
 
     // Multi-touch tracking
@@ -143,13 +146,15 @@ static GameViewController *s_sharedInstance = nil;
 
 - (void)setupOtopatchUI {
     CGRect bounds = [UIScreen mainScreen].bounds;
+    CGFloat width = bounds.size.width;
+    CGFloat height = bounds.size.height;
     
     _otopatchContainer = [[UIView alloc] initWithFrame:bounds];
     _otopatchContainer.backgroundColor = [UIColor colorWithRed:0.04 green:0.04 blue:0.06 alpha:1.0];
     _otopatchContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:_otopatchContainer];
     
-    // Background Image
+    // 1. Background Image (bg_loading.jpg)
     UIImage *bgImg = [UIImage imageNamed:@"bg_loading.jpg"];
     if (bgImg) {
         UIImageView *bgView = [[UIImageView alloc] initWithFrame:bounds];
@@ -159,67 +164,114 @@ static GameViewController *s_sharedInstance = nil;
         [_otopatchContainer addSubview:bgView];
     }
     
-    // Title / Logo
+    // 2. Light Dimming Overlay (#33000000 -> 20% dark overlay)
+    UIView *dimOverlay = [[UIView alloc] initWithFrame:bounds];
+    dimOverlay.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.20];
+    dimOverlay.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [_otopatchContainer addSubview:dimOverlay];
+    
+    // 3. Top-Left Logo (logo.png)
     UIImage *logoImg = [UIImage imageNamed:@"logo.png"];
     if (logoImg && logoImg.size.width > 0) {
-        CGFloat logoW = MIN(bounds.size.width * 0.45f, 340);
-        CGFloat logoH = logoW * (logoImg.size.height / logoImg.size.width);
-        UIImageView *logoView = [[UIImageView alloc] initWithFrame:CGRectMake((bounds.size.width - logoW) / 2.0f, bounds.size.height * 0.15f, logoW, logoH)];
+        UIImageView *logoView = [[UIImageView alloc] initWithFrame:CGRectMake(24, 16, 180, 65)];
         logoView.image = logoImg;
         logoView.contentMode = UIViewContentModeScaleAspectFit;
-        logoView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+        logoView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
         [_otopatchContainer addSubview:logoView];
     } else {
-        UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, bounds.size.height * 0.25f, bounds.size.width - 40, 48)];
-        titleLabel.text = @"ASPAR2 MOBILE";
-        titleLabel.textColor = [UIColor colorWithRed:0.95 green:0.75 blue:0.25 alpha:1.0];
-        titleLabel.font = [UIFont boldSystemFontOfSize:32.0];
-        titleLabel.textAlignment = NSTextAlignmentCenter;
-        titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(24, 20, 200, 36)];
+        titleLabel.text = @"ASPAR2";
+        titleLabel.textColor = [UIColor colorWithRed:0.95 green:0.77 blue:0.40 alpha:1.0];
+        titleLabel.font = [UIFont boldSystemFontOfSize:26.0];
+        titleLabel.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
         [_otopatchContainer addSubview:titleLabel];
     }
     
-    // Status Label
-    _otopatchStatusLabel = [[UILabel alloc] initWithFrame:CGRectMake(40, bounds.size.height * 0.58f, bounds.size.width - 80, 28)];
-    _otopatchStatusLabel.text = @"Sunucuya bağlanılıyor...";
-    _otopatchStatusLabel.textColor = [UIColor whiteColor];
-    _otopatchStatusLabel.font = [UIFont systemFontOfSize:15.0 weight:UIFontWeightMedium];
-    _otopatchStatusLabel.textAlignment = NSTextAlignmentCenter;
-    _otopatchStatusLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    [_otopatchContainer addSubview:_otopatchStatusLabel];
+    // 4. Top-Right Version Label ("v1.0.4 • iOS")
+    UILabel *verLabel = [[UILabel alloc] initWithFrame:CGRectMake(width - 200 - 24, 20, 200, 24)];
+    verLabel.text = @"v1.0.4 • iOS";
+    verLabel.textColor = [UIColor colorWithRed:0.69 green:0.78 blue:0.63 alpha:0.7];
+    verLabel.font = [UIFont systemFontOfSize:12.0 weight:UIFontWeightMedium];
+    verLabel.textAlignment = NSTextAlignmentRight;
+    verLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin;
+    [_otopatchContainer addSubview:verLabel];
+    
+    // 5. Bottom MMORPG Obsidian Panel with Gold Border
+    CGFloat panelMarginH = 32.0f;
+    CGFloat panelWidth = width - (panelMarginH * 2.0f);
+    CGFloat panelHeight = 110.0f;
+    CGFloat panelY = height - panelHeight - 18.0f;
+    
+    _otopatchPanel = [[UIView alloc] initWithFrame:CGRectMake(panelMarginH, panelY, panelWidth, panelHeight)];
+    _otopatchPanel.backgroundColor = [UIColor colorWithRed:0.06 green:0.05 blue:0.04 alpha:0.88]; // #E00F0C09
+    _otopatchPanel.layer.cornerRadius = 12.0f;
+    _otopatchPanel.layer.borderWidth = 2.0f;
+    _otopatchPanel.layer.borderColor = [UIColor colorWithRed:0.63 green:0.51 blue:0.31 alpha:1.0].CGColor; // #A0824E Gold
+    _otopatchPanel.clipsToBounds = YES;
+    _otopatchPanel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    [_otopatchContainer addSubview:_otopatchPanel];
+    
+    CGFloat contentW = panelWidth - 40.0f;
+    
+    // Top Row: Status (Left) & Percent (Right)
+    _otopatchStatusLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 12, contentW - 70.0f, 22)];
+    _otopatchStatusLabel.text = @"Hazırlanıyor...";
+    _otopatchStatusLabel.textColor = [UIColor colorWithRed:0.94 green:0.90 blue:0.85 alpha:1.0]; // #EFE6D8
+    _otopatchStatusLabel.font = [UIFont boldSystemFontOfSize:14.0];
+    _otopatchStatusLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [_otopatchPanel addSubview:_otopatchStatusLabel];
+    
+    _otopatchPercentLabel = [[UILabel alloc] initWithFrame:CGRectMake(panelWidth - 20 - 60, 12, 60, 22)];
+    _otopatchPercentLabel.text = @"%0";
+    _otopatchPercentLabel.textColor = [UIColor colorWithRed:0.95 green:0.77 blue:0.40 alpha:1.0]; // #F2C465 GOLD
+    _otopatchPercentLabel.font = [UIFont boldSystemFontOfSize:16.0];
+    _otopatchPercentLabel.textAlignment = NSTextAlignmentRight;
+    _otopatchPercentLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    [_otopatchPanel addSubview:_otopatchPercentLabel];
     
     // Progress Bar
-    CGFloat pbWidth = MIN(bounds.size.width - 120, 600);
     _otopatchProgress = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
-    _otopatchProgress.frame = CGRectMake((bounds.size.width - pbWidth) / 2.0f, bounds.size.height * 0.68f, pbWidth, 10);
-    _otopatchProgress.progressTintColor = [UIColor colorWithRed:0.95 green:0.40 blue:0.10 alpha:1.0];
-    _otopatchProgress.trackTintColor = [UIColor colorWithRed:0.15 green:0.15 blue:0.20 alpha:0.8];
-    _otopatchProgress.layer.cornerRadius = 5.0f;
+    _otopatchProgress.frame = CGRectMake(20, 42, contentW, 14);
+    _otopatchProgress.progressTintColor = [UIColor colorWithRed:0.95 green:0.77 blue:0.40 alpha:1.0]; // Gold fill
+    _otopatchProgress.trackTintColor = [UIColor colorWithRed:0.12 green:0.10 blue:0.07 alpha:1.0]; // Dark track
+    _otopatchProgress.layer.cornerRadius = 7.0f;
+    _otopatchProgress.layer.borderWidth = 1.0f;
+    _otopatchProgress.layer.borderColor = [UIColor colorWithRed:0.35 green:0.27 blue:0.16 alpha:1.0].CGColor;
     _otopatchProgress.clipsToBounds = YES;
-    _otopatchProgress.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
-    [_otopatchContainer addSubview:_otopatchProgress];
+    _otopatchProgress.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [_otopatchPanel addSubview:_otopatchProgress];
     
-    // Detail / Speed Label
-    _otopatchDetailLabel = [[UILabel alloc] initWithFrame:CGRectMake(40, bounds.size.height * 0.74f, bounds.size.width - 80, 24)];
-    _otopatchDetailLabel.text = @"0%";
-    _otopatchDetailLabel.textColor = [UIColor colorWithWhite:0.8 alpha:1.0];
-    _otopatchDetailLabel.font = [UIFont systemFontOfSize:13.0];
-    _otopatchDetailLabel.textAlignment = NSTextAlignmentCenter;
-    _otopatchDetailLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    [_otopatchContainer addSubview:_otopatchDetailLabel];
+    // Bottom Detail Label
+    _otopatchDetailLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 64, contentW, 20)];
+    _otopatchDetailLabel.text = @"";
+    _otopatchDetailLabel.textColor = [UIColor colorWithRed:0.69 green:0.65 blue:0.58 alpha:1.0]; // #AFA595 SUBTEXT
+    _otopatchDetailLabel.font = [UIFont systemFontOfSize:12.0];
+    _otopatchDetailLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [_otopatchPanel addSubview:_otopatchDetailLabel];
     
-    // Retry Button
+    // Buttons (Retry / Continue - Initially Hidden)
     _otopatchRetryBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    _otopatchRetryBtn.frame = CGRectMake((bounds.size.width - 160) / 2.0f, bounds.size.height * 0.78f, 160, 40);
-    [_otopatchRetryBtn setTitle:@"Tekrar Denetle" forState:UIControlStateNormal];
-    _otopatchRetryBtn.backgroundColor = [UIColor colorWithRed:0.85 green:0.25 blue:0.15 alpha:1.0];
-    _otopatchRetryBtn.layer.cornerRadius = 20.0f;
-    _otopatchRetryBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
+    _otopatchRetryBtn.frame = CGRectMake(20, 62, 130, 34);
+    [_otopatchRetryBtn setTitle:@"Tekrar Dene" forState:UIControlStateNormal];
+    [_otopatchRetryBtn setTitleColor:[UIColor colorWithRed:0.10 green:0.07 blue:0.03 alpha:1.0] forState:UIControlStateNormal];
+    _otopatchRetryBtn.backgroundColor = [UIColor colorWithRed:0.95 green:0.77 blue:0.40 alpha:1.0];
+    _otopatchRetryBtn.layer.cornerRadius = 8.0f;
+    _otopatchRetryBtn.titleLabel.font = [UIFont boldSystemFontOfSize:13.0];
     _otopatchRetryBtn.hidden = YES;
-    _otopatchRetryBtn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
     [_otopatchRetryBtn addTarget:self action:@selector(onOtopatchRetryClicked) forControlEvents:UIControlEventTouchUpInside];
-    [_otopatchContainer addSubview:_otopatchRetryBtn];
+    [_otopatchPanel addSubview:_otopatchRetryBtn];
     
+    _otopatchContinueBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    _otopatchContinueBtn.frame = CGRectMake(160, 62, 130, 34);
+    [_otopatchContinueBtn setTitle:@"Oyuna Gir" forState:UIControlStateNormal];
+    [_otopatchContinueBtn setTitleColor:[UIColor colorWithRed:0.10 green:0.07 blue:0.03 alpha:1.0] forState:UIControlStateNormal];
+    _otopatchContinueBtn.backgroundColor = [UIColor colorWithRed:0.95 green:0.77 blue:0.40 alpha:1.0];
+    _otopatchContinueBtn.layer.cornerRadius = 8.0f;
+    _otopatchContinueBtn.titleLabel.font = [UIFont boldSystemFontOfSize:13.0];
+    _otopatchContinueBtn.hidden = YES;
+    [_otopatchContinueBtn addTarget:self action:@selector(onOtopatchContinueClicked) forControlEvents:UIControlEventTouchUpInside];
+    [_otopatchPanel addSubview:_otopatchContinueBtn];
+
     // Start Otopatch Downloader
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *docsPath = paths.firstObject;
@@ -228,22 +280,33 @@ static GameViewController *s_sharedInstance = nil;
 
 - (void)startOtopatchUpdateWithDocsPath:(NSString *)docsPath {
     _otopatchRetryBtn.hidden = YES;
+    _otopatchContinueBtn.hidden = YES;
+    _otopatchDetailLabel.hidden = NO;
     
     [[IOSPackUpdater sharedInstance] startUpdateWithDocsPath:docsPath
         onStatus:^(NSString *statusText) {
+            self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:0.94 green:0.90 blue:0.85 alpha:1.0];
             self->_otopatchStatusLabel.text = statusText;
         }
         onProgress:^(NSString *fileName, int fileIndex, int fileCount, int percent, NSString *speedText) {
+            self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:0.94 green:0.90 blue:0.85 alpha:1.0];
+            self->_otopatchStatusLabel.text = [NSString stringWithFormat:@"İndiriliyor: %@ (%d/%d)", fileName, fileIndex, fileCount];
             self->_otopatchProgress.progress = (float)percent / 100.0f;
-            self->_otopatchDetailLabel.text = [NSString stringWithFormat:@"%d%% - %@", percent, speedText];
+            self->_otopatchPercentLabel.text = [NSString stringWithFormat:@"%%%d", percent];
+            self->_otopatchDetailLabel.text = [NSString stringWithFormat:@"Hız: %@", speedText];
         }
         onCompletion:^(BOOL success, NSString *errorMsg) {
             if (success) {
+                self->_otopatchProgress.progress = 1.0f;
+                self->_otopatchPercentLabel.text = @"%100";
+                self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:0.94 green:0.90 blue:0.85 alpha:1.0];
+                self->_otopatchStatusLabel.text = @"Oyun başlatılıyor...";
+                self->_otopatchDetailLabel.text = @"";
+                
                 NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
                 NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
                 NSString *docsPath = paths.firstObject;
 
-                self->_otopatchStatusLabel.text = @"Oyun başlatılıyor...";
                 BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
                 if (initOk) {
                     self->_initialized = YES;
@@ -255,9 +318,11 @@ static GameViewController *s_sharedInstance = nil;
                         self->_otopatchDone = YES;
                     }];
                 } else {
+                    self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:1.00 green:0.48 blue:0.41 alpha:1.0];
                     self->_otopatchStatusLabel.text = @"Oyun motoru başlatılamadı!";
-                    self->_otopatchDetailLabel.text = @"syserr.txt dosyasını kontrol edin.";
+                    self->_otopatchDetailLabel.hidden = YES;
                     self->_otopatchRetryBtn.hidden = NO;
+                    self->_otopatchContinueBtn.hidden = NO;
                     
                     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Motor Hatası"
                                                                                    message:@"Oyun motoru (system.py) başlatılamadı.\nLütfen 3uTools -> Documents/syserr.txt dosyasını kontrol edin."
@@ -266,10 +331,31 @@ static GameViewController *s_sharedInstance = nil;
                     [self presentViewController:alert animated:YES completion:nil];
                 }
             } else {
+                self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:1.00 green:0.48 blue:0.41 alpha:1.0];
                 self->_otopatchStatusLabel.text = errorMsg ?: @"Güncelleme hatası!";
+                self->_otopatchDetailLabel.hidden = YES;
                 self->_otopatchRetryBtn.hidden = NO;
+                self->_otopatchContinueBtn.hidden = NO;
             }
         }];
+}
+
+- (void)onOtopatchContinueClicked {
+    NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docsPath = paths.firstObject;
+
+    BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
+    if (initOk) {
+        self->_initialized = YES;
+        [UIView animateWithDuration:0.5 animations:^{
+            self->_otopatchContainer.alpha = 0.0f;
+        } completion:^(BOOL finished) {
+            [self->_otopatchContainer removeFromSuperview];
+            self->_otopatchContainer = nil;
+            self->_otopatchDone = YES;
+        }];
+    }
 }
 
 - (void)onOtopatchRetryClicked {
