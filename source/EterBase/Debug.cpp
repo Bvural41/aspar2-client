@@ -208,8 +208,6 @@ void Tracef(const char* c_szFormat, ...)
 
 void TraceError(const char* c_szFormat, ...)
 {
-#ifndef _DISTRIBUTE 
-
 	char szBuf[DEBUG_STRING_MAX_LEN+2];
 
 	strncpy(szBuf, "SYSERR: ", 9);
@@ -289,14 +287,10 @@ void TraceError(const char* c_szFormat, ...)
 
 	if (isLogFile)
 		LogFile(szBuf);
-
-#endif
 }
 
 void TraceErrorWithoutEnter(const char* c_szFormat, ...)
 {
-#ifndef _DISTRIBUTE 
-
 	char szBuf[DEBUG_STRING_MAX_LEN];
 
 	va_list args;
@@ -327,7 +321,6 @@ void TraceErrorWithoutEnter(const char* c_szFormat, ...)
 
 	if (isLogFile)
 		LogFile(szBuf);
-#endif
 }
 
 void LogBoxf(const char* c_szFormat, ...)
