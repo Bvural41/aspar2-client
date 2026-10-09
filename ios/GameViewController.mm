@@ -319,13 +319,22 @@ static GameViewController *s_sharedInstance = nil;
         return;
     }
 
+    static BOOL s_initFailed = NO;
+    if (s_initFailed) {
+        return;
+    }
+
     if (!_initialized) {
-        _initialized = YES;
         NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *docsPath = paths.firstObject;
 
-        IOS_Init([bundlePath UTF8String], [docsPath UTF8String], _targetWidth, _targetHeight);
+        if (!IOS_Init([bundlePath UTF8String], [docsPath UTF8String], _targetWidth, _targetHeight)) {
+            NSLog(@"[Aspar2 iOS] Engine initialization failed. Stopping render loop.");
+            s_initFailed = YES;
+            return;
+        }
+        _initialized = YES;
     }
 
     [EAGLContext setCurrentContext:_context];

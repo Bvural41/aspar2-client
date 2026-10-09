@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-void IOS_Init(const char* bundlePath, const char* docsPath, int screenWidth, int screenHeight);
+bool IOS_Init(const char* bundlePath, const char* docsPath, int screenWidth, int screenHeight);
 void IOS_Render();
 void IOS_ActionTouch(int action, float x, float y, float deltaX, float deltaY, bool isDrag);
 void IOS_JoystickTouch(int action, float x, float y);

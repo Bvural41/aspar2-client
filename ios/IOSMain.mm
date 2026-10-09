@@ -222,7 +222,7 @@ int g_nAndroidScreenHeight = 600;
 int g_nAndroidMouseX = 0;
 int g_nAndroidMouseY = 0;
 
-void IOS_Init(const char* bundlePath, const char* docsPath, int width, int height) {
+bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int height) {
 	NSLog(@"[Aspar2 iOS] Initializing Engine (%dx%d)", width, height);
 
 	if (bundlePath) g_strBundlePath = bundlePath;
@@ -349,7 +349,8 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 
 	if (!app.Create(NULL, "Aspar2", width, height, 1)) {
 		NSLog(@"[Aspar2 iOS] CPythonApplication::Create failed!");
-		return;
+		TraceError("IOS_Init: CPythonApplication::Create failed!");
+		return false;
 	}
 
 	UI::CWindowManager::Instance().SetScreenSize(width, height);
@@ -362,6 +363,7 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	static CPythonExceptionSender pyExceptionSender;
 	SetExceptionSender(&pyExceptionSender);
 
+	bool scriptSuccess = false;
 	if (pyLauncher.Create()) {
 		NSLog(@"[Aspar2 iOS] Running system.py...");
 		if (!RunMainScript(pyLauncher, "")) {
@@ -369,13 +371,15 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 			TraceError("IOS_Init: RunMainScript(system.py) failed!");
 		} else {
 			NSLog(@"[Aspar2 iOS] RunMainScript completed successfully!");
+			scriptSuccess = true;
 		}
 	} else {
 		NSLog(@"[Aspar2 iOS] pyLauncher.Create() failed!");
 		TraceError("IOS_Init: pyLauncher.Create() failed!");
 	}
 
-	NSLog(@"[Aspar2 iOS] Metin2 Engine Initialized Successfully");
+	NSLog(@"[Aspar2 iOS] Metin2 Engine Initialized Result: %s", scriptSuccess ? "SUCCESS" : "FAILED");
+	return scriptSuccess;
 }
 
 void IOS_Render() {
