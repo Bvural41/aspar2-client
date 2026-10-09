@@ -1,6 +1,8 @@
 #import "IOSPackUpdater.h"
 #import <zlib.h>
-#include "../lzo/lzo1x.h"
+extern "C" {
+#include "../source/lzo/lzo1x.h"
+}
 
 static NSString * const kUpdateBaseURL = @"https://metin2plus.com/pe3qgb78x/patcher_01/0.0.0.1/";
 static NSString * const kCrcListName   = @"mobile_crclist";

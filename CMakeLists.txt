@@ -116,6 +116,7 @@ file(GLOB PR_TERRAIN_LIB_SOURCES source/PRTerrainLib/*.cpp)
 file(GLOB ETER_LOCALE_SOURCES source/EterLocale/*.cpp)
 
 set(LZO_SOURCES
+    source/lzo/lzo_init.c
     source/lzo/lzo1x_1.c
     source/lzo/lzo1x_9x.c
     source/lzo/lzo1x_d1.c
