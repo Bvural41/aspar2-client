@@ -233,20 +233,27 @@ void TraceError(const char* c_szFormat, ...)
 	szBuf[totalLen] = '\n';
 	szBuf[totalLen + 1] = '\0';
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+#if defined(__ANDROID__)
 	__android_log_print(ANDROID_LOG_ERROR, "Metin2SysErr", "%s", szBuf);
+#else
+	NSLog(@"[Aspar2 iOS SYSERR] %s", szBuf);
+#endif
 	static FILE* s_pSysErrFile = nullptr;
 	static bool s_bSysErrInit = false;
 	if (!s_bSysErrInit)
 	{
 		s_bSysErrInit = true;
-		s_pSysErrFile = fopen("/sdcard/aspar2/syserr.txt", "a");
+		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *docsPath = paths.firstObject;
+		if (docsPath) {
+			NSString *syserrPath = [docsPath stringByAppendingPathComponent:@"syserr.txt"];
+			s_pSysErrFile = fopen([syserrPath UTF8String], "a");
+		}
+		if (!s_pSysErrFile)
+			s_pSysErrFile = fopen("/sdcard/aspar2/syserr.txt", "a");
 		if (!s_pSysErrFile)
 			s_pSysErrFile = fopen("/storage/emulated/0/aspar2/syserr.txt", "a");
-		if (!s_pSysErrFile)
-			s_pSysErrFile = fopen("/sdcard/metin2/syserr.txt", "a");
-		if (!s_pSysErrFile)
-			s_pSysErrFile = fopen("/storage/emulated/0/metin2/syserr.txt", "a");
 	}
 	if (s_pSysErrFile)
 	{
