@@ -29,6 +29,14 @@ struct PackCrcEntry {
     return s_instance;
 }
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        lzo_init();
+    }
+    return self;
+}
+
 - (void)cancelUpdate {
     _isCancelled = YES;
 }
@@ -50,24 +58,107 @@ struct PackCrcEntry {
     return (uint32_t)crc;
 }
 
-- (NSData *)fetchUrlData:(NSURLRequest *)request response:(NSURLResponse **)outResponse error:(NSError **)outError {
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    __block NSData *resultData = nil;
-    __block NSURLResponse *resultResp = nil;
-    __block NSError *resultErr = nil;
+- (BOOL)downloadUrl:(NSString *)urlStr toFile:(NSString *)destPath statusCode:(int *)outStatus {
+    NSURL *url = [NSURL URLWithString:urlStr];
+    if (!url) return NO;
     
-    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        resultData = data;
-        resultResp = response;
-        resultErr = error;
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30.0];
+    [req setValue:@"Aspar2iOS" forHTTPHeaderField:@"User-Agent"];
+    
+    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+    __block BOOL success = NO;
+    __block int httpCode = 0;
+    
+    NSURLSessionDownloadTask *task = [[NSURLSession sharedSession] downloadTaskWithRequest:req completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
+        NSHTTPURLResponse *httpResp = (NSHTTPURLResponse *)response;
+        if (httpResp) httpCode = (int)httpResp.statusCode;
+        
+        if (!error && location && httpCode == 200) {
+            NSFileManager *fm = [NSFileManager defaultManager];
+            if ([fm fileExistsAtPath:destPath]) [fm removeItemAtPath:destPath error:nil];
+            NSError *mvErr = nil;
+            if ([fm moveItemAtURL:location toURL:[NSURL fileURLWithPath:destPath] error:&mvErr]) {
+                success = YES;
+            }
+        }
         dispatch_semaphore_signal(sema);
     }];
     [task resume];
     dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
     
-    if (outResponse) *outResponse = resultResp;
-    if (outError) *outError = resultErr;
-    return resultData;
+    if (outStatus) *outStatus = httpCode;
+    return success;
+}
+
+- (BOOL)decompressLzFile:(NSString *)lzPath toFile:(NSString *)dstPath error:(NSString **)outErr {
+    FILE *inFp = fopen([lzPath UTF8String], "rb");
+    if (!inFp) {
+        if (outErr) *outErr = @"LZ dosyası açılamadı";
+        return NO;
+    }
+    
+    fseek(inFp, 0, SEEK_END);
+    long compSize = ftell(inFp);
+    fseek(inFp, 0, SEEK_SET);
+    
+    if (compSize < 4) {
+        fclose(inFp);
+        if (outErr) *outErr = @"LZ dosyası çok küçük";
+        return NO;
+    }
+    
+    uint32_t uncompSize = 0;
+    if (fread(&uncompSize, 1, 4, inFp) != 4) {
+        fclose(inFp);
+        if (outErr) *outErr = @"LZ başlığı okunamadı";
+        return NO;
+    }
+    
+    long rawCompSize = compSize - 4;
+    uint8_t *compBuf = (uint8_t *)malloc(rawCompSize);
+    if (!compBuf) {
+        fclose(inFp);
+        if (outErr) *outErr = @"Bellek ayırma hatası (compressed)";
+        return NO;
+    }
+    
+    if (fread(compBuf, 1, rawCompSize, inFp) != rawCompSize) {
+        free(compBuf);
+        fclose(inFp);
+        if (outErr) *outErr = @"LZ verisi okunamadı";
+        return NO;
+    }
+    fclose(inFp);
+    
+    uint8_t *uncompBuf = (uint8_t *)malloc(uncompSize);
+    if (!uncompBuf) {
+        free(compBuf);
+        if (outErr) *outErr = @"Bellek ayırma hatası (uncompressed)";
+        return NO;
+    }
+    
+    lzo_uint outLen = uncompSize;
+    int r = lzo1x_decompress_safe(compBuf, (lzo_uint)rawCompSize, uncompBuf, &outLen, NULL);
+    free(compBuf);
+    
+    if (r != LZO_E_OK || outLen != uncompSize) {
+        free(uncompBuf);
+        if (outErr) *outErr = [NSString stringWithFormat:@"LZ decompress hatası (%d)", r];
+        return NO;
+    }
+    
+    FILE *outFp = fopen([dstPath UTF8String], "wb");
+    if (!outFp) {
+        free(uncompBuf);
+        if (outErr) *outErr = @"Hedef dosya oluşturulamadı";
+        return NO;
+    }
+    
+    fwrite(uncompBuf, 1, uncompSize, outFp);
+    fclose(outFp);
+    free(uncompBuf);
+    
+    return YES;
 }
 
 - (void)startUpdateWithDocsPath:(NSString *)docsPath
@@ -93,6 +184,8 @@ struct PackCrcEntry {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (progressBlock) progressBlock(fileName, index, count, percent, speed);
             });
+        };
+
         // Check if local pack/aspar2 directory already exists
         NSString *aspar2PackDir = [[docsPath stringByAppendingPathComponent:@"aspar2"] stringByAppendingPathComponent:@"pack"];
         BOOL hasLocalDocsPack = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.index"]] &&
@@ -112,19 +205,11 @@ struct PackCrcEntry {
         
         // 1. Fetch mobile_crclist
         NSString *crcUrlStr = [NSString stringWithFormat:@"%@%@?t=%ld", kUpdateBaseURL, kCrcListName, (long)[[NSDate date] timeIntervalSince1970]];
-        NSURL *crcUrl = [NSURL URLWithString:crcUrlStr];
+        NSString *tempCrcFile = [NSTemporaryDirectory() stringByAppendingPathComponent:@"mobile_crclist.tmp"];
+        int httpCode = 0;
         
-        NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:crcUrl cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:15.0];
-        [req setValue:@"Aspar2iOS" forHTTPHeaderField:@"User-Agent"];
-        
-        NSError *error = nil;
-        NSURLResponse *response = nil;
-        NSData *crcData = [self fetchUrlData:req response:&response error:&error];
-        
-        if (error || !crcData || crcData.length == 0) {
-            BOOL hasLocal = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.index"]] &&
-                            [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.data"]];
-            if (hasLocal) {
+        if (![self downloadUrl:crcUrlStr toFile:tempCrcFile statusCode:&httpCode]) {
+            if (hasLocalDocsPack || hasLocalAspar2Pack) {
                 reportStatus(@"Sunucuya bağlanılamadı, yerel paketlerle başlatılıyor...");
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (completionBlock) completionBlock(YES, nil);
@@ -137,9 +222,17 @@ struct PackCrcEntry {
             return;
         }
         
-        NSString *crcContent = [[NSString alloc] initWithData:crcData encoding:NSUTF8StringEncoding];
-        NSArray *lines = [crcContent componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+        NSString *crcContent = [NSString stringWithContentsOfFile:tempCrcFile encoding:NSUTF8StringEncoding error:nil];
+        [fm removeItemAtPath:tempCrcFile error:nil];
         
+        if (!crcContent || crcContent.length == 0) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (completionBlock) completionBlock(NO, @"Güncelleme listesi okunamadı.");
+            });
+            return;
+        }
+        
+        NSArray *lines = [crcContent componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
         NSMutableArray<NSValue *> *entries = [NSMutableArray array];
         
         for (NSString *rawLine in lines) {
@@ -226,78 +319,61 @@ struct PackCrcEntry {
             
             reportStatus([NSString stringWithFormat:@"İndiriliyor: %@ (%d/%d)", entry.name, i + 1, (int)todoList.count]);
             
-            // Try .lz first
-            NSString *fileUrlStr = [NSString stringWithFormat:@"%@%@%@.lz", kUpdateBaseURL, kPackDirName, entry.name];
-            NSURL *fileUrl = [NSURL URLWithString:fileUrlStr];
-            
-            NSMutableURLRequest *fileReq = [NSMutableURLRequest requestWithURL:fileUrl cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30.0];
-            [fileReq setValue:@"Aspar2iOS" forHTTPHeaderField:@"User-Agent"];
-            
-            NSURLResponse *httpResp = nil;
-            NSError *dlErr = nil;
-            NSData *downloadedData = [self fetchUrlData:fileReq response:&httpResp error:&dlErr];
-            NSHTTPURLResponse *httpUrlResp = (NSHTTPURLResponse *)httpResp;
+            NSString *lzPartPath = [self->_packDir stringByAppendingPathComponent:[entry.name stringByAppendingString:@".lz.part"]];
+            NSString *rawPartPath = [self->_packDir stringByAppendingPathComponent:[entry.name stringByAppendingString:@".part"]];
+            NSString *finalPath = [self->_packDir stringByAppendingPathComponent:entry.name];
             
             BOOL isLz = YES;
-            if ((httpUrlResp && httpUrlResp.statusCode == 404) || !downloadedData || downloadedData.length == 0) {
+            NSString *lzUrlStr = [NSString stringWithFormat:@"%@%@%@.lz", kUpdateBaseURL, kPackDirName, entry.name];
+            int dlCode = 0;
+            
+            if (![self downloadUrl:lzUrlStr toFile:lzPartPath statusCode:&dlCode]) {
                 isLz = NO;
                 NSString *rawUrlStr = [NSString stringWithFormat:@"%@%@%@", kUpdateBaseURL, kPackDirName, entry.name];
-                fileReq = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:rawUrlStr] cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30.0];
-                downloadedData = [self fetchUrlData:fileReq response:&httpResp error:&dlErr];
-                httpUrlResp = (NSHTTPURLResponse *)httpResp;
+                if (![self downloadUrl:rawUrlStr toFile:rawPartPath statusCode:&dlCode]) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"İndirme başarısız: %@", entry.name]);
+                    });
+                    return;
+                }
             }
             
-            if (!downloadedData || downloadedData.length == 0 || (httpUrlResp && httpUrlResp.statusCode != 200)) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"İndirme başarısız: %@", entry.name]);
-                });
-                return;
-            }
-            
-            NSData *finalData = nil;
             if (isLz) {
-                if (downloadedData.length < 4) {
+                reportStatus([NSString stringWithFormat:@"Açılıyor: %@ (%d/%d)", entry.name, i + 1, (int)todoList.count]);
+                NSString *decErr = nil;
+                if (![self decompressLzFile:lzPartPath toFile:rawPartPath error:&decErr]) {
+                    [fm removeItemAtPath:lzPartPath error:nil];
+                    [fm removeItemAtPath:rawPartPath error:nil];
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"Bozuk LZ paket: %@", entry.name]);
+                        if (completionBlock) completionBlock(NO, decErr ?: [NSString stringWithFormat:@"LZ açma hatası: %@", entry.name]);
                     });
                     return;
                 }
-                
-                const uint8_t *bytes = (const uint8_t *)downloadedData.bytes;
-                uint32_t uncompSize = (uint32_t)bytes[0] | ((uint32_t)bytes[1] << 8) | ((uint32_t)bytes[2] << 16) | ((uint32_t)bytes[3] << 24);
-                
-                NSMutableData *decompressed = [NSMutableData dataWithLength:uncompSize];
-                lzo_uint outLen = uncompSize;
-                
-                int lzoResult = lzo1x_decompress_safe(bytes + 4, (lzo_uint)(downloadedData.length - 4), (lzo_bytep)decompressed.mutableBytes, &outLen, NULL);
-                if (lzoResult != 0 || outLen != uncompSize) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"LZ açma hatası (%d): %@", lzoResult, entry.name]);
-                    });
-                    return;
-                }
-                finalData = decompressed;
-            } else {
-                finalData = downloadedData;
+                [fm removeItemAtPath:lzPartPath error:nil];
             }
             
-            if (finalData.length != entry.size) {
+            // Verify size & CRC32
+            NSDictionary *rawAttrs = [fm attributesOfItemAtPath:rawPartPath error:nil];
+            if ([rawAttrs fileSize] != entry.size) {
+                [fm removeItemAtPath:rawPartPath error:nil];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"Boyut uyuşmuyor: %@", entry.name]);
                 });
                 return;
             }
             
-            uLong fileCrc = crc32(0L, (const Bytef *)finalData.bytes, (uInt)finalData.length);
-            if ((uint32_t)fileCrc != entry.crc) {
+            reportStatus([NSString stringWithFormat:@"Doğrulanıyor: %@ (%d/%d)", entry.name, i + 1, (int)todoList.count]);
+            uint32_t fileCrc = [self calculateCrc32ForFile:rawPartPath];
+            if (fileCrc != entry.crc) {
+                [fm removeItemAtPath:rawPartPath error:nil];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"CRC32 uyuşmuyor: %@", entry.name]);
                 });
                 return;
             }
             
-            NSString *targetPath = [self->_packDir stringByAppendingPathComponent:entry.name];
-            [finalData writeToFile:targetPath atomically:YES];
+            if ([fm fileExistsAtPath:finalPath]) [fm removeItemAtPath:finalPath error:nil];
+            [fm moveItemAtPath:rawPartPath toPath:finalPath error:nil];
             
             downloadedBytesAll += entry.size;
             NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:startTime];
