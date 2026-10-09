@@ -616,7 +616,7 @@ BOOL CEffectMeshScript::OnLoadScript(CTextFileLoader & rTextFileLoader)
 		return FALSE;
 	}
 
-	if (!rTextFileLoader.GetTokenInteger("meshanimationloopenable", &m_isMeshAnimationLoop))
+	if (!rTextFileLoader.GetTokenBoolean("meshanimationloopenable", &m_isMeshAnimationLoop))
 		return FALSE;
 	if (!rTextFileLoader.GetTokenInteger("meshanimationloopcount", &m_iMeshAnimationLoopCount))
 	{

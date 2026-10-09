@@ -82,8 +82,8 @@ BOOL NRaceData::LoadMotionAttackData(CTextFileLoader & rTextFileLoader, TMotionA
 	if (!LoadAttackData(rTextFileLoader, pData))
 		return FALSE;
 
-	// NOTE : ±âÁ¸ÀÇ AttackingTypeÀÌ MotionTypeÀ¸·Î ¹Ù²î¾úÀ½
-	//        ±âÁ¸ µ¥ÀÌÅ¸ÀÇ °æ¿ì ¾øÀ¸¸é ±âÁ¸ °ÍÀ¸·Î ÀÐ°Ô²û..
+	// NOTE : ê¸°ì¡´ì˜ AttackingTypeì´ MotionTypeìœ¼ë¡œ ë°”ë€Œì—ˆìŒ
+	//        ê¸°ì¡´ ë°ì´íƒ€ì˜ ê²½ìš° ì—†ìœ¼ë©´ ê¸°ì¡´ ê²ƒìœ¼ë¡œ ì½ê²Œë”..
 	if (!rTextFileLoader.GetTokenInteger("motiontype", &pData->iMotionType))
 	{
 		if (!rTextFileLoader.GetTokenInteger("attackingtype", &pData->iMotionType))
@@ -330,7 +330,7 @@ BOOL NRaceData::LoadAttachingData(CTextFileLoader & rTextFileLoader, TAttachingD
 		if (!rTextFileLoader.GetTokenDoubleWord("attachingdatatype", &rAttachingData.dwType))
 			return false;
 
-		if (!rTextFileLoader.GetTokenInteger("isattaching", &rAttachingData.isAttaching))
+		if (!rTextFileLoader.GetTokenBoolean("isattaching", &rAttachingData.isAttaching))
 			return false;
 		if (!rTextFileLoader.GetTokenDoubleWord("attachingmodelindex", &rAttachingData.dwAttachingModelIndex))
 			return false;
