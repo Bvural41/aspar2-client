@@ -239,13 +239,32 @@ static GameViewController *s_sharedInstance = nil;
         }
         onCompletion:^(BOOL success, NSString *errorMsg) {
             if (success) {
-                [UIView animateWithDuration:0.5 animations:^{
-                    self->_otopatchContainer.alpha = 0.0f;
-                } completion:^(BOOL finished) {
-                    [self->_otopatchContainer removeFromSuperview];
-                    self->_otopatchContainer = nil;
-                    self->_otopatchDone = YES;
-                }];
+                NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+                NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+                NSString *docsPath = paths.firstObject;
+
+                self->_otopatchStatusLabel.text = @"Oyun başlatılıyor...";
+                BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
+                if (initOk) {
+                    self->_initialized = YES;
+                    [UIView animateWithDuration:0.5 animations:^{
+                        self->_otopatchContainer.alpha = 0.0f;
+                    } completion:^(BOOL finished) {
+                        [self->_otopatchContainer removeFromSuperview];
+                        self->_otopatchContainer = nil;
+                        self->_otopatchDone = YES;
+                    }];
+                } else {
+                    self->_otopatchStatusLabel.text = @"Oyun motoru başlatılamadı!";
+                    self->_otopatchDetailLabel.text = @"syserr.txt dosyasını kontrol edin.";
+                    self->_otopatchRetryBtn.hidden = NO;
+                    
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Motor Hatası"
+                                                                                   message:@"Oyun motoru (system.py) başlatılamadı.\nLütfen 3uTools -> Documents/syserr.txt dosyasını kontrol edin."
+                                                                            preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:@"Tamam" style:UIAlertActionStyleDefault handler:nil]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
             } else {
                 self->_otopatchStatusLabel.text = errorMsg ?: @"Güncelleme hatası!";
                 self->_otopatchRetryBtn.hidden = NO;
@@ -317,24 +336,6 @@ static GameViewController *s_sharedInstance = nil;
 - (void)renderFrame:(CADisplayLink *)displayLink {
     if (!_otopatchDone) {
         return;
-    }
-
-    static BOOL s_initFailed = NO;
-    if (s_initFailed) {
-        return;
-    }
-
-    if (!_initialized) {
-        NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString *docsPath = paths.firstObject;
-
-        if (!IOS_Init([bundlePath UTF8String], [docsPath UTF8String], _targetWidth, _targetHeight)) {
-            NSLog(@"[Aspar2 iOS] Engine initialization failed. Stopping render loop.");
-            s_initFailed = YES;
-            return;
-        }
-        _initialized = YES;
     }
 
     [EAGLContext setCurrentContext:_context];

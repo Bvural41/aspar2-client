@@ -238,10 +238,8 @@ void TraceError(const char* c_szFormat, ...)
 	NSLog(@"[Aspar2 iOS SYSERR] %s", szBuf);
 #endif
 	static FILE* s_pSysErrFile = nullptr;
-	static bool s_bSysErrInit = false;
-	if (!s_bSysErrInit)
+	if (!s_pSysErrFile)
 	{
-		s_bSysErrInit = true;
 #ifdef __OBJC__
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *docsPath = paths.firstObject;
