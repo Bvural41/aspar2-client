@@ -8,7 +8,7 @@ bool CPythonApplication::CreateCursors()
 	m_bCursorVisible = TRUE;
 	m_bLiarCursorOn = false;
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	return true;
 #endif
 

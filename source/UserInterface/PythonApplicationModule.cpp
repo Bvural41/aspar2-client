@@ -762,7 +762,7 @@ PyObject * appSetCursor(PyObject * poSelf, PyObject * poArgs)
 	if (!PyTuple_GetInteger(poArgs, 0, &iCursorNum))
 		return Py_BuildException();
 	
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	CPythonApplication::Instance().SetCursorNum(iCursorNum);
 	return Py_BuildNone();
 #else

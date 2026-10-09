@@ -21,14 +21,18 @@ static void UncaughtExceptionHandler(NSException *exception) {
 }
 
 static void SignalHandler(int sig) {
+    signal(sig, SIG_DFL);
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *docsPath = paths.firstObject;
     if (docsPath) {
         NSString *logPath = [docsPath stringByAppendingPathComponent:@"syserr.txt"];
-        NSString *errorLog = [NSString stringWithFormat:@"\n=== CRASH SIGNAL %d ===\n", sig];
+        NSArray *stackSymbols = [NSThread callStackSymbols];
+        NSString *stackStr = [stackSymbols componentsJoinedByString:@"\n"];
+        NSString *errorLog = [NSString stringWithFormat:@"\n=== CRASH SIGNAL %d ===\nStack Trace:\n%@\n", sig, stackStr];
         FILE *f = fopen([logPath UTF8String], "a");
         if (f) {
             fputs([errorLog UTF8String], f);
+            fflush(f);
             fclose(f);
         }
     }

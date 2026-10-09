@@ -303,33 +303,36 @@ static GameViewController *s_sharedInstance = nil;
                 self->_otopatchStatusLabel.text = @"Oyun başlatılıyor...";
                 self->_otopatchDetailLabel.text = @"";
                 
-                NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
-                NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-                NSString *docsPath = paths.firstObject;
+                // Allow UIKit to render "%100" and "Oyun başlatılıyor..." before executing engine init
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+                    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+                    NSString *docsPath = paths.firstObject;
 
-                BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
-                if (initOk) {
-                    self->_initialized = YES;
-                    [UIView animateWithDuration:0.5 animations:^{
-                        self->_otopatchContainer.alpha = 0.0f;
-                    } completion:^(BOOL finished) {
-                        [self->_otopatchContainer removeFromSuperview];
-                        self->_otopatchContainer = nil;
-                        self->_otopatchDone = YES;
-                    }];
-                } else {
-                    self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:1.00 green:0.48 blue:0.41 alpha:1.0];
-                    self->_otopatchStatusLabel.text = @"Oyun motoru başlatılamadı!";
-                    self->_otopatchDetailLabel.hidden = YES;
-                    self->_otopatchRetryBtn.hidden = NO;
-                    self->_otopatchContinueBtn.hidden = NO;
-                    
-                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Motor Hatası"
-                                                                                   message:@"Oyun motoru (system.py) başlatılamadı.\nLütfen 3uTools -> Documents/syserr.txt dosyasını kontrol edin."
-                                                                            preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:@"Tamam" style:UIAlertActionStyleDefault handler:nil]];
-                    [self presentViewController:alert animated:YES completion:nil];
-                }
+                    BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
+                    if (initOk) {
+                        self->_initialized = YES;
+                        [UIView animateWithDuration:0.5 animations:^{
+                            self->_otopatchContainer.alpha = 0.0f;
+                        } completion:^(BOOL finished) {
+                            [self->_otopatchContainer removeFromSuperview];
+                            self->_otopatchContainer = nil;
+                            self->_otopatchDone = YES;
+                        }];
+                    } else {
+                        self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:1.00 green:0.48 blue:0.41 alpha:1.0];
+                        self->_otopatchStatusLabel.text = @"Oyun motoru başlatılamadı!";
+                        self->_otopatchDetailLabel.hidden = YES;
+                        self->_otopatchRetryBtn.hidden = NO;
+                        self->_otopatchContinueBtn.hidden = NO;
+                        
+                        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Motor Hatası"
+                                                                                       message:@"Oyun motoru (system.py) başlatılamadı.\nLütfen 3uTools -> Documents/syserr.txt dosyasını kontrol edin."
+                                                                                preferredStyle:UIAlertControllerStyleAlert];
+                        [alert addAction:[UIAlertAction actionWithTitle:@"Tamam" style:UIAlertActionStyleDefault handler:nil]];
+                        [self presentViewController:alert animated:YES completion:nil];
+                    }
+                });
             } else {
                 self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:1.00 green:0.48 blue:0.41 alpha:1.0];
                 self->_otopatchStatusLabel.text = errorMsg ?: @"Güncelleme hatası!";
