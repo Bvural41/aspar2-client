@@ -8,11 +8,14 @@ static NSString * const kUpdateBaseURL = @"https://metin2plus.com/pe3qgb78x/patc
 static NSString * const kCrcListName   = @"mobile_crclist";
 static NSString * const kPackDirName   = @"mobile_pack/";
 
-struct PackCrcEntry {
-    uint32_t crc;
-    uint64_t size;
-    NSString *name;
-};
+@interface PackCrcItem : NSObject
+@property (nonatomic, assign) uint32_t crc;
+@property (nonatomic, assign) uint64_t size;
+@property (nonatomic, copy) NSString *name;
+@end
+
+@implementation PackCrcItem
+@end
 
 @interface IOSPackUpdater () {
     BOOL _isCancelled;
@@ -245,7 +248,7 @@ struct PackCrcEntry {
         }
         
         NSArray *lines = [crcContent componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-        NSMutableArray<NSValue *> *entries = [NSMutableArray array];
+        NSMutableArray<PackCrcItem *> *entries = [NSMutableArray array];
         
         for (NSString *rawLine in lines) {
             NSString *line = [rawLine stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -258,12 +261,12 @@ struct PackCrcEntry {
             }
             if (filteredTokens.count < 3) continue;
             
-            PackCrcEntry entry;
+            PackCrcItem *item = [[PackCrcItem alloc] init];
             NSScanner *scanner = [NSScanner scannerWithString:filteredTokens[0]];
             unsigned int hexCrc = 0;
             [scanner scanHexInt:&hexCrc];
-            entry.crc = (uint32_t)hexCrc;
-            entry.size = [filteredTokens[1] longLongValue];
+            item.crc = (uint32_t)hexCrc;
+            item.size = [filteredTokens[1] longLongValue];
             
             int fromIdx = (filteredTokens.count >= 5) ? 4 : 2;
             NSMutableString *nm = [NSMutableString string];
@@ -277,37 +280,34 @@ struct PackCrcEntry {
                 name = [name substringFromIndex:lastSlash + 1];
             }
             if (name.length == 0 || [name containsString:@".."]) continue;
-            entry.name = name;
+            item.name = name;
             
-            NSValue *val = [NSValue value:&entry withObjCType:@encode(PackCrcEntry)];
-            [entries addObject:val];
+            [entries addObject:item];
         }
         
         // 2. Identify missing or outdated files
-        NSMutableArray<NSValue *> *todoList = [NSMutableArray array];
+        NSMutableArray<PackCrcItem *> *todoList = [NSMutableArray array];
         uint64_t totalBytesToDownload = 0;
         
-        for (NSValue *val in entries) {
+        for (PackCrcItem *item in entries) {
             if (self->_isCancelled) return;
-            PackCrcEntry entry;
-            [val getValue:&entry];
             
-            NSString *localPath = [self->_packDir stringByAppendingPathComponent:entry.name];
+            NSString *localPath = [self->_packDir stringByAppendingPathComponent:item.name];
             BOOL needDownload = YES;
             
             if ([fm fileExistsAtPath:localPath]) {
                 NSDictionary *attrs = [fm attributesOfItemAtPath:localPath error:nil];
-                if ([attrs fileSize] == entry.size) {
+                if ([attrs fileSize] == item.size) {
                     uint32_t localCrc = [self calculateCrc32ForFile:localPath];
-                    if (localCrc == entry.crc) {
+                    if (localCrc == item.crc) {
                         needDownload = NO;
                     }
                 }
             }
             
             if (needDownload) {
-                [todoList addObject:val];
-                totalBytesToDownload += entry.size;
+                [todoList addObject:item];
+                totalBytesToDownload += item.size;
             }
         }
         
@@ -326,38 +326,37 @@ struct PackCrcEntry {
         for (int i = 0; i < (int)todoList.count; i++) {
             if (self->_isCancelled) return;
             
-            PackCrcEntry entry;
-            [todoList[i] getValue:&entry];
+            PackCrcItem *item = todoList[i];
             
-            reportStatus([NSString stringWithFormat:@"İndiriliyor: %@ (%d/%d)", entry.name, i + 1, (int)todoList.count]);
+            reportStatus([NSString stringWithFormat:@"İndiriliyor: %@ (%d/%d)", item.name, i + 1, (int)todoList.count]);
             
-            NSString *lzPartPath = [self->_packDir stringByAppendingPathComponent:[entry.name stringByAppendingString:@".lz.part"]];
-            NSString *rawPartPath = [self->_packDir stringByAppendingPathComponent:[entry.name stringByAppendingString:@".part"]];
-            NSString *finalPath = [self->_packDir stringByAppendingPathComponent:entry.name];
+            NSString *lzPartPath = [self->_packDir stringByAppendingPathComponent:[item.name stringByAppendingString:@".lz.part"]];
+            NSString *rawPartPath = [self->_packDir stringByAppendingPathComponent:[item.name stringByAppendingString:@".part"]];
+            NSString *finalPath = [self->_packDir stringByAppendingPathComponent:item.name];
             
             BOOL isLz = YES;
-            NSString *lzUrlStr = [NSString stringWithFormat:@"%@%@%@.lz", kUpdateBaseURL, kPackDirName, entry.name];
+            NSString *lzUrlStr = [NSString stringWithFormat:@"%@%@%@.lz", kUpdateBaseURL, kPackDirName, item.name];
             int dlCode = 0;
             
             if (![self downloadUrl:lzUrlStr toFile:lzPartPath statusCode:&dlCode]) {
                 isLz = NO;
-                NSString *rawUrlStr = [NSString stringWithFormat:@"%@%@%@", kUpdateBaseURL, kPackDirName, entry.name];
+                NSString *rawUrlStr = [NSString stringWithFormat:@"%@%@%@", kUpdateBaseURL, kPackDirName, item.name];
                 if (![self downloadUrl:rawUrlStr toFile:rawPartPath statusCode:&dlCode]) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"İndirme başarısız: %@", entry.name]);
+                        if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"İndirme başarısız: %@", item.name]);
                     });
                     return;
                 }
             }
             
             if (isLz) {
-                reportStatus([NSString stringWithFormat:@"Açılıyor: %@ (%d/%d)", entry.name, i + 1, (int)todoList.count]);
+                reportStatus([NSString stringWithFormat:@"Açılıyor: %@ (%d/%d)", item.name, i + 1, (int)todoList.count]);
                 NSString *decErr = nil;
                 if (![self decompressLzFile:lzPartPath toFile:rawPartPath error:&decErr]) {
                     [fm removeItemAtPath:lzPartPath error:nil];
                     [fm removeItemAtPath:rawPartPath error:nil];
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        if (completionBlock) completionBlock(NO, decErr ?: [NSString stringWithFormat:@"LZ açma hatası: %@", entry.name]);
+                        if (completionBlock) completionBlock(NO, decErr ?: [NSString stringWithFormat:@"LZ açma hatası: %@", item.name]);
                     });
                     return;
                 }
@@ -366,20 +365,20 @@ struct PackCrcEntry {
             
             // Verify size & CRC32
             NSDictionary *rawAttrs = [fm attributesOfItemAtPath:rawPartPath error:nil];
-            if ([rawAttrs fileSize] != entry.size) {
+            if ([rawAttrs fileSize] != item.size) {
                 [fm removeItemAtPath:rawPartPath error:nil];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"Boyut uyuşmuyor: %@", entry.name]);
+                    if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"Boyut uyuşmuyor: %@", item.name]);
                 });
                 return;
             }
             
-            reportStatus([NSString stringWithFormat:@"Doğrulanıyor: %@ (%d/%d)", entry.name, i + 1, (int)todoList.count]);
+            reportStatus([NSString stringWithFormat:@"Doğrulanıyor: %@ (%d/%d)", item.name, i + 1, (int)todoList.count]);
             uint32_t fileCrc = [self calculateCrc32ForFile:rawPartPath];
-            if (fileCrc != entry.crc) {
+            if (fileCrc != item.crc) {
                 [fm removeItemAtPath:rawPartPath error:nil];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"CRC32 uyuşmuyor: %@", entry.name]);
+                    if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"CRC32 uyuşmuyor: %@", item.name]);
                 });
                 return;
             }
@@ -387,7 +386,7 @@ struct PackCrcEntry {
             if ([fm fileExistsAtPath:finalPath]) [fm removeItemAtPath:finalPath error:nil];
             [fm moveItemAtPath:rawPartPath toPath:finalPath error:nil];
             
-            downloadedBytesAll += entry.size;
+            downloadedBytesAll += item.size;
             NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:startTime];
             double speedMB = (elapsed > 0) ? ((double)downloadedBytesAll / (1024.0 * 1024.0)) / elapsed : 0.0;
             NSString *speedStr = [NSString stringWithFormat:@"%.1f MB/s", speedMB];
@@ -395,7 +394,7 @@ struct PackCrcEntry {
             int pct = (int)((double)downloadedBytesAll / (double)totalBytesToDownload * 100.0);
             if (pct > 100) pct = 100;
             
-            reportProgress(entry.name, i + 1, (int)todoList.count, pct, speedStr);
+            reportProgress(item.name, i + 1, (int)todoList.count, pct, speedStr);
         }
         
         reportStatus(@"Tüm güncellemeler yüklendi! Oyuna giriliyor...");
