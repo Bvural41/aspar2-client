@@ -599,6 +599,11 @@
       #define RADTODO(str)
     #endif
 
+#if defined(__arm64__) || defined(__aarch64__) || defined(__RAD64__) || defined(_M_ARM64)
+  #undef RADSTRUCT
+  #define RADSTRUCT struct
+#endif
+
     #ifdef __RADX32__
       #if defined(_MSC_VER)
         #define RADLINK __stdcall
