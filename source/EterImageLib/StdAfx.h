@@ -22,7 +22,15 @@
 #pragma warning(push, 3)
 #include <string>
 #include <vector>
+#include <algorithm>
 #pragma warning(pop)
+
+#ifndef min
+#define min(a,b) (((a)<(b))?(a):(b))
+#endif
+#ifndef max
+#define max(a,b) (((a)>(b))?(a):(b))
+#endif
 
 inline void _TraceForImage(const char* c_szFormat, ...)
 {
