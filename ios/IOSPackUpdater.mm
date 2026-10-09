@@ -34,7 +34,7 @@ struct PackCrcEntry {
 }
 
 - (uint32_t)calculateCrc32ForFile:(NSString *)filePath {
-    NSInputStream *stream = [NSInputStream inputStreamWithFilePath:filePath];
+    NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:filePath];
     if (!stream) return 0;
     [stream open];
     
@@ -48,6 +48,26 @@ struct PackCrcEntry {
     }
     [stream close];
     return (uint32_t)crc;
+}
+
+- (NSData *)fetchUrlData:(NSURLRequest *)request response:(NSURLResponse **)outResponse error:(NSError **)outError {
+    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+    __block NSData *resultData = nil;
+    __block NSURLResponse *resultResp = nil;
+    __block NSError *resultErr = nil;
+    
+    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        resultData = data;
+        resultResp = response;
+        resultErr = error;
+        dispatch_semaphore_signal(sema);
+    }];
+    [task resume];
+    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    
+    if (outResponse) *outResponse = resultResp;
+    if (outError) *outError = resultErr;
+    return resultData;
 }
 
 - (void)startUpdateWithDocsPath:(NSString *)docsPath
@@ -86,7 +106,7 @@ struct PackCrcEntry {
         
         NSError *error = nil;
         NSURLResponse *response = nil;
-        NSData *crcData = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
+        NSData *crcData = [self fetchUrlData:req response:&response error:&error];
         
         if (error || !crcData || crcData.length == 0) {
             BOOL hasLocal = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.index"]] &&
@@ -200,19 +220,21 @@ struct PackCrcEntry {
             NSMutableURLRequest *fileReq = [NSMutableURLRequest requestWithURL:fileUrl cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30.0];
             [fileReq setValue:@"Aspar2iOS" forHTTPHeaderField:@"User-Agent"];
             
-            NSHTTPURLResponse *httpResp = nil;
+            NSURLResponse *httpResp = nil;
             NSError *dlErr = nil;
-            NSData *downloadedData = [NSURLConnection sendSynchronousRequest:fileReq returningResponse:&httpResp error:&dlErr];
+            NSData *downloadedData = [self fetchUrlData:fileReq response:&httpResp error:&dlErr];
+            NSHTTPURLResponse *httpUrlResp = (NSHTTPURLResponse *)httpResp;
             
             BOOL isLz = YES;
-            if (httpResp.statusCode == 404 || !downloadedData || downloadedData.length == 0) {
+            if ((httpUrlResp && httpUrlResp.statusCode == 404) || !downloadedData || downloadedData.length == 0) {
                 isLz = NO;
                 NSString *rawUrlStr = [NSString stringWithFormat:@"%@%@%@", kUpdateBaseURL, kPackDirName, entry.name];
                 fileReq = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:rawUrlStr] cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30.0];
-                downloadedData = [NSURLConnection sendSynchronousRequest:fileReq returningResponse:&httpResp error:&dlErr];
+                downloadedData = [self fetchUrlData:fileReq response:&httpResp error:&dlErr];
+                httpUrlResp = (NSHTTPURLResponse *)httpResp;
             }
             
-            if (!downloadedData || downloadedData.length == 0 || (httpResp && httpResp.statusCode != 200)) {
+            if (!downloadedData || downloadedData.length == 0 || (httpUrlResp && httpUrlResp.statusCode != 200)) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"İndirme başarısız: %@", entry.name]);
                 });
