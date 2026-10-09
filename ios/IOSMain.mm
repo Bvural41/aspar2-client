@@ -254,13 +254,13 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		// 1. Check Documents directory (downloaded patches / otopatcher)
 		if (!g_strDocsPath.empty()) {
 			std::string docPack = g_strDocsPath + "/pack/" + baseName;
-			if (access((docPack + ".index").c_str(), R_OK) == 0) {
+			if (access((docPack + ".index").c_str(), R_OK) == 0 || access((docPack + ".eix").c_str(), R_OK) == 0) {
 				bool ok = CEterPackManager::Instance().RegisterPack(docPack.c_str(), dirPrefix);
 				NSLog(@"[Aspar2 iOS] RegisterPack (DOCS) %s: %s", docPack.c_str(), ok ? "OK" : "FAILED");
 				if (ok) return true;
 			}
 			std::string docAspar2Pack = g_strDocsPath + "/aspar2/pack/" + baseName;
-			if (access((docAspar2Pack + ".index").c_str(), R_OK) == 0) {
+			if (access((docAspar2Pack + ".index").c_str(), R_OK) == 0 || access((docAspar2Pack + ".eix").c_str(), R_OK) == 0) {
 				bool ok = CEterPackManager::Instance().RegisterPack(docAspar2Pack.c_str(), dirPrefix);
 				NSLog(@"[Aspar2 iOS] RegisterPack (ASPAR2 DOCS) %s: %s", docAspar2Pack.c_str(), ok ? "OK" : "FAILED");
 				if (ok) return true;
@@ -274,11 +274,11 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	};
 
 	// Register root pack
-	if (!g_strDocsPath.empty() && access((g_strDocsPath + "/pack/root.index").c_str(), R_OK) == 0) {
+	if (!g_strDocsPath.empty() && (access((g_strDocsPath + "/pack/root.index").c_str(), R_OK) == 0 || access((g_strDocsPath + "/pack/root.eix").c_str(), R_OK) == 0)) {
 		std::string docRoot = g_strDocsPath + "/pack/root";
 		CEterPackManager::Instance().RegisterRootPack(docRoot.c_str());
 		NSLog(@"[Aspar2 iOS] RegisterRootPack (DOCS): OK");
-	} else if (!g_strDocsPath.empty() && access((g_strDocsPath + "/aspar2/pack/root.index").c_str(), R_OK) == 0) {
+	} else if (!g_strDocsPath.empty() && (access((g_strDocsPath + "/aspar2/pack/root.index").c_str(), R_OK) == 0 || access((g_strDocsPath + "/aspar2/pack/root.eix").c_str(), R_OK) == 0)) {
 		std::string docRoot = g_strDocsPath + "/aspar2/pack/root";
 		CEterPackManager::Instance().RegisterRootPack(docRoot.c_str());
 		NSLog(@"[Aspar2 iOS] RegisterRootPack (ASPAR2 DOCS): OK");
@@ -366,11 +366,13 @@ void IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		NSLog(@"[Aspar2 iOS] Running system.py...");
 		if (!RunMainScript(pyLauncher, "")) {
 			NSLog(@"[Aspar2 iOS] RunMainScript failed!");
+			TraceError("IOS_Init: RunMainScript(system.py) failed!");
 		} else {
 			NSLog(@"[Aspar2 iOS] RunMainScript completed successfully!");
 		}
 	} else {
 		NSLog(@"[Aspar2 iOS] pyLauncher.Create() failed!");
+		TraceError("IOS_Init: pyLauncher.Create() failed!");
 	}
 
 	NSLog(@"[Aspar2 iOS] Metin2 Engine Initialized Successfully");

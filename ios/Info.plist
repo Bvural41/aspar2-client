@@ -61,6 +61,10 @@
         <string>UIInterfaceOrientationLandscapeRight</string>
         <string>UIInterfaceOrientationLandscapeLeft</string>
     </array>
+    <key>UIFileSharingEnabled</key>
+    <true/>
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>

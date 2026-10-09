@@ -35,24 +35,42 @@ void Traceback()
 		str.append("\n");
 	}
 	
-	PyObject * exc;
-	PyObject * v;
-	PyObject * tb;
-	const char * errStr;
+	PyObject * exc = NULL;
+	PyObject * v = NULL;
+	PyObject * tb = NULL;
+	const char * errStr = NULL;
 
 	PyErr_Fetch(&exc, &v, &tb);
 
-	if (PyString_Check(v))
+	if (v && PyString_Check(v))
 	{
 		errStr = PyString_AS_STRING(v);
 		str.append("Error: ");
 		str.append(errStr);
 
-		Tracef("%s\n", errStr);
+		TraceError("Python Exception: %s", errStr);
 	}
-	Py_DECREF(exc);
-	Py_DECREF(v);
-	Py_DECREF(tb);
+	else if (v)
+	{
+		PyObject* s = PyObject_Str(v);
+		if (s && PyString_Check(s))
+		{
+			errStr = PyString_AS_STRING(s);
+			str.append("Error: ");
+			str.append(errStr);
+			TraceError("Python Exception: %s", errStr);
+			Py_DECREF(s);
+		}
+	}
+
+	if (!str.empty())
+	{
+		TraceError("Python Traceback:\n%s", str.c_str());
+	}
+
+	if (exc) Py_DECREF(exc);
+	if (v) Py_DECREF(v);
+	if (tb) Py_DECREF(tb);
 	LogBoxf("Traceback:\n\n%s\n", str.c_str());
 }
 
@@ -247,7 +265,10 @@ bool CPythonLauncher::RunFile(const char* c_szFileName)
 		
 		dwBufSize=file.Size();
 		if (dwBufSize==0)
+		{
+			TraceError("RunFile(%s): File is empty or not found in packs!", c_szFileName);
 			return false;
+		}
 		
 		acBufData=new char[dwBufSize];
 		memcpy(acBufData, pvData, dwBufSize);	
