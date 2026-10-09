@@ -213,8 +213,8 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	return pyLauncher.RunFile("system.py");
 }
 
-static std::string g_strBundlePath = "";
-static std::string g_strDocsPath = "";
+std::string g_strBundlePath = "";
+std::string g_strDocsPath = "";
 
 extern "C" {
 
