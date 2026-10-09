@@ -782,7 +782,7 @@ bool CPythonApplication::Process()
 
 				OnUIRender();
 				OnMouseRender();
-#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+#if defined(__ANDROID__)
 				m_kTouchControls.Render();
 #endif
 				/////////////////////
@@ -1552,7 +1552,9 @@ bool CPythonApplication::Create(PyObject * poSelf, const char * c_szName, int wi
 		if (!CreateDevice(width, height, Windowed, 32, 60))
 			return false;
 		m_pySystem.SetResolution(width, height);
+#if defined(__ANDROID__)
 		m_kTouchControls.UpdateScreenSize(width, height);
+#endif
 #elif defined(ENABLE_GPU_CONFIG)
 		if (!CreateDevice(m_pySystem.GetWidth(), m_pySystem.GetHeight(), Windowed, m_pySystem.GetBPP(), m_pySystem.GetFrequency(), m_pySystem.GetGPU()))
 			return false;
