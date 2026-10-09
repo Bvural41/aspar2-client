@@ -208,6 +208,7 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	pyLauncher.RunLine("__DEBUG__ = 1");
 	pyLauncher.RunLine("import sys, types");
 	pyLauncher.RunLine("if '_locale' not in sys.modules:\n    m = types.ModuleType('_locale')\n    m.Error = Exception\n    m.CHAR_MAX = 127\n    m.LC_ALL, m.LC_COLLATE, m.LC_CTYPE = 0, 1, 2\n    m.LC_MONETARY, m.LC_NUMERIC, m.LC_TIME = 3, 4, 5\n    m.setlocale = lambda *a, **k: 'C'\n    m._getdefaultlocale = lambda *a, **k: ('tr_TR', 'cp1254')\n    m.localeconv = lambda *a, **k: {'decimal_point': '.', 'thousands_sep': ','}\n    m.strcoll = lambda a, b: (a > b) - (a < b)\n    m.strxfrm = lambda s: s\n    sys.modules['_locale'] = m\n");
+	pyLauncher.RunLine("__COMMAND_LINE__ = \"\"");
 
 	return pyLauncher.RunFile("system.py");
 }
