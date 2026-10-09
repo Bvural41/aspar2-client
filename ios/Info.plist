@@ -8,6 +8,29 @@
     <string>Aspar2</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIconFiles</key>
+    <array>
+        <string>AppIcon</string>
+        <string>AppIcon@2x</string>
+        <string>AppIcon@3x</string>
+        <string>AppIcon-60@2x</string>
+        <string>AppIcon-76@2x</string>
+        <string>AppIcon-1024</string>
+    </array>
+    <key>CFBundleIcons</key>
+    <dict>
+        <key>CFBundlePrimaryIcon</key>
+        <dict>
+            <key>CFBundleIconFiles</key>
+            <array>
+                <string>AppIcon</string>
+                <string>AppIcon-60@2x</string>
+                <string>AppIcon-76@2x</string>
+            </array>
+            <key>UIPrerenderedIcon</key>
+            <true/>
+        </dict>
+    </dict>
     <key>CFBundleIdentifier</key>
     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleInfoDictionaryVersion</key>
