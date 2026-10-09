@@ -318,6 +318,9 @@ static GameViewController *s_sharedInstance = nil;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
+    if (_otopatchContainer) {
+        _otopatchContainer.frame = self.view.bounds;
+    }
     [self setupBuffers];
 }
 
