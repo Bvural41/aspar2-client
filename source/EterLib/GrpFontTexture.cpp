@@ -4,15 +4,24 @@
 
 #include "Util.h"
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
+#include <vector>
+#include <string>
+#include "../eterPack/EterPackManager.h"
+
+#if defined(__ANDROID__)
 #include <android/log.h>
 #include <android/asset_manager.h>
-#include <vector>
 #define FONT_LOG(...) __android_log_print(ANDROID_LOG_INFO, "Metin2Font", __VA_ARGS__)
-
 extern AAssetManager* g_pAssetManager;
+#else
+#include <stdio.h>
+#define FONT_LOG(...) printf("[Metin2Font] " __VA_ARGS__)
+extern std::string g_strDocsPath;
+extern std::string g_strBundlePath;
+#endif
 
 static std::vector<unsigned char> s_fontBuffer;
 static stbtt_fontinfo s_fontInfo;
@@ -23,10 +32,36 @@ static bool EnsureFontLoaded()
 	if (s_fontLoaded)
 		return true;
 
+	// 0. Try loading Tahoma/Arial font from Metin2 pack via CEterPackManager
+	CMappedFile mapFile;
+	LPCVOID pData = nullptr;
+	const char* packFontPaths[] = {
+		"locale/common/font/tahoma.ttf",
+		"locale/common/font/arial.ttf",
+		"tahoma.ttf",
+		"arial.ttf"
+	};
+	for (const char* pFont : packFontPaths)
+	{
+		if (CEterPackManager::Instance().Get(mapFile, pFont, &pData) && pData && mapFile.Size() > 0)
+		{
+			s_fontBuffer.assign((const unsigned char*)pData, (const unsigned char*)pData + mapFile.Size());
+			int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
+			if (offset < 0) offset = 0;
+			if (stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
+			{
+				s_fontLoaded = true;
+				FONT_LOG("Successfully loaded %s from pack! (%zu bytes)\n", pFont, s_fontBuffer.size());
+				return true;
+			}
+		}
+	}
+
+#if defined(__ANDROID__)
 	// 1. Try loading Tahoma font from APK assets via AAssetManager
 	if (g_pAssetManager)
 	{
-		const char* assetNames[] = { "tahoma.ttf" };
+		const char* assetNames[] = { "tahoma.ttf", "arial.ttf" };
 		for (const char* assetName : assetNames)
 		{
 			AAsset* asset = AAssetManager_open(g_pAssetManager, assetName, AASSET_MODE_BUFFER);
@@ -38,10 +73,12 @@ static bool EnsureFontLoaded()
 					s_fontBuffer.resize(sz);
 					int readBytes = AAsset_read(asset, s_fontBuffer.data(), sz);
 					AAsset_close(asset);
-					if (readBytes == sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), 0))
+					int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
+					if (offset < 0) offset = 0;
+					if (readBytes == sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
 					{
 						s_fontLoaded = true;
-						FONT_LOG("Successfully loaded %s from APK assets! (%ld bytes)", assetName, (long)sz);
+						FONT_LOG("Successfully loaded %s from APK assets! (%ld bytes)\n", assetName, (long)sz);
 						return true;
 					}
 				}
@@ -52,20 +89,38 @@ static bool EnsureFontLoaded()
 			}
 		}
 	}
+#endif
 
-	// 2. Try loading Tahoma font from filesystem
-	const char* filePaths[] = {
-		"/sdcard/aspar2/tahoma.ttf",
-		"/storage/emulated/0/aspar2/tahoma.ttf",
-		"/sdcard/metin2/tahoma.ttf",
-		"/storage/emulated/0/metin2/tahoma.ttf",
+	// 2. Try loading font from filesystem
+	std::vector<std::string> filePaths = {
 		"pack/tahoma.ttf",
-		"tahoma.ttf"
+		"tahoma.ttf",
+		"pack/arial.ttf",
+		"arial.ttf"
 	};
+#if defined(__ANDROID__)
+	filePaths.push_back("/sdcard/aspar2/tahoma.ttf");
+	filePaths.push_back("/storage/emulated/0/aspar2/tahoma.ttf");
+	filePaths.push_back("/sdcard/metin2/tahoma.ttf");
+	filePaths.push_back("/storage/emulated/0/metin2/tahoma.ttf");
+#endif
+#if defined(__APPLE__) || defined(__IOS__)
+	if (!g_strDocsPath.empty()) {
+		filePaths.push_back(g_strDocsPath + "/tahoma.ttf");
+		filePaths.push_back(g_strDocsPath + "/pack/tahoma.ttf");
+		filePaths.push_back(g_strDocsPath + "/arial.ttf");
+		filePaths.push_back(g_strDocsPath + "/aspar2/pack/tahoma.ttf");
+	}
+	if (!g_strBundlePath.empty()) {
+		filePaths.push_back(g_strBundlePath + "/tahoma.ttf");
+		filePaths.push_back(g_strBundlePath + "/arial.ttf");
+		filePaths.push_back(g_strBundlePath + "/assets/tahoma.ttf");
+	}
+#endif
 
-	for (const char* path : filePaths)
+	for (const std::string& path : filePaths)
 	{
-		FILE* f = fopen(path, "rb");
+		FILE* f = fopen(path.c_str(), "rb");
 		if (f)
 		{
 			fseek(f, 0, SEEK_END);
@@ -76,10 +131,12 @@ static bool EnsureFontLoaded()
 				s_fontBuffer.resize(sz);
 				size_t readBytes = fread(s_fontBuffer.data(), 1, sz, f);
 				fclose(f);
-				if (readBytes == (size_t)sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), 0))
+				int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
+				if (offset < 0) offset = 0;
+				if (readBytes == (size_t)sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
 				{
 					s_fontLoaded = true;
-					FONT_LOG("Successfully loaded Tahoma font from: %s (%ld bytes)", path, sz);
+					FONT_LOG("Successfully loaded font from: %s (%ld bytes)\n", path.c_str(), sz);
 					return true;
 				}
 			}
@@ -90,12 +147,24 @@ static bool EnsureFontLoaded()
 		}
 	}
 
-	// 3. Fallback to Android system fonts
+	// 3. Fallback to system fonts
+#if defined(__ANDROID__)
 	const char* fontPaths[] = {
 		"/system/fonts/Roboto-Regular.ttf",
 		"/system/fonts/RobotoStatic-Regular.ttf",
 		"/system/fonts/DroidSans.ttf"
 	};
+#elif defined(__APPLE__) || defined(__IOS__)
+	const char* fontPaths[] = {
+		"/System/Library/Fonts/Core/Arial.ttf",
+		"/System/Library/Fonts/CoreAddition/Arial.ttf",
+		"/System/Library/Fonts/Cache/Arial.ttf",
+		"/System/Library/Fonts/Helvetica.ttc",
+		"/System/Library/Fonts/AppleSDGothicNeo.ttc"
+	};
+#else
+	const char* fontPaths[] = {};
+#endif
 
 	for (const char* path : fontPaths)
 	{
@@ -110,10 +179,12 @@ static bool EnsureFontLoaded()
 				s_fontBuffer.resize(sz);
 				size_t readBytes = fread(s_fontBuffer.data(), 1, sz, f);
 				fclose(f);
-				if (readBytes == (size_t)sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), 0))
+				int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
+				if (offset < 0) offset = 0;
+				if (readBytes == (size_t)sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
 				{
 					s_fontLoaded = true;
-					FONT_LOG("Fallback: loaded system font: %s (%ld bytes)", path, sz);
+					FONT_LOG("Fallback: loaded system font: %s (%ld bytes)\n", path, sz);
 					return true;
 				}
 			}
@@ -124,7 +195,7 @@ static bool EnsureFontLoaded()
 		}
 	}
 
-	FONT_LOG("ERROR: Failed to load any font!");
+	FONT_LOG("ERROR: Failed to load any font!\n");
 	return false;
 }
 #endif
@@ -150,7 +221,7 @@ void CGraphicFontTexture::Initialize()
 
 bool CGraphicFontTexture::IsEmpty() const
 {
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	return m_pFontTextureVector.empty();
 #else
 	return m_fontMap.size() == 0;
@@ -159,7 +230,7 @@ bool CGraphicFontTexture::IsEmpty() const
 
 void CGraphicFontTexture::Destroy()
 {
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) && !defined(__APPLE__) && !defined(__IOS__)
 	HDC hDC = m_dib.GetDCHandle();
 	if (hDC)
 		SelectObject(hDC, m_hFontOld);
@@ -218,7 +289,7 @@ bool CGraphicFontTexture::Create(const char* c_szFontName, int fontSize, bool bI
 	if (!m_dib.Create(ms_hDC, width, height))
 		return false;
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	EnsureFontLoaded();
 	m_fontMap[GetDefaultCodePage()] = (HFONT)1;
 #else
@@ -343,7 +414,7 @@ CGraphicFontTexture::TCharacterInfomation* CGraphicFontTexture::GetCharacterInfo
 
 CGraphicFontTexture::TCharacterInfomation* CGraphicFontTexture::UpdateCharacterInfomation(TCharacterKey code)
 {
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	if (!EnsureFontLoaded())
 		return NULL;
 

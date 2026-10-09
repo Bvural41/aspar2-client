@@ -1290,10 +1290,33 @@ TEterPackIndex* CEterPack::FindIndex(const char * filename)
 	DWORD filename_crc = GetCRC32(tmpFilename, strlen(tmpFilename));
 	TDataPositionMap::iterator i = m_DataPositionMap.find(filename_crc);
 
-	if (i == m_DataPositionMap.end())
-		return NULL;
+	if (i != m_DataPositionMap.end())
+		return (i->second);
 
-	return (i->second);
+	// Fallback: check alternate prefix variations
+	std::string sName = tmpFilename;
+	std::vector<std::string> alts;
+	if (sName.length() > 3 && (sName[0] == 'd' || sName[0] == 'D') && sName[1] == ':')
+	{
+		alts.push_back(sName.substr(3)); // "ymir work/..."
+		if (sName.compare(0, 13, "d:/ymir work/") == 0)
+			alts.push_back(sName.substr(13)); // "ui/..."
+	}
+	else
+	{
+		alts.push_back("d:/" + sName);
+		if (sName.compare(0, 10, "ymir work/") == 0)
+			alts.push_back(sName.substr(10));
+	}
+	for (const auto& alt : alts)
+	{
+		DWORD crc = GetCRC32(alt.c_str(), alt.length());
+		auto it = m_DataPositionMap.find(crc);
+		if (it != m_DataPositionMap.end())
+			return it->second;
+	}
+
+	return NULL;
 }
 
 bool CEterPack::IsExist(const char * filename)
@@ -1625,7 +1648,7 @@ void CEterFileDict::UpdateItem(CEterPack* pkPack, TEterPackIndex* pkInfo)
 		m_dict.insert(TDict::value_type(pkInfo->filename_crc, item));
 	else
 	{
-		if (strcmp(f->second.pkInfo->filename, item.pkInfo->filename) == 0)
+		if (stricmp(f->second.pkInfo->filename, item.pkInfo->filename) == 0)
 		{
 			f->second = item;
 		}
@@ -1647,7 +1670,7 @@ CEterFileDict::Item* CEterFileDict::GetItem(DWORD dwFileNameHash, const char * c
 	{
 		Item& item = iter->second;
 
-		if (0 == strcmp(c_pszFileName, item.pkInfo->filename))
+		if (0 == stricmp(c_pszFileName, item.pkInfo->filename))
 			return &item;
 
 		++iter;

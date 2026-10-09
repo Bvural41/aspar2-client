@@ -254,14 +254,24 @@ bool CEterPackManager::GetFromPack(CMappedFile & rMappedFile, const char * c_szF
 			if (strFileName.length() > 3 && (strFileName[0] == 'd' || strFileName[0] == 'D') && strFileName[1] == ':' && (strFileName[2] == '/' || strFileName[2] == '\\'))
 			{
 				altNames.push_back(strFileName.substr(3));
+				std::string capD = "D:" + strFileName.substr(2);
+				altNames.push_back(capD);
 				if (strFileName.compare(0, 13, "d:/ymir work/") == 0)
+				{
 					altNames.push_back(strFileName.substr(13));
+					altNames.push_back("D:/ymir work/" + strFileName.substr(13));
+				}
 			}
 			else
 			{
 				altNames.push_back("d:/" + strFileName);
+				altNames.push_back("D:/" + strFileName);
 				if (strFileName.compare(0, 10, "ymir work/") == 0)
+				{
 					altNames.push_back(strFileName.substr(10));
+					altNames.push_back("d:/" + strFileName);
+					altNames.push_back("D:/" + strFileName);
+				}
 			}
 
 			for (const auto& alt : altNames)

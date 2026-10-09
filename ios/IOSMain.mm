@@ -295,6 +295,34 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	struct PackEntry { const char* dir; const char* name; };
 	static const PackEntry s_packEntries[] = {
 		{ "pack/", "metin2_patch_maps" },
+		{ "pack/", "metin2_patch_map_smhdungeon" },
+		{ "pack/", "metin2_patch_map_greedy" },
+		{ "pack/", "metin2_patch_guild_pve" },
+		{ "pack/", "metin2_patch_aggregate" },
+		{ "pack/", "metin2_patch_arena" },
+		{ "pack/", "metin2_patch_ts_snow_dungeon" },
+		{ "pack/", "metin2_patch_private_search" },
+		{ "pack/", "metin2_patch_catch_king" },
+		{ "pack/", "metin2_patch_labyrinth" },
+		{ "pack/", "metin2_patch_crystal_dungeon" },
+		{ "pack/", "metin2_patch_mushroom" },
+		{ "pack/", "metin2_patch_ork" },
+		{ "pack/", "metin2_patch_dungeon_info" },
+		{ "pack/", "metin2_patch_flag" },
+		{ "pack/", "metin2_patch_12zi_mob" },
+		{ "pack/", "metin2_patch_sould" },
+		{ "pack/", "metin2_patch_myshop_deco" },
+		{ "pack/", "metin2_patch_new_emotions" },
+		{ "pack/", "metin2_patch_12zi_obj" },
+		{ "pack/", "metin2_patch_12zi_map" },
+		{ "pack/", "metin2_patch_luck" },
+		{ "pack/", "metin2_patch_battlefied" },
+		{ "pack/", "metin2_patch_arch_box" },
+		{ "pack/", "metin2_patch_gem" },
+		{ "pack/", "metin2_patch_new_pet" },
+		{ "pack/", "metin2_patch_new_ui" },
+		{ "pack/", "metin2_patch_pet_mount" },
+		{ "pack/", "metin2_patch_heald" },
 		{ "pack/", "metin2_patch_snow" },
 		{ "pack/", "metin2_patch_w20_sound" },
 		{ "pack/", "metin2_patch_party" },
@@ -311,6 +339,22 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		{ "pack/", "metin2_patch_mount" },
 		{ "season1/", "season1" },
 		{ "season2/", "season2" },
+		{ "d:/ymir work/pc/", "pc" },
+		{ "d:/ymir work/pc2/", "pc2" },
+		{ "d:/ymir work/pc3/", "pc3" },
+		{ "d:/ymir work/monster/", "monster" },
+		{ "d:/ymir work/monster2/", "monster2" },
+		{ "d:/ymir work/effect/", "effect" },
+		{ "d:/ymir work/zone/", "zone" },
+		{ "d:/ymir work/terrainmaps/", "terrain" },
+		{ "d:/ymir work/npc/", "npc" },
+		{ "d:/ymir work/npc2/", "npc2" },
+		{ "d:/ymir work/tree/", "tree" },
+		{ "d:/ymir work/guild/", "guild" },
+		{ "d:/ymir work/item/", "item" },
+		{ "textureset/", "textureset" },
+		{ "property/", "property" },
+		{ "icon/", "icon" },
 		{ "sound/monster/", "sound" },
 		{ "sound/npc/", "sound" },
 		{ "sound/pc/", "sound" },
@@ -343,6 +387,45 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	regPack("pack/property", "*");
 	regPack("pack/terrain", "*");
 	regPack("pack/zone", "*");
+	regPack("pack/item", "*");
+	regPack("pack/icon", "*");
+	regPack("pack/pc", "*");
+	regPack("pack/pc2", "*");
+	regPack("pack/pc3", "*");
+	regPack("pack/monster", "*");
+	regPack("pack/monster2", "*");
+	regPack("pack/effect", "*");
+	regPack("pack/uiscript", "*");
+
+	// Auto-scan and register all additional packs and patches from Documents & Bundle
+	auto scanDir = [&](const std::string& dirPath) {
+		DIR* pPackDir = opendir(dirPath.c_str());
+		if (pPackDir) {
+			std::string prefix = dirPath;
+			if (prefix.empty() || prefix.back() != '/') prefix += '/';
+			struct dirent* entry;
+			while ((entry = readdir(pPackDir)) != nullptr) {
+				std::string fname = entry->d_name;
+				if (fname.size() > 6 && fname.substr(fname.size() - 6) == ".index") {
+					std::string packBase = fname.substr(0, fname.size() - 6);
+					if (packBase != "root") {
+						std::string fullPath = prefix + packBase;
+						bool ok = CEterPackManager::Instance().RegisterPack(fullPath.c_str(), "*");
+						NSLog(@"[Aspar2 iOS] AutoRegisterPack %s: %s", fullPath.c_str(), ok ? "OK" : "FAILED");
+					}
+				}
+			}
+			closedir(pPackDir);
+		}
+	};
+
+	if (!g_strDocsPath.empty()) {
+		scanDir(g_strDocsPath + "/pack");
+		scanDir(g_strDocsPath + "/aspar2/pack");
+	}
+	if (!g_strBundlePath.empty()) {
+		scanDir(g_strBundlePath + "/pack");
+	}
 
 	LocaleService_LoadConfig("locale.cfg");
 	if (strcmp(LocaleService_GetLocaleName(), "ymir") == 0 || strlen(LocaleService_GetLocaleName()) == 0) {

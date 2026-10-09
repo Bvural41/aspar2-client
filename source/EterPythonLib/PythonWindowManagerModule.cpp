@@ -2135,7 +2135,14 @@ PyObject* wndImageLoadImage(PyObject* poSelf, PyObject* poArgs)
 		return Py_BuildException();
 
 	if (!((UI::CImageBox*)pWindow)->LoadImage(szFileName))
+	{
+		TraceError("Failed to load image (filename: %s)", szFileName);
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+		return Py_BuildNone();
+#else
 		return Py_BuildException("Failed to load image (filename: %s)", szFileName);
+#endif
+	}
 
 	return Py_BuildNone();
 }
