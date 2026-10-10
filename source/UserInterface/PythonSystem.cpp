@@ -8,13 +8,51 @@
 #endif
 #include "PythonApplication.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+extern "C" int g_nAndroidScreenWidth;
+extern "C" int g_nAndroidScreenHeight;
+#endif
+
+#if defined(__APPLE__) || defined(__IOS__)
+extern std::string g_strDocsPath;
+
+static std::string GetConfigFilePath(const char* szFileName, bool bForWrite)
+{
+	if (!g_strDocsPath.empty())
+	{
+		std::string docPath = g_strDocsPath;
+		if (docPath.back() != '/')
+			docPath += "/";
+		docPath += szFileName;
+
+		if (!bForWrite)
+		{
+			FILE* fp = fopen(docPath.c_str(), "rb");
+			if (fp)
+			{
+				fclose(fp);
+				return docPath;
+			}
+			fp = fopen(szFileName, "rb");
+			if (fp)
+			{
+				fclose(fp);
+				return std::string(szFileName);
+			}
+			return docPath;
+		}
+		else
+		{
+			return docPath;
+		}
+	}
+	return std::string(szFileName);
+}
+#elif defined(__ANDROID__)
 #include <android/log.h>
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "Metin2System", __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "Metin2System", __VA_ARGS__)
 
-extern "C" int g_nAndroidScreenWidth;
-extern "C" int g_nAndroidScreenHeight;
 extern std::string g_strAndroidExternalPath;
 
 static std::string GetConfigFilePath(const char* szFileName, bool bForWrite)
