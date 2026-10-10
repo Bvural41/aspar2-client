@@ -601,7 +601,7 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 	const char* glRenderer = (const char*)glGetString(GL_RENDERER);
 	const char* glVersion = (const char*)glGetString(GL_VERSION);
 	const char* glSlVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-	Tracen("[GLES] Context Info: Vendor: %s, Renderer: %s, Version: %s, GLSL: %s",
+	Tracenf("[GLES] Context Info: Vendor: %s, Renderer: %s, Version: %s, GLSL: %s",
 		glVendor ? glVendor : "NULL",
 		glRenderer ? glRenderer : "NULL",
 		glVersion ? glVersion : "NULL",
@@ -630,7 +630,7 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 	};
 
 	auto fnCreateProgram = [&](const char* vsSrc, const char* fsSrc, const char* debugName) -> GLuint {
-		Tracen("[GLES] Compiling shaders for program: %s", debugName);
+		Tracenf("[GLES] Compiling shaders for program: %s", debugName);
 		GLuint vs = fnCompileShader(GL_VERTEX_SHADER, vsSrc, debugName);
 		GLuint fs = fnCompileShader(GL_FRAGMENT_SHADER, fsSrc, debugName);
 		if (!vs || !fs)
@@ -650,7 +650,7 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 		}
 		glAttachShader(prog, vs);
 		glAttachShader(prog, fs);
-		Tracen("[GLES] Linking shader program: %s (prog=%u, vs=%u, fs=%u)", debugName, prog, vs, fs);
+		Tracenf("[GLES] Linking shader program: %s (prog=%u, vs=%u, fs=%u)", debugName, prog, vs, fs);
 		glLinkProgram(prog);
 		GLint linkStatus = 0;
 		glGetProgramiv(prog, GL_LINK_STATUS, &linkStatus);
@@ -664,7 +664,7 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 		}
 		else
 		{
-			Tracen("[GLES] Successfully linked shader program: %s", debugName);
+			Tracenf("[GLES] Successfully linked shader program: %s", debugName);
 		}
 		glDeleteShader(vs);
 		glDeleteShader(fs);
