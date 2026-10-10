@@ -509,7 +509,20 @@ static float s_fJoystickY = -1.0f;
 static float s_fJoystickW = 194.0f;
 static float s_fJoystickH = 194.0f;
 
+void IOS_SetJoystickZone(float x, float y, float width, float height) {
+	s_fJoystickX = x;
+	s_fJoystickY = y;
+	s_fJoystickW = width;
+	s_fJoystickH = height;
+	if ([GameViewController sharedInstance]) {
+		[[GameViewController sharedInstance] setJoystickZoneWithX:x y:y width:width height:height];
+	}
+}
+
 static bool IOS_IsJoystickZone(float x, float y) {
+	if (!IOS_IsGamePhase()) {
+		return false;
+	}
 	UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
 	long sh = rkWndMgr.GetScreenHeight();
 	float jx = s_fJoystickX;
@@ -520,6 +533,9 @@ static bool IOS_IsJoystickZone(float x, float y) {
 }
 
 static bool IOS_IsHudZone(long x, long y) {
+	if (!IOS_IsGamePhase()) {
+		return false;
+	}
 	UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
 	long sw = rkWndMgr.GetScreenWidth();
 	long sh = rkWndMgr.GetScreenHeight();
@@ -570,6 +586,10 @@ void IOS_ActionTouch(int action, float x, float y, float deltaX, float deltaY, b
 	} else if (action == 1) { // ACTION_UP
 		if (!s_bActionConverted && s_bActionIsUI) {
 			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			CPythonApplication::Instance().OnMouseLeftButtonUp(ix, iy);
+		} else if (!s_bActionIsUI && !isDrag) {
+			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			CPythonApplication::Instance().OnMouseLeftButtonDown(ix, iy);
 			CPythonApplication::Instance().OnMouseLeftButtonUp(ix, iy);
 		}
 		s_bActionIsUI = false;

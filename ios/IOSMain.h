@@ -8,6 +8,7 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int screenWidth, int
 void IOS_Render();
 void IOS_ActionTouch(int action, float x, float y, float deltaX, float deltaY, bool isDrag);
 void IOS_JoystickTouch(int action, float x, float y);
+void IOS_SetJoystickZone(float x, float y, float width, float height);
 void IOS_SecondaryTouch(int action, float x, float y, float deltaX, float deltaY);
 void IOS_OnKeyboardText(const char* text);
 void IOS_OnKeyboardEnter();

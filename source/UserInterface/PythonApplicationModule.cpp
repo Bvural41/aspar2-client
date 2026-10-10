@@ -1330,10 +1330,12 @@ PyObject* appTitleCreate(PyObject* poSelf, PyObject* poArgs)
 #ifdef __ANDROID__
 extern "C" void Android_SetJoystickZone(float x, float y, float width, float height);
 #endif
+#if defined(__APPLE__)
+extern "C" void IOS_SetJoystickZone(float x, float y, float width, float height);
+#endif
 
 PyObject * appSetMobileJoystickZone(PyObject * poSelf, PyObject * poArgs)
 {
-#ifdef __ANDROID__
 	float x, y, width, height;
 	if (!PyTuple_GetFloat(poArgs, 0, &x))
 		return Py_BuildException();
@@ -1344,7 +1346,10 @@ PyObject * appSetMobileJoystickZone(PyObject * poSelf, PyObject * poArgs)
 	if (!PyTuple_GetFloat(poArgs, 3, &height))
 		return Py_BuildException();
 
+#ifdef __ANDROID__
 	Android_SetJoystickZone(x, y, width, height);
+#elif defined(__APPLE__)
+	IOS_SetJoystickZone(x, y, width, height);
 #endif
 	return Py_BuildNone();
 }

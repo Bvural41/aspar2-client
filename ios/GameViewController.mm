@@ -477,6 +477,9 @@ static GameViewController *s_sharedInstance = nil;
 #pragma mark - Touch Handling
 
 - (BOOL)isPointInJoystickZoneX:(float)x y:(float)y {
+    if (!IOS_IsGamePhase()) {
+        return NO;
+    }
     float jx = _joystickX;
     float jy = (_joystickY >= 0.0f) ? _joystickY : (_targetHeight - _joystickH);
     return (x >= jx && x <= jx + _joystickW && y >= jy && y <= jy + _joystickH);
@@ -503,7 +506,7 @@ static GameViewController *s_sharedInstance = nil;
             _actionLastY = y;
             _actionDidDrag = NO;
             IOS_ActionTouch(0, x, y, 0.0f, 0.0f, false);
-        } else if (_secondaryTouch == nil && ![self isPointInJoystickZoneX:x y:y]) {
+        } else if (_secondaryTouch == nil && IOS_IsGamePhase() && ![self isPointInJoystickZoneX:x y:y]) {
             _secondaryTouch = touch;
             _secondaryLastX = x;
             _secondaryLastY = y;
