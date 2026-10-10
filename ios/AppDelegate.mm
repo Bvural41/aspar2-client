@@ -55,7 +55,7 @@ static void SignalHandler(int sig, siginfo_t *info, void *ucontext) {
     sigaction(SIGSEGV, &sa, NULL);
     sigaction(SIGFPE, &sa, NULL);
     sigaction(SIGBUS, &sa, NULL);
-    sigaction(SIGPIPE, &sa, NULL);
+    signal(SIGPIPE, SIG_IGN);
 
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[GameViewController alloc] init];

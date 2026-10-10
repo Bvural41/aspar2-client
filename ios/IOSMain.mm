@@ -204,6 +204,18 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 #endif
 
 	pyLauncher.RunLine("import sys");
+	if (!g_strBundlePath.empty()) {
+		std::string s1 = "sys.path.append('" + g_strBundlePath + "')";
+		pyLauncher.RunLine(s1.c_str());
+		std::string s2 = "sys.path.append('" + g_strBundlePath + "/lib')";
+		pyLauncher.RunLine(s2.c_str());
+	}
+	if (!g_strDocsPath.empty()) {
+		std::string s3 = "sys.path.append('" + g_strDocsPath + "')";
+		pyLauncher.RunLine(s3.c_str());
+		std::string s4 = "sys.path.append('" + g_strDocsPath + "/lib')";
+		pyLauncher.RunLine(s4.c_str());
+	}
 	pyLauncher.RunLine("sys.path.append('lib')");
 	pyLauncher.RunLine("__DEBUG__ = 1");
 	pyLauncher.RunLine("import sys, types");
@@ -238,9 +250,14 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	g_nAndroidMouseX = width / 2;
 	g_nAndroidMouseY = height / 2;
 
-	if (!g_strBundlePath.empty()) {
+	if (!g_strDocsPath.empty()) {
+		chdir(g_strDocsPath.c_str());
+		NSLog(@"[Aspar2 iOS] Working directory set to Documents: %s", g_strDocsPath.c_str());
+		std::string userDataDir = g_strDocsPath + "/UserData";
+		mkdir(userDataDir.c_str(), 0755);
+	} else if (!g_strBundlePath.empty()) {
 		chdir(g_strBundlePath.c_str());
-		NSLog(@"[Aspar2 iOS] Working directory set to: %s", g_strBundlePath.c_str());
+		NSLog(@"[Aspar2 iOS] Working directory set to Bundle: %s", g_strBundlePath.c_str());
 	}
 
 	static CLZO lzo;
