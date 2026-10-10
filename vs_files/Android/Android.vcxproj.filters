@@ -6,10 +6,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\android\app\build.gradle">
+    <None Include="..\..\android_ios\android\app\build.gradle">
       <Filter>Build Files</Filter>
     </None>
-    <None Include="..\..\android\build.gradle">
+    <None Include="..\..\android_ios\android\build.gradle">
       <Filter>Build Files</Filter>
     </None>
     <None Include="..\..\CMakeLists.txt">

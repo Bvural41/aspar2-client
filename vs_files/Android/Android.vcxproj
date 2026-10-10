@@ -50,23 +50,23 @@
 
   <!-- Distribute_Android: Build Release APK -->
   <PropertyGroup Condition="'$(Configuration)'=='Distribute_Android'">
-    <NMakeBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat assembleRelease"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean assembleRelease"</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean"</NMakeCleanCommandLine>
-    <NMakeOutput>$(ProjectDir)..\..\android\app\build\outputs\apk\release\Aspar2.apk</NMakeOutput>
+    <NMakeBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android_ios\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat assembleRelease"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android_ios\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean assembleRelease"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android_ios\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)..\..\android_ios\android\app\build\outputs\apk\release\Aspar2.apk</NMakeOutput>
   </PropertyGroup>
 
   <!-- Debug_Android: Build Debug APK -->
   <PropertyGroup Condition="'$(Configuration)'=='Debug_Android'">
-    <NMakeBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat assembleDebug"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean assembleDebug"</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean"</NMakeCleanCommandLine>
-    <NMakeOutput>$(ProjectDir)..\..\android\app\build\outputs\apk\debug\Aspar2-debug.apk</NMakeOutput>
+    <NMakeBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android_ios\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat assembleDebug"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android_ios\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean assembleDebug"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cmd.exe /c "cd /d $(ProjectDir)..\..\android_ios\android &amp;&amp; set JAVA_HOME=C:\Users\Bvural41\.jdks\jbr-17.0.14&amp;&amp; gradlew.bat clean"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)..\..\android_ios\android\app\build\outputs\apk\debug\Aspar2-debug.apk</NMakeOutput>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\android\app\build.gradle" />
-    <None Include="..\..\android\build.gradle" />
+    <None Include="..\..\android_ios\android\app\build.gradle" />
+    <None Include="..\..\android_ios\android\build.gradle" />
     <None Include="..\..\CMakeLists.txt" />
   </ItemGroup>
 
