@@ -66,7 +66,7 @@ static void SignalHandler(int sig, siginfo_t *info, void *ucontext) {
     // Ambient audio session (allows background/game sound properly)
     @try {
         AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-        [audioSession setCategory:AVAudioSessionCategoryAmbient error:nil];
+        [audioSession setCategory:AVAudioSessionCategoryAmbient withOptions:AVAudioSessionCategoryOptionMixWithOthers error:nil];
         [audioSession setActive:YES error:nil];
     } @catch (NSException *e) {
         NSLog(@"AudioSession setup exception: %@", e);

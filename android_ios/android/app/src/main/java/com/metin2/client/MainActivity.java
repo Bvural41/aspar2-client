@@ -904,8 +904,20 @@ public class MainActivity extends Activity {
     private void hideUpdateScreen() {
         runOnUiThread(() -> {
             if (mUpdateScreen != null && mRootLayout != null) {
-                mRootLayout.removeView(mUpdateScreen);
+                final View screenToHide = mUpdateScreen;
                 mUpdateScreen = null;
+                screenToHide.animate()
+                    .alpha(0.0f)
+                    .scaleX(1.05f)
+                    .scaleY(1.05f)
+                    .setDuration(600)
+                    .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
+                    .withEndAction(() -> {
+                        if (mRootLayout != null) {
+                            mRootLayout.removeView(screenToHide);
+                        }
+                    })
+                    .start();
             }
         });
     }
