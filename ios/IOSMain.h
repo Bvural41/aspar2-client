@@ -23,7 +23,6 @@ bool IOS_IsGamePhase();
 void IOS_PauseAudio();
 void IOS_ResumeAudio();
 void IOS_SaveConfig();
-void IOS_SetBreadcrumb(const char* breadcrumb);
 
 #ifdef __cplusplus
 }

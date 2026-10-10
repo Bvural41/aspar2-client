@@ -56,37 +56,20 @@ void CGrannyModelInstance::UpdateTransform(D3DXMATRIX * pMatrix, float fSecondsE
 	//Tracef("%f %f %f",pMatrix->_41,pMatrix->_42,pMatrix->_43);
 }
 
-#if defined(__APPLE__)
-extern "C" void IOS_SetBreadcrumb(const char*);
-#endif
-
 void CGrannyModelInstance::Deform(const D3DXMATRIX * c_pWorldMatrix)
 {
 	if (IsEmpty() || !m_pModel)
 		return;
 
-#if defined(__APPLE__)
-	IOS_SetBreadcrumb("GrannyModelInstance::Deform - UpdateWorldPose");
-#endif
 	UpdateWorldPose();
-
-#if defined(__APPLE__)
-	IOS_SetBreadcrumb("GrannyModelInstance::Deform - UpdateWorldMatrices");
-#endif
 	UpdateWorldMatrices(c_pWorldMatrix);
 
 	if (m_pModel->CanDeformPNTVertices())
 	{
-#if defined(__APPLE__)
-		IOS_SetBreadcrumb("GrannyModelInstance::Deform - LockRange");
-#endif
 		CGraphicVertexBuffer& rkDeformableVertexBuffer = __GetDeformableVertexBufferRef();
 		TPNTVertex* pntVertices = nullptr;
 		if (rkDeformableVertexBuffer.LockRange(m_pModel->GetDeformVertexCount(), (void **)&pntVertices) && pntVertices)
 		{
-#if defined(__APPLE__)
-			IOS_SetBreadcrumb("GrannyModelInstance::Deform - DeformPNTVertices");
-#endif
 			DeformPNTVertices(pntVertices);
 			rkDeformableVertexBuffer.Unlock();
 		}
@@ -95,9 +78,6 @@ void CGrannyModelInstance::Deform(const D3DXMATRIX * c_pWorldMatrix)
 			TraceError("GRANNY DEFORM DYNAMIC BUFFER LOCK ERROR");
 		}
 	}
-#if defined(__APPLE__)
-	IOS_SetBreadcrumb("GrannyModelInstance::Deform - done");
-#endif
 }
 
 //////////////////////////////////////////////////////

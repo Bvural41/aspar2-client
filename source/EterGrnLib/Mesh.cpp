@@ -74,11 +74,6 @@ void CGrannyMesh::DeformPNTVertices(void * dstBaseVertices, D3DXMATRIX * boneMat
 	if (!boneIndices)
 		return;
 
-#if defined(__APPLE__)
-	extern void IOS_SetBreadcrumb(const char*);
-	IOS_SetBreadcrumb("GrannyDeformVertices");
-#endif
-
 	GrannyDeformVertices(
 		m_pgrnMeshDeformer,
 		boneIndices,
@@ -86,10 +81,6 @@ void CGrannyMesh::DeformPNTVertices(void * dstBaseVertices, D3DXMATRIX * boneMat
 		vtxCount,
 		srcVertices,
 		dstVertices);
-
-#if defined(__APPLE__)
-	IOS_SetBreadcrumb("GrannyDeformVertices done");
-#endif
 }
 
 bool CGrannyMesh::CanDeformPNTVertices() const

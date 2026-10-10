@@ -20,14 +20,6 @@ static void UncaughtExceptionHandler(NSException *exception) {
     }
 }
 
-static char s_szCrashBreadcrumb[256] = "Initialized";
-
-extern "C" void IOS_SetBreadcrumb(const char* breadcrumb) {
-    if (breadcrumb) {
-        snprintf(s_szCrashBreadcrumb, sizeof(s_szCrashBreadcrumb), "%s", breadcrumb);
-    }
-}
-
 static void SignalHandler(int sig, siginfo_t *info, void *ucontext) {
     signal(sig, SIG_DFL);
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -38,8 +30,8 @@ static void SignalHandler(int sig, siginfo_t *info, void *ucontext) {
         NSString *stackStr = [stackSymbols componentsJoinedByString:@"\n"];
         void *faultAddr = info ? info->si_addr : NULL;
         int code = info ? info->si_code : 0;
-        NSString *errorLog = [NSString stringWithFormat:@"\n=== CRASH SIGNAL %d (code=%d, addr=%p, breadcrumb='%s') ===\nStack Trace:\n%@\n",
-                              sig, code, faultAddr, s_szCrashBreadcrumb, stackStr];
+        NSString *errorLog = [NSString stringWithFormat:@"\n=== CRASH SIGNAL %d (code=%d, addr=%p) ===\nStack Trace:\n%@\n",
+                              sig, code, faultAddr, stackStr];
         FILE *f = fopen([logPath UTF8String], "a");
         if (f) {
             fputs([errorLog UTF8String], f);
