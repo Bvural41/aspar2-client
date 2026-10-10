@@ -26,6 +26,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+std::string g_strBundlePath = "";
+std::string g_strDocsPath = "";
+
 extern void initpack();
 extern void initdbg();
 extern void initime();
@@ -224,9 +227,6 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 
 	return pyLauncher.RunFile("system.py");
 }
-
-std::string g_strBundlePath = "";
-std::string g_strDocsPath = "";
 
 extern "C" {
 
@@ -611,7 +611,7 @@ void IOS_SecondaryTouch(int action, float x, float y, float deltaX, float deltaY
 
 void IOS_OnKeyboardText(const char* text) {
 	if (!text) return;
-	CPythonIME::Instance().SetText(text, strlen(text));
+	CPythonIME::Instance().SetText(text, (int)strlen(text));
 	CPythonApplication::Instance().RunIMEUpdate();
 }
 
