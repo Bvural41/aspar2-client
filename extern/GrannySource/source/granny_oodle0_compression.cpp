@@ -146,12 +146,10 @@ static void copy_bytes( void* dest, void* src, U32 length)
     DDest = (uint8 *)dest;
     DLength = length;
 #endif
-  U8* d, *s;
+  volatile U8* d = ( volatile U8* ) dest;
+  const volatile U8* s = ( const volatile U8* ) src;
 
-  s = ( U8* ) src;
-  d = ( U8* ) dest;
-
-  while ( length )
+  while ( length > 0 )
   {
     *d++ = *s++;
     --length;

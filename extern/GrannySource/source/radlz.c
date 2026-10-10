@@ -997,34 +997,14 @@ typedef struct LZDDATA
 
 static void copy_bytes( void* d, void* s, U32 length)
 {
-  U8* dest, *src;
+  volatile U8* dest = ( volatile U8* ) d;
+  const volatile U8* src = ( const volatile U8* ) s;
 
-  src = ( U8* ) s;
-  dest = ( U8* ) d;
-
-  if ( length >= 4 )
+  while ( length > 0 )
   {
-    if ( ( src - dest ) >= 4 )
-    {
-      do
-      {
-        length -= 4;
-        ( (U32*) dest )[ 0 ] = ( (U32*) src )[ 0 ];
-        dest += 4;
-        src += 4;
-      } while ( length > 4 );
-
-      if ( length == 0 )
-        return;
-    }
-  }
-    
-  do
-  {
-    length--;
     *dest++ = *src++;
-  } while ( length );
-
+    --length;
+  }
 }
 
 
