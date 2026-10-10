@@ -222,7 +222,7 @@
   #error "radtypes.h did not detect your processor type."
 #endif
 
-#if defined(__ppc64__) || defined(__aarch64__) || defined(_M_X64) || defined(__x86_64__) || defined(__x86_64)
+#if defined(__ppc64__) || defined(__aarch64__) || defined(__arm64__) || defined(_M_X64) || defined(__x86_64__) || defined(__x86_64)
   #define __RAD64__
   #define __RAD64REGS__  // need to set this for platforms that aren't 64-bit, but have 64-bit regs (xenon, ps3)
 #endif

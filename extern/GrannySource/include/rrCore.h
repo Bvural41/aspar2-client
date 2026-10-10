@@ -339,6 +339,10 @@
         #define __RADMACAPI__
 
         #define __RAD32__
+        #if defined(__arm64__) || defined(__aarch64__) || defined(_M_ARM64) || defined(__x86_64__) || defined(_M_X64)
+          #define __RAD64__
+          #define __RAD64REGS__
+        #endif
         #define __RADLITTLEENDIAN__
         #define RADINLINE inline
         #define __RADSTATIC__
@@ -351,6 +355,13 @@
         #if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
           //#define __RADX86__
           #define __RADIPHONESIM__
+          #if defined(__x86_64__) || defined(_M_X64)
+            #define __RADX64__
+            #define __RADX86__
+            #define __RADMMX__
+          #elif defined(__arm64__) || defined(__aarch64__) || defined(_M_ARM64)
+            #define __RADARM__
+          #endif
         #elif defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
           #define __RADARM__
         #endif
