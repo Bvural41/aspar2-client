@@ -324,12 +324,13 @@ static GameViewController *s_sharedInstance = nil;
                     BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
                     if (initOk) {
                         self->_initialized = YES;
+                        self->_otopatchDone = YES;
+                        self->_otopatchContainer.userInteractionEnabled = NO;
                         [UIView animateWithDuration:0.4 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                             self->_otopatchContainer.alpha = 0.0f;
                         } completion:^(BOOL finished) {
                             [self->_otopatchContainer removeFromSuperview];
                             self->_otopatchContainer = nil;
-                            self->_otopatchDone = YES;
                         }];
                     } else {
                         self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:1.00 green:0.48 blue:0.41 alpha:1.0];
@@ -367,12 +368,13 @@ static GameViewController *s_sharedInstance = nil;
     BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
     if (initOk) {
         self->_initialized = YES;
-        [UIView animateWithDuration:0.5 animations:^{
+        self->_otopatchDone = YES;
+        self->_otopatchContainer.userInteractionEnabled = NO;
+        [UIView animateWithDuration:0.4 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             self->_otopatchContainer.alpha = 0.0f;
         } completion:^(BOOL finished) {
             [self->_otopatchContainer removeFromSuperview];
             self->_otopatchContainer = nil;
-            self->_otopatchDone = YES;
         }];
     }
 }
