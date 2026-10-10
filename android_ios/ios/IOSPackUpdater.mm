@@ -17,6 +17,31 @@ static NSString * const kPackDirName   = @"mobile_pack/";
 @implementation PackCrcItem
 @end
 
+@interface IOSDownloadDelegate : NSObject <NSURLSessionDownloadDelegate>
+@property (nonatomic, copy) void (^onProgress)(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalExpectedBytes);
+@property (nonatomic, copy) void (^onFinish)(NSURL *location, NSHTTPURLResponse *response, NSError *error);
+@end
+
+@implementation IOSDownloadDelegate
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+    if (self.onProgress) {
+        self.onProgress(bytesWritten, totalBytesWritten, totalBytesExpectedToWrite);
+    }
+}
+
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
+    if (self.onFinish) {
+        self.onFinish(location, (NSHTTPURLResponse *)downloadTask.response, nil);
+    }
+}
+
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
+    if (error && self.onFinish) {
+        self.onFinish(nil, (NSHTTPURLResponse *)task.response, error);
+    }
+}
+@end
+
 @interface IOSPackUpdater () {
     BOOL _isCancelled;
     NSString *_packDir;
@@ -32,6 +57,13 @@ static NSString * const kPackDirName   = @"mobile_pack/";
         s_instance = [[IOSPackUpdater alloc] init];
     });
     return s_instance;
+}
+
++ (NSString *)formatBytes:(uint64_t)bytes {
+    if (bytes >= 1024ULL * 1024 * 1024) {
+        return [NSString stringWithFormat:@"%.2f GB", (double)bytes / (1024.0 * 1024.0 * 1024.0)];
+    }
+    return [NSString stringWithFormat:@"%.1f MB", (double)bytes / (1024.0 * 1024.0)];
 }
 
 - (instancetype)init {
@@ -63,7 +95,10 @@ static NSString * const kPackDirName   = @"mobile_pack/";
     return (uint32_t)crc;
 }
 
-- (BOOL)downloadUrl:(NSString *)urlStr toFile:(NSString *)destPath statusCode:(int *)outStatus {
+- (BOOL)downloadUrl:(NSString *)urlStr
+             toFile:(NSString *)destPath
+         statusCode:(int *)outStatus
+         onProgress:(void (^)(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalExpectedBytes))progressHandler {
     NSURL *url = [NSURL URLWithString:urlStr];
     if (!url) return NO;
     
@@ -74,10 +109,10 @@ static NSString * const kPackDirName   = @"mobile_pack/";
     __block BOOL success = NO;
     __block int httpCode = 0;
     
-    NSURLSessionDownloadTask *task = [[NSURLSession sharedSession] downloadTaskWithRequest:req completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-        NSHTTPURLResponse *httpResp = (NSHTTPURLResponse *)response;
+    IOSDownloadDelegate *del = [[IOSDownloadDelegate alloc] init];
+    del.onProgress = progressHandler;
+    del.onFinish = ^(NSURL *location, NSHTTPURLResponse *httpResp, NSError *error) {
         if (httpResp) httpCode = (int)httpResp.statusCode;
-        
         if (!error && location && httpCode == 200) {
             NSFileManager *fm = [NSFileManager defaultManager];
             NSString *parentDir = [destPath stringByDeletingLastPathComponent];
@@ -97,12 +132,29 @@ static NSString * const kPackDirName   = @"mobile_pack/";
             }
         }
         dispatch_semaphore_signal(sema);
-    }];
+    };
+    
+    NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
+    config.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    config.timeoutIntervalForRequest = 30.0;
+    config.timeoutIntervalForResource = 300.0;
+    
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    queue.maxConcurrentOperationCount = 1;
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:config delegate:del delegateQueue:queue];
+    
+    NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:req];
     [task resume];
+    
     dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    [session finishTasksAndInvalidate];
     
     if (outStatus) *outStatus = httpCode;
     return success;
+}
+
+- (BOOL)downloadUrl:(NSString *)urlStr toFile:(NSString *)destPath statusCode:(int *)outStatus {
+    return [self downloadUrl:urlStr toFile:destPath statusCode:outStatus onProgress:nil];
 }
 
 - (BOOL)decompressLzFile:(NSString *)lzPath toFile:(NSString *)dstPath error:(NSString **)outErr {
@@ -195,9 +247,9 @@ static NSString * const kPackDirName   = @"mobile_pack/";
             });
         };
         
-        auto reportProgress = ^(NSString *fileName, int index, int count, int percent, NSString *speed) {
+        auto reportProgress = ^(NSString *fileName, int index, int count, uint64_t allDone, uint64_t allTotal, uint64_t netSpeedBps, int64_t etaSec) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                if (progressBlock) progressBlock(fileName, index, count, percent, speed);
+                if (progressBlock) progressBlock(fileName, index, count, allDone, allTotal, netSpeedBps, etaSec);
             });
         };
 
@@ -322,8 +374,11 @@ static NSString * const kPackDirName   = @"mobile_pack/";
         }
         
         // 3. Download files in todoList
-        uint64_t downloadedBytesAll = 0;
-        NSDate *startTime = [NSDate date];
+        __block uint64_t baseDoneBytes = 0;
+        __block uint64_t netBytesWindow = 0;
+        __block NSTimeInterval lastSpeedCalcTime = [NSDate timeIntervalSinceReferenceDate];
+        __block uint64_t currentSpeedBps = 0;
+        __block NSTimeInterval lastReportTime = 0;
         
         for (int i = 0; i < (int)todoList.count; i++) {
             if (self->_isCancelled) return;
@@ -340,10 +395,33 @@ static NSString * const kPackDirName   = @"mobile_pack/";
             NSString *lzUrlStr = [NSString stringWithFormat:@"%@%@%@.lz", kUpdateBaseURL, kPackDirName, item.name];
             int dlCode = 0;
             
-            if (![self downloadUrl:lzUrlStr toFile:lzPartPath statusCode:&dlCode]) {
+            auto progressCb = ^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalExpectedBytes) {
+                if (self->_isCancelled) return;
+                netBytesWindow += (uint64_t)bytesWritten;
+                
+                NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+                if (now - lastSpeedCalcTime >= 0.5) {
+                    NSTimeInterval dt = now - lastSpeedCalcTime;
+                    currentSpeedBps = (dt > 0) ? (uint64_t)((double)netBytesWindow / dt) : 0;
+                    netBytesWindow = 0;
+                    lastSpeedCalcTime = now;
+                }
+                
+                if (now - lastReportTime >= 0.1) {
+                    lastReportTime = now;
+                    uint64_t curDone = baseDoneBytes + (uint64_t)totalBytesWritten;
+                    if (curDone > totalBytesToDownload) curDone = totalBytesToDownload;
+                    int64_t eta = (currentSpeedBps > 0 && totalBytesToDownload > curDone) ? 
+                        (int64_t)((totalBytesToDownload - curDone) / currentSpeedBps) : -1;
+                    
+                    reportProgress(item.name, i + 1, (int)todoList.count, curDone, totalBytesToDownload, currentSpeedBps, eta);
+                }
+            };
+            
+            if (![self downloadUrl:lzUrlStr toFile:lzPartPath statusCode:&dlCode onProgress:progressCb]) {
                 isLz = NO;
                 NSString *rawUrlStr = [NSString stringWithFormat:@"%@%@%@", kUpdateBaseURL, kPackDirName, item.name];
-                if (![self downloadUrl:rawUrlStr toFile:rawPartPath statusCode:&dlCode]) {
+                if (![self downloadUrl:rawUrlStr toFile:rawPartPath statusCode:&dlCode onProgress:progressCb]) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         if (completionBlock) completionBlock(NO, [NSString stringWithFormat:@"İndirme başarısız: %@", item.name]);
                     });
@@ -388,15 +466,13 @@ static NSString * const kPackDirName   = @"mobile_pack/";
             if ([fm fileExistsAtPath:finalPath]) [fm removeItemAtPath:finalPath error:nil];
             [fm moveItemAtPath:rawPartPath toPath:finalPath error:nil];
             
-            downloadedBytesAll += item.size;
-            NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:startTime];
-            double speedMB = (elapsed > 0) ? ((double)downloadedBytesAll / (1024.0 * 1024.0)) / elapsed : 0.0;
-            NSString *speedStr = [NSString stringWithFormat:@"%.1f MB/s", speedMB];
+            baseDoneBytes += item.size;
             
-            int pct = (int)((double)downloadedBytesAll / (double)totalBytesToDownload * 100.0);
-            if (pct > 100) pct = 100;
-            
-            reportProgress(item.name, i + 1, (int)todoList.count, pct, speedStr);
+            uint64_t curDone = baseDoneBytes;
+            if (curDone > totalBytesToDownload) curDone = totalBytesToDownload;
+            int64_t eta = (currentSpeedBps > 0 && totalBytesToDownload > curDone) ? 
+                (int64_t)((totalBytesToDownload - curDone) / currentSpeedBps) : -1;
+            reportProgress(item.name, i + 1, (int)todoList.count, curDone, totalBytesToDownload, currentSpeedBps, eta);
         }
         
         reportStatus(@"Tüm güncellemeler yüklendi! Oyuna giriliyor...");

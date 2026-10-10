@@ -3,6 +3,7 @@
 #import "IOSPackUpdater.h"
 #import <WebKit/WebKit.h>
 #import <AVFoundation/AVFoundation.h>
+#import <QuartzCore/QuartzCore.h>
 
 extern GLuint g_nDefaultFramebuffer;
 
@@ -13,6 +14,61 @@ extern GLuint g_nDefaultFramebuffer;
 + (Class)layerClass {
     return [CAEAGLLayer class];
 }
+@end
+
+@interface MMORPGProgressBar : UIView
+@property (nonatomic, assign) float progress;
+@end
+
+@implementation MMORPGProgressBar {
+    UIView *_fillView;
+    CAGradientLayer *_gradient;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithRed:0.12 green:0.10 blue:0.07 alpha:1.0]; // #1F1912 Dark track
+        self.layer.cornerRadius = frame.size.height / 2.0f;
+        self.layer.borderWidth = 1.0f;
+        self.layer.borderColor = [UIColor colorWithRed:0.35 green:0.27 blue:0.16 alpha:1.0].CGColor; // #5A462A
+        self.clipsToBounds = YES;
+
+        _fillView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, frame.size.height)];
+        _fillView.clipsToBounds = YES;
+        _fillView.layer.cornerRadius = frame.size.height / 2.0f;
+
+        _gradient = [CAGradientLayer layer];
+        _gradient.colors = @[
+            (id)[UIColor colorWithRed:0.60 green:0.42 blue:0.12 alpha:1.0].CGColor, // #9A6B1E GOLD_DARK
+            (id)[UIColor colorWithRed:0.95 green:0.77 blue:0.40 alpha:1.0].CGColor  // #F2C465 GOLD
+        ];
+        _gradient.startPoint = CGPointMake(0.0, 0.5);
+        _gradient.endPoint = CGPointMake(1.0, 0.5);
+        _gradient.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+        [_fillView.layer addSublayer:_gradient];
+
+        [self addSubview:_fillView];
+    }
+    return self;
+}
+
+- (void)setProgress:(float)progress {
+    _progress = fmaxf(0.0f, fminf(1.0f, progress));
+    CGRect f = _fillView.frame;
+    f.size.width = self.bounds.size.width * _progress;
+    f.size.height = self.bounds.size.height;
+    _fillView.frame = f;
+    _gradient.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    self.layer.cornerRadius = self.bounds.size.height / 2.0f;
+    _fillView.layer.cornerRadius = self.bounds.size.height / 2.0f;
+    self.progress = _progress;
+}
+
 @end
 
 @interface GameViewController () <UITextFieldDelegate, WKNavigationDelegate> {
@@ -32,7 +88,7 @@ extern GLuint g_nDefaultFramebuffer;
     // Otopatch Downloader UI
     UIView *_otopatchContainer;
     UIView *_otopatchPanel;
-    UIProgressView *_otopatchProgress;
+    MMORPGProgressBar *_otopatchProgress;
     UILabel *_otopatchStatusLabel;
     UILabel *_otopatchPercentLabel;
     UILabel *_otopatchDetailLabel;
@@ -237,15 +293,8 @@ static GameViewController *s_sharedInstance = nil;
     _otopatchPercentLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     [_otopatchPanel addSubview:_otopatchPercentLabel];
     
-    // Progress Bar
-    _otopatchProgress = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
-    _otopatchProgress.frame = CGRectMake(20, 42, contentW, 14);
-    _otopatchProgress.progressTintColor = [UIColor colorWithRed:0.95 green:0.77 blue:0.40 alpha:1.0]; // Gold fill
-    _otopatchProgress.trackTintColor = [UIColor colorWithRed:0.12 green:0.10 blue:0.07 alpha:1.0]; // Dark track
-    _otopatchProgress.layer.cornerRadius = 7.0f;
-    _otopatchProgress.layer.borderWidth = 1.0f;
-    _otopatchProgress.layer.borderColor = [UIColor colorWithRed:0.35 green:0.27 blue:0.16 alpha:1.0].CGColor;
-    _otopatchProgress.clipsToBounds = YES;
+    // Progress Bar (Thick MMORPG Gold Bar matching Android dp(14))
+    _otopatchProgress = [[MMORPGProgressBar alloc] initWithFrame:CGRectMake(20, 42, contentW, 14)];
     _otopatchProgress.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [_otopatchPanel addSubview:_otopatchProgress];
     
@@ -296,12 +345,24 @@ static GameViewController *s_sharedInstance = nil;
             self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:0.94 green:0.90 blue:0.85 alpha:1.0];
             self->_otopatchStatusLabel.text = statusText;
         }
-        onProgress:^(NSString *fileName, int fileIndex, int fileCount, int percent, NSString *speedText) {
+        onProgress:^(NSString *fileName, int fileIndex, int fileCount,
+                     uint64_t allDone, uint64_t allTotal,
+                     uint64_t netSpeedBps, int64_t etaSec) {
             self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:0.94 green:0.90 blue:0.85 alpha:1.0];
-            self->_otopatchStatusLabel.text = [NSString stringWithFormat:@"İndiriliyor: %@ (%d/%d)", fileName, fileIndex, fileCount];
-            self->_otopatchProgress.progress = (float)percent / 100.0f;
-            self->_otopatchPercentLabel.text = [NSString stringWithFormat:@"%%%d", percent];
-            self->_otopatchDetailLabel.text = [NSString stringWithFormat:@"Hız: %@", speedText];
+            self->_otopatchStatusLabel.text = [NSString stringWithFormat:@"İndiriliyor: %@  (%d/%d)", fileName, fileIndex, fileCount];
+            float frac = (allTotal > 0) ? MIN(1.0f, (float)((double)allDone / (double)allTotal)) : 0.0f;
+            self->_otopatchProgress.progress = frac;
+            self->_otopatchPercentLabel.text = [NSString stringWithFormat:@"%%%d", (int)floor(frac * 100.0f)];
+
+            NSMutableString *detail = [NSMutableString string];
+            [detail appendFormat:@"%@ / %@", [IOSPackUpdater formatBytes:allDone], [IOSPackUpdater formatBytes:allTotal]];
+            if (netSpeedBps > 0) {
+                [detail appendFormat:@"   •   Hız: %.1f MB/s", (double)netSpeedBps / (1024.0 * 1024.0)];
+            }
+            if (etaSec >= 0) {
+                [detail appendFormat:@"   •   Kalan: %02d:%02d", (int)(etaSec / 60), (int)(etaSec % 60)];
+            }
+            self->_otopatchDetailLabel.text = detail;
         }
         onCompletion:^(BOOL success, NSString *errorMsg) {
             if (success) {
