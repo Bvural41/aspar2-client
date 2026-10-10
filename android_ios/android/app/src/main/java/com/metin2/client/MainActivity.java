@@ -106,6 +106,35 @@ public class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(lp);
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            try {
+                android.view.Display display = getWindowManager().getDefaultDisplay();
+                android.view.Display.Mode[] modes = display.getSupportedModes();
+                android.view.Display.Mode targetMode = null;
+                for (android.view.Display.Mode mode : modes) {
+                    if (Math.abs(mode.getRefreshRate() - 60.0f) < 1.0f) {
+                        targetMode = mode;
+                        break;
+                    }
+                }
+                if (targetMode != null) {
+                    WindowManager.LayoutParams lp = getWindow().getAttributes();
+                    lp.preferredDisplayModeId = targetMode.getModeId();
+                    getWindow().setAttributes(lp);
+                    Log.i(TAG, "Requested 60Hz display mode: " + targetMode);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to set 60Hz display mode: " + e.getMessage());
+            }
+        }
+
         // Calculate aspect-ratio aware target resolution based on 720p base height
         int screenW = 1280;
         int screenH = 720;
@@ -892,6 +921,12 @@ public class MainActivity extends Activity {
         }
 
         public void onSurfaceChanged(GL10 gl, int width, int height) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                try {
+                    mGLView.getHolder().getSurface().setFrameRate(60.0f, android.view.Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+                } catch (Exception ignored) {}
+            }
+
             mSurfaceW = width;
             mSurfaceH = height;
             tryInit();
