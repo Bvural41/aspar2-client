@@ -206,6 +206,12 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	initskillpet();
 #endif
 
+	if (!g_strBundlePath.empty() && !g_strDocsPath.empty()) {
+		std::string pyPath = g_strDocsPath + "/lib:" + g_strBundlePath + "/lib:" + g_strBundlePath;
+		setenv("PYTHONPATH", pyPath.c_str(), 1);
+		setenv("PYTHONHOME", g_strBundlePath.c_str(), 1);
+	}
+
 	pyLauncher.RunLine("import sys");
 	if (!g_strBundlePath.empty()) {
 		std::string s1 = "sys.path.append('" + g_strBundlePath + "')";
@@ -226,6 +232,45 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	pyLauncher.RunLine("__COMMAND_LINE__ = \"\"");
 
 	return pyLauncher.RunFile("system.py");
+}
+
+static void IOS_SyncBundleToDocuments(const std::string& bundlePath, const std::string& docsPath) {
+	if (bundlePath.empty() || docsPath.empty()) return;
+
+	NSFileManager* fm = [NSFileManager defaultManager];
+	NSString* nsBundle = [NSString stringWithUTF8String:bundlePath.c_str()];
+	NSString* nsDocs = [NSString stringWithUTF8String:docsPath.c_str()];
+
+	NSError* err = nil;
+	NSArray* contents = [fm contentsOfDirectoryAtPath:nsBundle error:&err];
+	if (!contents) return;
+
+	NSSet* skipSet = [NSSet setWithObjects:@"_CodeSignature", @"Info.plist", @"PkgInfo", @"embedded.mobileprovision", @"Aspar2", nil];
+
+	for (NSString* item in contents) {
+		if ([skipSet containsObject:item]) continue;
+		if ([item hasPrefix:@"AppIcon"] || [item hasPrefix:@"Icon"]) continue;
+
+		NSString* src = [nsBundle stringByAppendingPathComponent:item];
+		NSString* dst = [nsDocs stringByAppendingPathComponent:item];
+
+		if ([fm fileExistsAtPath:dst]) {
+			continue;
+		}
+
+		NSDictionary* attrs = [fm attributesOfItemAtPath:dst error:nil];
+		if (attrs) {
+			[fm removeItemAtPath:dst error:nil];
+		}
+
+		NSError* linkErr = nil;
+		if (![fm createSymbolicLinkAtPath:dst withDestinationPath:src error:&linkErr]) {
+			NSLog(@"[Aspar2 iOS] Symlink failed for %@ -> %@: %@. Copying...", item, src, linkErr);
+			[fm copyItemAtPath:src toPath:dst error:nil];
+		} else {
+			NSLog(@"[Aspar2 iOS] Linked %@ to %@", item, dst);
+		}
+	}
 }
 
 extern "C" {
@@ -251,6 +296,7 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	g_nAndroidMouseY = height / 2;
 
 	if (!g_strDocsPath.empty()) {
+		IOS_SyncBundleToDocuments(g_strBundlePath, g_strDocsPath);
 		chdir(g_strDocsPath.c_str());
 		NSLog(@"[Aspar2 iOS] Working directory set to Documents: %s", g_strDocsPath.c_str());
 		std::string userDataDir = g_strDocsPath + "/UserData";
