@@ -218,14 +218,6 @@ static NSString * const kPackDirName   = @"mobile_pack/";
             }
         }
         
-        if (hasLocalDocsPack || hasLocalAspar2Pack || hasGenericPacks) {
-            reportStatus(@"Yerel paketler bulundu! Oyuna giriliyor...");
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (completionBlock) completionBlock(YES, nil);
-            });
-            return;
-        }
-
         reportStatus(@"Sunucuya bağlanılıyor...");
         
         // 1. Fetch mobile_crclist
@@ -234,7 +226,7 @@ static NSString * const kPackDirName   = @"mobile_pack/";
         int httpCode = 0;
         
         if (![self downloadUrl:crcUrlStr toFile:tempCrcFile statusCode:&httpCode]) {
-            if (hasLocalDocsPack || hasLocalAspar2Pack) {
+            if (hasLocalDocsPack || hasLocalAspar2Pack || hasGenericPacks) {
                 reportStatus(@"Sunucuya bağlanılamadı, yerel paketlerle başlatılıyor...");
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (completionBlock) completionBlock(YES, nil);

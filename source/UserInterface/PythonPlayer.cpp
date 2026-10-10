@@ -2129,7 +2129,7 @@ CPythonPlayer::CPythonPlayer(void)
 	m_sysIsCoolTime = TRUE;
 	m_sysIsLevelLimit = TRUE;
 	m_dwPlayTime = 0;
-	#if defined(__ANDROID__)
+	#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	m_aeMBFButton[MBT_LEFT]=CPythonPlayer::MBF_AUTO;
 #else
 	m_aeMBFButton[MBT_LEFT]=CPythonPlayer::MBF_SMART;

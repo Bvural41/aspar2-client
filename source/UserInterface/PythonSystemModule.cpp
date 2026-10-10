@@ -272,7 +272,7 @@ PyObject * systemSetConfig(PyObject * poSelf, PyObject * poArgs)
 
 	memcpy(&tmp, CPythonSystem::Instance().GetConfig(), sizeof(tmp));
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	tmp.width				= CPythonSystem::Instance().GetWidth();
 	tmp.height				= CPythonSystem::Instance().GetHeight();
 #else

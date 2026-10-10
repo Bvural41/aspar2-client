@@ -209,19 +209,62 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	if (!g_strDocsPath.empty()) {
 		std::string hook = 
 			"import __builtin__, os\n"
+			"DOCS_DIR = r'" + g_strDocsPath + "'\n"
+			"def _remap_path(path):\n"
+			"    if not isinstance(path, basestring):\n"
+			"        return path\n"
+			"    p = path.replace(chr(92), '/').strip()\n"
+			"    if p.lower() == 'userdata' or p.lower().startswith('userdata/'):\n"
+			"        return os.path.join(DOCS_DIR, p)\n"
+			"    return path\n"
 			"_orig_open = __builtin__.open\n"
 			"def _safe_open(name, mode='r', *args, **kwargs):\n"
+			"    remapped = _remap_path(name)\n"
+			"    if any(m in mode for m in ('w', 'a', '+')):\n"
+			"        if remapped == name and not os.path.isabs(remapped):\n"
+			"            remapped = os.path.join(DOCS_DIR, name)\n"
+			"        parent = os.path.dirname(remapped)\n"
+			"        if parent and not os.path.exists(parent):\n"
+			"            try:\n"
+			"                os.makedirs(parent)\n"
+			"            except Exception:\n"
+			"                pass\n"
+			"        return _orig_open(remapped, mode, *args, **kwargs)\n"
+			"    if remapped != name and os.path.exists(remapped):\n"
+			"        return _orig_open(remapped, mode, *args, **kwargs)\n"
 			"    try:\n"
 			"        return _orig_open(name, mode, *args, **kwargs)\n"
 			"    except IOError:\n"
-			"        if any(m in mode for m in ('w', 'a', '+')):\n"
-			"            doc_path = os.path.join('" + g_strDocsPath + "', os.path.basename(name))\n"
-			"            try:\n"
-			"                return _orig_open(doc_path, mode, *args, **kwargs)\n"
-			"            except Exception:\n"
-			"                pass\n"
+			"        doc_alt = os.path.join(DOCS_DIR, name)\n"
+			"        if os.path.exists(doc_alt):\n"
+			"            return _orig_open(doc_alt, mode, *args, **kwargs)\n"
 			"        raise\n"
-			"__builtin__.open = _safe_open\n";
+			"__builtin__.open = _safe_open\n"
+			"_orig_exists = os.path.exists\n"
+			"os.path.exists = lambda p: _orig_exists(_remap_path(p)) or _orig_exists(p)\n"
+			"_orig_isfile = os.path.isfile\n"
+			"os.path.isfile = lambda p: _orig_isfile(_remap_path(p)) or _orig_isfile(p)\n"
+			"_orig_isdir = os.path.isdir\n"
+			"os.path.isdir = lambda p: _orig_isdir(_remap_path(p)) or _orig_isdir(p)\n"
+			"_orig_mkdir = os.mkdir\n"
+			"def _safe_mkdir(p, *args, **kwargs):\n"
+			"    return _orig_mkdir(_remap_path(p), *args, **kwargs)\n"
+			"os.mkdir = _safe_mkdir\n"
+			"_orig_makedirs = os.makedirs\n"
+			"def _safe_makedirs(p, *args, **kwargs):\n"
+			"    target = _remap_path(p)\n"
+			"    if not _orig_exists(target):\n"
+			"        return _orig_makedirs(target, *args, **kwargs)\n"
+			"os.makedirs = _safe_makedirs\n"
+			"_orig_remove = os.remove\n"
+			"os.remove = lambda p, *args, **kwargs: _orig_remove(_remap_path(p), *args, **kwargs)\n"
+			"_orig_listdir = os.listdir\n"
+			"def _safe_listdir(p='.', *args, **kwargs):\n"
+			"    target = _remap_path(p)\n"
+			"    if _orig_exists(target):\n"
+			"        return _orig_listdir(target, *args, **kwargs)\n"
+			"    return _orig_listdir(p, *args, **kwargs)\n"
+			"os.listdir = _safe_listdir\n";
 		pyLauncher.RunLine(hook.c_str());
 	}
 
@@ -279,6 +322,21 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		}
 		std::string userDataDir = g_strDocsPath + "/UserData";
 		mkdir(userDataDir.c_str(), 0755);
+		mkdir((userDataDir + "/chatting").c_str(), 0755);
+		mkdir((userDataDir + "/offline_shop").c_str(), 0755);
+
+		// Migrate any legacy chat or json files in root Documents to UserData
+		for (NSString* item in contents) {
+			if ([item hasSuffix:@".chat"]) {
+				NSString* oldPath = [nsDocs stringByAppendingPathComponent:item];
+				NSString* newPath = [NSString stringWithFormat:@"%s/chatting/%@", userDataDir.c_str(), item];
+				[fm moveItemAtPath:oldPath toPath:newPath error:nil];
+			} else if ([item hasPrefix:@"visited_"] && [item hasSuffix:@".json"]) {
+				NSString* oldPath = [nsDocs stringByAppendingPathComponent:item];
+				NSString* newPath = [NSString stringWithFormat:@"%s/offline_shop/%@", userDataDir.c_str(), item];
+				[fm moveItemAtPath:oldPath toPath:newPath error:nil];
+			}
+		}
 	}
 
 	static CLZO lzo;

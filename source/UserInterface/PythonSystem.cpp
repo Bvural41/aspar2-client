@@ -567,7 +567,7 @@ void CPythonSystem::SetDefaultConfig()
 	m_Config.bShowTimeSystem = true;
 #endif
 #ifdef ENABLE_INVENTORY_ADDITION
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	m_Config.bShowInventoryAddition = false;
 #else
 	m_Config.bShowInventoryAddition = true;
@@ -1311,7 +1311,7 @@ bool CPythonSystem::SaveConfig()
 		return false;
 	}
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
 	int saveWidth = (g_nAndroidScreenWidth > 0) ? g_nAndroidScreenWidth : m_Config.width;
 	int saveHeight = (g_nAndroidScreenHeight > 0) ? g_nAndroidScreenHeight : m_Config.height;
 #else

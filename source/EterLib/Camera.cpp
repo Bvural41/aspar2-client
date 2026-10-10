@@ -151,7 +151,7 @@ bool CCamera::Drag(int nMouseX, int nMouseY, LPPOINT lpReturnPoint)
 	long lMouseX = nMouseX;
 	long lMouseY = nMouseY;
 	
-#if defined(__ANDROID__) || defined(ANDROID)
+#if defined(__ANDROID__) || defined(ANDROID) || defined(__APPLE__) || defined(__IOS__)
 	long deltaX = lMouseX - m_lMousePosX;
 	long deltaY = lMouseY - m_lMousePosY;
 

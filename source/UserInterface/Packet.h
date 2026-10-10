@@ -2652,7 +2652,7 @@ typedef struct SPlayerSkill
 {
 	BYTE bMasterType;
 	BYTE bLevel;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 	uint32_t tNextRead;
 #else
 	time_t tNextRead;
@@ -2665,7 +2665,7 @@ typedef struct packet_skill_level_new
 	TPlayerSkill skills[SKILL_MAX_NUM];
 } TPacketGCSkillLevelNew;
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 static_assert(sizeof(TPlayerSkill) == 6, "TPlayerSkill size must be 6 bytes");
 static_assert(sizeof(TPacketGCSkillLevelNew) == 1921, "TPacketGCSkillLevelNew size must be 1921 bytes");
 #endif
@@ -3077,14 +3077,14 @@ typedef struct packet_offline_shop_update_item
 typedef struct SPacketGCTime
 {
     BYTE        bHeader;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
     uint32_t    time;
 #else
     time_t      time;
 #endif
 } TPacketGCTime;
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 static_assert(sizeof(TPacketGCTime) == 5, "TPacketGCTime size must be 5 bytes");
 #endif
 

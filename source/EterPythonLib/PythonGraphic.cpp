@@ -135,9 +135,19 @@ void CPythonGraphic::SetViewport(float fx, float fy, float fWidth, float fHeight
 	}
 	else
 	{
-		GLint gl_y = (GLint)(ms_iHeight - (fy + fHeight));
+		GLint fbW = (m_backupViewport.Width > 0) ? m_backupViewport.Width : ms_iWidth;
+		GLint fbH = (m_backupViewport.Height > 0) ? m_backupViewport.Height : ms_iHeight;
+
+		float scaleX = (ms_iWidth > 0 && fbW > 0) ? ((float)fbW / (float)ms_iWidth) : 1.0f;
+		float scaleY = (ms_iHeight > 0 && fbH > 0) ? ((float)fbH / (float)ms_iHeight) : 1.0f;
+
+		GLint real_x = (GLint)(fx * scaleX);
+		GLsizei real_w = (GLsizei)(fWidth * scaleX);
+		GLsizei real_h = (GLsizei)(fHeight * scaleY);
+		GLint gl_y = (GLint)(fbH - ((fy + fHeight) * scaleY));
 		if (gl_y < 0) gl_y = 0;
-		glViewport((GLint)fx, gl_y, (GLsizei)fWidth, (GLsizei)fHeight);
+
+		glViewport(real_x, gl_y, real_w, real_h);
 	}
 #else
 	if (!ms_lpd3dDevice)
