@@ -71,13 +71,15 @@ bool CGrannyModelInstance::Intersect(const D3DXMATRIX * c_pMatrix,
 
 			// WORK
 			granny_world_pose* pWorldPose = __GetWorldPosePtr();
-			const granny_int32x* boneIndices = __GetMeshBoneIndices(m);
+			const auto boneIndices = __GetMeshBoneIndices(m);
 			if (!pWorldPose || !boneIndices)
 				continue;
 			const float * Transform = GrannyGetWorldPose4x4(pWorldPose, boneIndices[b]);
 			if (!Transform)
 				continue;
 			// END_OF_WORK
+
+			TBoundBox * pBoundBox = s_boundBoxPool.alloc();
 
 			MakeBoundBox(pBoundBox,
 						 Transform,
@@ -207,7 +209,7 @@ void CGrannyModelInstance::GetBoundBox(D3DXVECTOR3* vtMin, D3DXVECTOR3* vtMax)
 		const granny_mesh* pgrnMesh = m_pModel->GetGrannyModelPointer()->MeshBindings[m].Mesh;
 
 		// WORK
-		const granny_int32x* boneIndices = __GetMeshBoneIndices(m);
+		const auto boneIndices = __GetMeshBoneIndices(m);
 		// END_OF_WORK
 		granny_world_pose* pWorldPose = __GetWorldPosePtr();
 		if (!pWorldPose || !boneIndices)
@@ -242,7 +244,7 @@ bool CGrannyModelInstance::GetMeshMatrixPointer(int iMesh, const D3DXMATRIX ** c
 	if (!pWorldPose)
 		return false;
 
-	const granny_int32x* boneIndices = __GetMeshBoneIndices(iMesh);
+	const auto boneIndices = __GetMeshBoneIndices(iMesh);
 	if (!boneIndices)
 		return false;
 

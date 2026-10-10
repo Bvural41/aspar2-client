@@ -44,8 +44,6 @@ add_compile_options(
     $<$<COMPILE_LANGUAGE:CXX>:-frtti>
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions>
     -O3
-    $<$<PLATFORM_ID:iOS>:-fno-omit-frame-pointer>
-    $<$<NOT:$<PLATFORM_ID:iOS>>:-fomit-frame-pointer>
     -g
     -fdeclspec
     -fms-extensions
@@ -368,6 +366,7 @@ if(ANDROID)
 elseif(APPLE)
     enable_language(OBJC OBJCXX)
     add_definitions(-DGRANNY_IPHONE)
+    add_compile_options(-fno-omit-frame-pointer)
 
     file(GLOB IOS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.mm
