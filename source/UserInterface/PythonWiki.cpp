@@ -2,7 +2,7 @@
 #ifdef ENABLE_INGAME_WIKI
 #include "PythonWiki.h"
 #include <picojson.h>
-#include "../eterPack/EterPackManager.h"
+#include "../EterPack/EterPackManager.h"
 #include "../GameLib/ItemManager.h"
 #include "PythonNetworkStream.h"
 #include "pythonnonplayer.h"

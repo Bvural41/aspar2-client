@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../milesLib/Type.h"
+#include "../MilesLib/Type.h"
 #include "RaceMotionDataEvent.h"
 #include "../UserInterface/Locale_inc.h"
 

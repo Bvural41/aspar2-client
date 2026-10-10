@@ -5,7 +5,7 @@ static const float c_fHalfPixel = 0.0f;
 #else
 static const float c_fHalfPixel = 0.5f;
 #endif
-#include "../eterBase/CRC32.h"
+#include "../EterBase/CRC32.h"
 #include "../UserInterface/Locale_inc.h"
 #include "GrpExpandedImageInstance.h"
 #include "StateManager.h"

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "PythonMessenger.h"
 #ifdef ENABLE_MESSENGER_RENEWAL
 #include "PythonCommunity.h"

@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "PythonApplication.h"
-#include "../eterlib/Camera.h"
+#include "../EterLib/Camera.h"
 #ifdef ENABLE_TAB_NEXT_TARGET
 #include "PythonCharacterManager.h"
 #include "PythonPlayer.h"

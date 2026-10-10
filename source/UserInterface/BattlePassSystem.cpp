@@ -5,7 +5,7 @@
 #include <fstream>
 #include <picojson.h>
 #include <chrono>
-#include "../eterPack/EterPackManager.h"
+#include "../EterPack/EterPackManager.h"
 
 PyObject* battlepassMainClass = NULL;
 

@@ -6,8 +6,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../eterBase/MappedFile.h"
-#include "../eterBase/Debug.h"
+#include "../EterBase/MappedFile.h"
+#include "../EterBase/Debug.h"
 
 #include "DXTCImage.h"
 

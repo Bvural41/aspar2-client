@@ -6,9 +6,8 @@ on:
     branches:
       - main
     paths:
-      - 'ios/**'
+      - 'android_ios/**'
       - 'source/**'
-      - 'android_compat/**'
       - 'extern/**'
       - 'CMakeLists.txt'
       - '.github/workflows/build_ios.yml'

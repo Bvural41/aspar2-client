@@ -1,7 +1,7 @@
 #ifndef __INC_TERRAINLIB_TEXTURESET_H__
 #define __INC_TERRAINLIB_TEXTURESET_H__
 
-#include "../eterLib/GrpImageInstance.h"
+#include "../EterLib/GrpImageInstance.h"
 
 typedef struct STerrainTexture
 {

@@ -12,7 +12,7 @@
 #include "ActorInstanceInterface.h"
 #include "Interface.h"
 #include "../UserInterface/Locale_inc.h"
-//#include "../eterGrnLib/ThingInstance.h"
+//#include "../EterGrnLib/ThingInstance.h"
 
 class CItemData;
 class CWeaponTrace;

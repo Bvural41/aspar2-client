@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterBase/Stl.h"
+#include "../EterBase/Stl.h"
 #include "GrpTexture.h"
 #include "StateManager.h"
 

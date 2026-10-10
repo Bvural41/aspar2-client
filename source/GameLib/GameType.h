@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "../eterLib/TextFileLoader.h"
-#include "../eterLib/CollisionData.h"
+#include "../EterLib/TextFileLoader.h"
+#include "../EterLib/CollisionData.h"
 
 extern float g_fGameFPS;
 

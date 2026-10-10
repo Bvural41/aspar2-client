@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "GL_Loader.h"
-#include "../eterBase/Debug.h"
+#include "../EterBase/Debug.h"
 
 #if defined(USE_OPENGL_ES)
 

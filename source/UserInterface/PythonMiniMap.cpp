@@ -1,14 +1,14 @@
 #include "StdAfx.h"
-#include "../eterLib/StateManager.h"
-#include "../eterLib/GrpSubImage.h"
-#include "../eterlib/Camera.h"
+#include "../EterLib/StateManager.h"
+#include "../EterLib/GrpSubImage.h"
+#include "../EterLib/Camera.h"
 #include "../EterPack/EterPackManager.h"
 #include "PythonMiniMap.h"
 #include "PythonBackground.h"
 #include "PythonCharacterManager.h"
 #include "PythonGuild.h"
 #include "AbstractPlayer.h"
-#include "../eterPythonLib/PythonWindowManager.h"
+#include "../EterPythonLib/PythonWindowManager.h"
 #ifdef ENABLE_AUTO_SYSTEM
 #include "PythonPlayer.h"
 #endif

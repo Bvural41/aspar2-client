@@ -1,6 +1,6 @@
-#include "Stdafx.h"
-#include "../eterLib/GrpMath.h"
-#include "../effectLib/EffectManager.h"
+#include "StdAfx.h"
+#include "../EterLib/GrpMath.h"
+#include "../EffectLib/EffectManager.h"
 
 #include "MapManager.h"
 

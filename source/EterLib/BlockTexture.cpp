@@ -8,8 +8,8 @@ static const float c_fHalfPixel = 0.5f;
 #include "BlockTexture.h"
 #include "GrpBase.h"
 #include "GrpDib.h"
-#include "../eterbase/Stl.h"
-#include "../eterlib/StateManager.h"
+#include "../EterBase/Stl.h"
+#include "../EterLib/StateManager.h"
 
 void CBlockTexture::SetClipRect(const RECT & c_rRect)
 {

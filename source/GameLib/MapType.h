@@ -3,8 +3,8 @@
 
 class CProperty;
 
-#include "../eterLib/SkyBox.h"
-#include "../mileslib/SoundManager.h"
+#include "../EterLib/SkyBox.h"
+#include "../MilesLib/SoundManager.h"
 #include "../UserInterface/Locale_inc.h"
 
 /////////////////////////////////////////////////////////////////

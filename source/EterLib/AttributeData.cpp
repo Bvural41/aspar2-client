@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterBase/Utils.h"
+#include "../EterBase/Utils.h"
 #include "AttributeData.h"
 
 const char c_szAttributeDataFileHeader[] = "AttributeData";

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../eterLib/FuncObject.h"
-#include "../eterlib/NetStream.h"
-#include "../eterLib/NetPacketHeaderMap.h"
+#include "../EterLib/FuncObject.h"
+#include "../EterLib/NetStream.h"
+#include "../EterLib/NetPacketHeaderMap.h"
 #include "InsultChecker.h"
 #include "packet.h"
 #ifdef ENABLE_LOADING_TIP_INFO

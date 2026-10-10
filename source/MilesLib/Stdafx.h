@@ -27,9 +27,9 @@
 #define max(a,b) (((a)>(b))?(a):(b))
 #endif
 
-#include "../eterBase/CRC32.h"
-#include "../eterBase/Utils.h"
-#include "../eterBase/Debug.h"
+#include "../EterBase/CRC32.h"
+#include "../EterBase/Utils.h"
+#include "../EterBase/Debug.h"
 
 
 #endif

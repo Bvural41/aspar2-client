@@ -2,7 +2,7 @@
 
 #include "Ref.h"
 #include "Resource.h"
-#include "../eterImageLib/TGAImage.h"
+#include "../EterImageLib/TGAImage.h"
 
 class CTargaResource : public CResource
 {

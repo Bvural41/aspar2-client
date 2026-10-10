@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterBase/Random.h"
-#include "../eterlib/StateManager.h"
+#include "../EterBase/Random.h"
+#include "../EterLib/StateManager.h"
 #include "EffectManager.h"
 
 

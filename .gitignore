@@ -1,12 +1,18 @@
-# Android build artifacts
+# Android / Mobile build artifacts
 .gradle/
 build/
 app/build/
 .cxx/
 local.properties
+**/android/.gradle/
+**/android/build/
+**/android/app/build/
+**/android/local.properties
+**/android/.cxx/
 *.apk
 *.aab
 *.so
+vs_files/**/Distribute/
 
 # Visual Studio / Windows build artifacts
 /Debug/

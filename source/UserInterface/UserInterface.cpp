@@ -9,14 +9,14 @@
 #include <crtdbg.h>
 #endif
 
-#include "../eterPack/EterPackManager.h"
-#include "../eterLib/Util.h"
+#include "../EterPack/EterPackManager.h"
+#include "../EterLib/Util.h"
 #ifdef CEF_BROWSER
 #include "CefWebBrowser.h"
 #else
 #include "../CWebBrowser/CWebBrowser.h"
 #endif
-#include "../eterBase/CPostIt.h"
+#include "../EterBase/CPostIt.h"
 
 #include "CheckLatestFiles.h"
 

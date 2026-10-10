@@ -4,7 +4,7 @@
 
 #include "StdAfx.h"
 
-#include "../eterLib/ResourceManager.h"
+#include "../EterLib/ResourceManager.h"
 
 #include "AreaLoaderThread.h"
 #include "AreaTerrain.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterlib/StdAfx.h"
+#include "../EterLib/StdAfx.h"
 #include <SDL2/SDL_touch.h>
 
 class CAndroidTouchControls

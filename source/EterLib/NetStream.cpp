@@ -3,7 +3,7 @@
 //#include "eterCrypt.h"
 
 #ifndef _IMPROVED_PACKET_ENCRYPTION_
-#include "../eterBase/tea.h"
+#include "../EterBase/tea.h"
 #endif
 
 //#define _PACKETDUMP

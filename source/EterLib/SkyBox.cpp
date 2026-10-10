@@ -1,10 +1,10 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "SkyBox.h"
 #include "Camera.h"
 #include "StateManager.h"
 #include "ResourceManager.h"
 
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 //////////////////////////////////////////////////////////////////////////
 // CSkyObjectQuad

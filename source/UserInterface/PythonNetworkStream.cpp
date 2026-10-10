@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterLib/NetPacketHeaderMap.h"
+#include "../EterLib/NetPacketHeaderMap.h"
 
 #ifdef __ANDROID__
 #include <android/log.h>

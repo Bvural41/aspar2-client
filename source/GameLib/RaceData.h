@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterGrnLib/Thing.h"
+#include "../EterGrnLib/Thing.h"
 #include "../UserInterface/Locale_inc.h"
 
 class CRaceMotionData;

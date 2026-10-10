@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "GrpD3DXBuffer.h"
-#include "../eterBase/Stl.h"
+#include "../EterBase/Stl.h"
 
 CDirect3DXBuffer::CDirect3DXBuffer()
 {

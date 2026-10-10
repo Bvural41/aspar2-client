@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "GrpText.h"
-#include "../eterBase/Stl.h"
+#include "../EterBase/Stl.h"
 
 #include "Util.h"
 
@@ -9,7 +9,7 @@
 #include <stb_truetype.h>
 #include <vector>
 #include <string>
-#include "../eterPack/EterPackManager.h"
+#include "../EterPack/EterPackManager.h"
 
 #if defined(__ANDROID__)
 #include <android/log.h>

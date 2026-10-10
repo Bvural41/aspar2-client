@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterBase/CRC32.h"
-#include "../eterBase/Filename.h"
+#include "../EterBase/CRC32.h"
+#include "../EterBase/Filename.h"
 #include "PythonWindow.h"
 #include "PythonSlotWindow.h"
 

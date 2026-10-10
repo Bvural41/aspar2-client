@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterPack/EterPackManager.h"
-#include "../eterBase/tea.h"
+#include "../EterPack/EterPackManager.h"
+#include "../EterBase/tea.h"
 
 // CHINA_CRYPT_KEY
 DWORD g_adwEncryptKey[4];

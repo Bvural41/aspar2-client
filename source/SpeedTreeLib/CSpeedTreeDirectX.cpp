@@ -4,9 +4,9 @@
 #include <d3d9types.h>
 #include <d3dx9.h>
 #include "VertexShaders.h"
-#include "../eterBase/Timer.h"
-#include "../eterLib/StateManager.h"
-#include "../eterLib/Camera.h"
+#include "../EterBase/Timer.h"
+#include "../EterLib/StateManager.h"
+#include "../EterLib/Camera.h"
 
 CSpeedTreeDirectX::CSpeedTreeDirectX() : m_dwBranchVertexShader(nullptr), m_dwLeafVertexShader(nullptr) {}
 

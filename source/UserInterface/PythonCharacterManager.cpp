@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pythoncharactermanager.h"
 #include "PythonBackground.h"
 #include "PythonNonPlayer.h"
@@ -6,7 +6,7 @@
 #include "packet.h"
 #include "PythonChat.h"
 #include "PythonTextTail.h"
-#include "../eterLib/Camera.h"
+#include "../EterLib/Camera.h"
 #ifdef ENABLE_AUTO_SYSTEM
 #include "PythonPlayer.h"
 #include "PythonSystem.h"

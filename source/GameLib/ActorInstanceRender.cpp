@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterLib/StateManager.h"
+#include "../EterLib/StateManager.h"
 
 #include "ActorInstance.h"
 

@@ -13,11 +13,11 @@
 #define _USE_32BIT_TIME_T
 #endif
 
-#include "../eterLib/StdAfx.h"
-#include "../eterPythonLib/StdAfx.h"
-#include "../gameLib/StdAfx.h"
-#include "../scriptLib/StdAfx.h"
-#include "../milesLib/StdAfx.h"
+#include "../EterLib/StdAfx.h"
+#include "../EterPythonLib/StdAfx.h"
+#include "../GameLib/StdAfx.h"
+#include "../ScriptLib/StdAfx.h"
+#include "../MilesLib/StdAfx.h"
 #include "../EffectLib/StdAfx.h"
 #include "../PRTerrainLib/StdAfx.h"
 #include "../SpeedTreeLib/StdAfx.h"

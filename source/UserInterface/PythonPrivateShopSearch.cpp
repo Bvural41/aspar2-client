@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #ifdef ENABLE_SHOP_SEARCH_SYSTEM
 #include "PythonPrivateShopSearch.h"
 #include "Packet.h"

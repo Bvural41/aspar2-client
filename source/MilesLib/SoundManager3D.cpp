@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "StdAfx.h"
 #include "SoundManager3D.h"
 
 CSoundManager3D::CSoundManager3D()

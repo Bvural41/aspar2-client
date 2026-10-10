@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../eterBase/Timer.h"
-#include "../eterBase/Debug.h"
+#include "../EterBase/Timer.h"
+#include "../EterBase/Debug.h"
 
 /*
 class CProfiler : public CSingleton<CProfiler>

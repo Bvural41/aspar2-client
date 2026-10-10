@@ -1,8 +1,8 @@
 #include "StdAfx.h"
-#include "../eterLib/StateManager.h"
-#include "../eterlib/Camera.h"
+#include "../EterLib/StateManager.h"
+#include "../EterLib/Camera.h"
 #if defined(USE_OPENGL_ES)
-#include "../eterLib/GL_Loader.h"
+#include "../EterLib/GL_Loader.h"
 #endif
 
 #include "MapOutdoor.h"

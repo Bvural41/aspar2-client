@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "GrpObjectInstance.h"
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 void CGraphicObjectInstance::OnInitialize()
 {

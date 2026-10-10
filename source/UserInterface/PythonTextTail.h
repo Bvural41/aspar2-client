@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterBase/Singleton.h"
+#include "../EterBase/Singleton.h"
 
 class CPythonTextTail : public CSingleton<CPythonTextTail>
 {

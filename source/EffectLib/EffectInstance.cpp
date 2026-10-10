@@ -3,8 +3,8 @@
 #include "ParticleSystemInstance.h"
 #include "SimpleLightInstance.h"
 
-#include "../eterBase/Stl.h"
-#include "../eterLib/StateManager.h"
+#include "../EterBase/Stl.h"
+#include "../EterLib/StateManager.h"
 #include "../MilesLib/SoundManager.h"
 
 CDynamicPool<CEffectInstance>	CEffectInstance::ms_kPool;

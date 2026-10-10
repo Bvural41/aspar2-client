@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterLib/ResourceManager.h"
-#include "../eterLib/StateManager.h"
+#include "../EterLib/ResourceManager.h"
+#include "../EterLib/StateManager.h"
 
 #include "WeaponTrace.h"
 

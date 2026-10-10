@@ -2,7 +2,7 @@
 #include "StateManager.h"
 #include "GrpBase.h"
 #include "Camera.h"
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 //#define StateManager_Assert(a) if (!(a)) puts("assert"#a)
 #define StateManager_Assert(a) assert(a)

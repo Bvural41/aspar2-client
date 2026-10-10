@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterLib/ResourceManager.h"
+#include "../EterLib/ResourceManager.h"
 
 #include "RaceData.h"
 #include "RaceMotionData.h"

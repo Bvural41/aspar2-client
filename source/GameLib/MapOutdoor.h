@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../eterLib/SkyBox.h"
-#include "../eterLib/LensFlare.h"
-#include "../eterLib/ScreenFilter.h"
+#include "../EterLib/SkyBox.h"
+#include "../EterLib/LensFlare.h"
+#include "../EterLib/ScreenFilter.h"
 
 #include "../PRTerrainLib/TerrainType.h"
 #include "../PRTerrainLib/TextureSet.h"

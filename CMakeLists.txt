@@ -48,18 +48,33 @@ add_compile_options(
     -fdeclspec
     -fms-extensions
     -fno-strict-aliasing
+    -w
+    -Wno-everything
+    -Wno-nonportable-include-path
+    -Wno-comment
+    -Wno-new-returns-null
+    -Wno-microsoft-extra-qualification
+    -Wno-extra-tokens
     -Wno-register
     -Wno-invalid-source-encoding
     -Wno-address-of-temporary
     -Wno-format-security
     -Wno-narrowing
     -Wno-return-type
+    -Wno-pragma-pack
+    -Wno-macro-redefined
+    -Wno-deprecated-declarations
+    -Wno-unused-parameter
+    -Wno-unused-variable
+    -Wno-unused-function
+    -Wno-switch
+    -Wno-nullability-completeness
 )
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/Python-2.7.18/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/Python-2.7.18/Modules/_io
-    ${CMAKE_CURRENT_SOURCE_DIR}/android_compat
+    ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/compat
     ${CMAKE_CURRENT_SOURCE_DIR}/source
     ${CMAKE_CURRENT_SOURCE_DIR}/source/common
     ${CMAKE_CURRENT_SOURCE_DIR}/source/EterBase
@@ -89,7 +104,7 @@ include_directories(
 if(ANDROID)
     include_directories(${ANDROID_NDK}/sources/android/cpufeatures)
 elseif(APPLE)
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ios)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios)
 endif()
 
 file(GLOB ETER_BASE_SOURCES source/EterBase/*.cpp source/EterBase/Poly/*.cpp)
@@ -309,7 +324,7 @@ set(GRANNY_C_SOURCES
 )
 
 set(GRANNY_PLATFORM_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/android_granny_platform.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/compat/android_granny_platform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/GrannySource/source/winxx/win64/granny.cpp
 )
 
@@ -318,7 +333,7 @@ set(GRANNY_ALL_SOURCES
     ${GRANNY_C_SOURCES}
     ${GRANNY_PLATFORM_SOURCES}
 )
-set_source_files_properties(${GRANNY_ALL_SOURCES} PROPERTIES COMPILE_DEFINITIONS "BUILDING_GRANNY_STATIC=1;BUILDING_GRANNY=1;RAD_NO_LOWERCASE_TYPES=0;_HAS_ITERATOR_DEBUGGING=0")
+set_source_files_properties(${GRANNY_ALL_SOURCES} PROPERTIES COMPILE_DEFINITIONS "BUILDING_GRANNY_STATIC=1;BUILDING_GRANNY=1;RAD_NO_LOWERCASE_TYPES=0;_HAS_ITERATOR_DEBUGGING=0" COMPILE_FLAGS "-w")
 
 if(ANDROID)
     add_library(metin2_mobile SHARED
@@ -340,9 +355,9 @@ if(ANDROID)
         ${CRYPTOPP_SOURCES}
         ${LZO_SOURCES}
         ${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/d3dx9math_impl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/compat/d3dx9math_impl.cpp
         ${PYTHON_SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/android_engine_stubs.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/compat/android_engine_stubs.cpp
         ${GRANNY_ALL_SOURCES}
     )
 
@@ -369,9 +384,9 @@ elseif(APPLE)
     add_compile_options(-fno-omit-frame-pointer)
 
     file(GLOB IOS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.mm
-        ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.m
-        ${CMAKE_CURRENT_SOURCE_DIR}/ios/*.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/*.mm
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/*.m
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/*.h
     )
 
     set_source_files_properties(
@@ -401,9 +416,9 @@ elseif(APPLE)
         ${ETER_LOCALE_SOURCES}
         ${CRYPTOPP_SOURCES}
         ${LZO_SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/d3dx9math_impl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/compat/d3dx9math_impl.cpp
         ${PYTHON_SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/android_compat/android_engine_stubs.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/compat/android_engine_stubs.cpp
         ${GRANNY_ALL_SOURCES}
     )
 
@@ -426,7 +441,7 @@ elseif(APPLE)
         OUTPUT_NAME "Aspar2"
         XCODE_ATTRIBUTE_PRODUCT_NAME "Aspar2"
         MACOSX_BUNDLE YES
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Info.plist
         XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.aspar2.client"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
         XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC "YES"
@@ -447,17 +462,17 @@ elseif(APPLE)
     install(TARGETS Aspar2 BUNDLE DESTINATION Applications RUNTIME DESTINATION Applications)
 
     add_custom_command(TARGET Aspar2 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/android/app/src/main/assets $<TARGET_BUNDLE_DIR:Aspar2>
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon@3x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon-60@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon-76@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/AppIcon-1024.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/Icon-60.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/Icon-76.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/bg_loading.jpg $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ios/logo.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/app/src/main/assets $<TARGET_BUNDLE_DIR:Aspar2>
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon@3x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-60@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-76@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-1024.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Icon-60.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Icon-76.png $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/bg_loading.jpg $<TARGET_BUNDLE_DIR:Aspar2>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/logo.png $<TARGET_BUNDLE_DIR:Aspar2>/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications
         COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:Aspar2> ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications/Aspar2.app
     )

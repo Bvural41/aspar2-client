@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "SoundInstance.h"
 
 CSoundInstance2D::CSoundInstance2D() : m_pSoundData(NULL), m_bSoundInitialized(false)

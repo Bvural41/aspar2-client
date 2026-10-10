@@ -9,7 +9,7 @@ static const float c_fHalfPixel = 0.5f;
 #include "StateManager.h"
 #include "ResourceManager.h"
 
-#include "../eterBase/CRC32.h"
+#include "../EterBase/CRC32.h"
 
 CDynamicPool<CGraphicMarkInstance> CGraphicMarkInstance::ms_kPool;
 

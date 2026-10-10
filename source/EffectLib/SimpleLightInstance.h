@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterLib/GrpScreen.h"
+#include "../EterLib/GrpScreen.h"
 
 #include "EffectElementBaseInstance.h"
 #include "SimpleLightData.h"

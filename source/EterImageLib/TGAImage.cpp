@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-#include "../eterBase/MappedFile.h"
+#include "../EterBase/MappedFile.h"
 #include "TGAImage.h"
 
 CTGAImage::CTGAImage() : m_dwFlag(0)

@@ -1,8 +1,8 @@
 #include "StdAfx.h"
-#include "../eterBase/Error.h"
-#include "../eterlib/Camera.h"
-#include "../eterlib/AttributeInstance.h"
-#include "../gamelib/AreaTerrain.h"
+#include "../EterBase/Error.h"
+#include "../EterLib/Camera.h"
+#include "../EterLib/AttributeInstance.h"
+#include "../GameLib/AreaTerrain.h"
 #include "../EterGrnLib/Material.h"
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 #ifdef CEF_BROWSER

@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterLib/GrpMath.h"
+#include "../EterLib/GrpMath.h"
 #include "../UserInterface/PythonBackground.h"
 #include "../UserInterface/Locale_inc.h"
 

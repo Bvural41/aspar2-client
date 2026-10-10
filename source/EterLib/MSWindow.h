@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterBase/Stl.h"
+#include "../EterBase/Stl.h"
 
 struct SDL_Window;
 

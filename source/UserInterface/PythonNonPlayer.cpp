@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "../eterPack/EterPackManager.h"
+#include "StdAfx.h"
+#include "../EterPack/EterPackManager.h"
 #include "pythonnonplayer.h"
 #include "InstanceBase.h"
 #include "PythonCharacterManager.h"

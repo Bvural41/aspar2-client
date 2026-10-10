@@ -2,7 +2,7 @@
 #include "PythonApplication.h"
 #include "PythonPlayer.h"
 #include "PythonNetworkStream.h"
-#include "../eterlib/Camera.h"
+#include "../EterLib/Camera.h"
 #include "../MilesLib/SoundBase.h"
 #include "../MilesLib/SoundManager.h"
 
@@ -108,8 +108,8 @@ static void install_sigsegv_handler() {
     __android_log_print(ANDROID_LOG_INFO, "Metin2Crash", "Custom SIGSEGV handler installed");
 }
 
-#include "../eterPack/EterPackManager.h"
-#include "../eterBase/lzo.h"
+#include "../EterPack/EterPackManager.h"
+#include "../EterBase/lzo.h"
 #include "EventHandler.h"
 #include "../ScriptLib/PythonLauncher.h"
 #include "PythonExceptionSender.h"

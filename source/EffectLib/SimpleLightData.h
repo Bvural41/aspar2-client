@@ -2,7 +2,7 @@
 
 #include <d3dx9.h>
 
-#include "../eterLib/TextFileLoader.h"
+#include "../EterLib/TextFileLoader.h"
 
 #include "Type.h"
 #include "EffectElementBase.h"

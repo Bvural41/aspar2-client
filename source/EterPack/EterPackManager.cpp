@@ -11,8 +11,8 @@ extern AAssetManager* g_pAssetManager;
 #endif
 #include "EterPackPolicy_CSHybridCrypt.h"
 
-#include "../eterBase/Debug.h"
-#include "../eterBase/CRC32.h"
+#include "../EterBase/Debug.h"
+#include "../EterBase/CRC32.h"
 
 #define PATH_ABSOLUTE_YMIRWORK1	"d:/ymir work/"
 #define PATH_ABSOLUTE_YMIRWORK2	"d:\\ymir work\\"

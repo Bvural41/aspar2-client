@@ -4,8 +4,8 @@
 #include "PythonApplication.h"
 #include "NetworkActorManager.h"
 #include "AbstractPlayer.h"
-#include "../eterPack/EterPackManager.h"
-#include "../eterLib/ResourceManager.h"
+#include "../EterPack/EterPackManager.h"
+#include "../EterLib/ResourceManager.h"
 
 void CPythonNetworkStream::EnableChatInsultFilter(bool isEnable)
 {

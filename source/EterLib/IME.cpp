@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "IME.h"
 #include "TextTag.h"
-#include "../eterBase/Utils.h"
+#include "../EterBase/Utils.h"
 
 #if defined(__ANDROID__) || defined(__APPLE__)
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "../gamelib/RaceData.h"
-#include "../gamelib/ActorInstance.h"
+#include "../GameLib/RaceData.h"
+#include "../GameLib/ActorInstance.h"
 #ifdef ENABLE_SASH_SYSTEM
-#include "../eterlib/GrpObjectInstance.h"
+#include "../EterLib/GrpObjectInstance.h"
 #endif
 #include "GameType.h"
 #include "AffectFlagContainer.h"

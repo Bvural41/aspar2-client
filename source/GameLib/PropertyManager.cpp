@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterPack/EterPackManager.h"
+#include "../EterPack/EterPackManager.h"
 #ifdef __ANDROID__
 #include <unistd.h>
 #endif

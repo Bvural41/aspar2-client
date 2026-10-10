@@ -6,4 +6,4 @@
 #include <windows.h>
 #include <assert.h>
 
-#include "../eterBase/StdAfx.h"
+#include "../EterBase/StdAfx.h"

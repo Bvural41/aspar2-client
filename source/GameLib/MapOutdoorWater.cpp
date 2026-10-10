@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterLib/StateManager.h"
-#include "../eterLib/ResourceManager.h"
+#include "../EterLib/StateManager.h"
+#include "../EterLib/ResourceManager.h"
 
 #include "MapOutdoor.h"
 #include "TerrainPatch.h"

@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "GrpRatioInstance.h"
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 CGraphicRatioInstance::CGraphicRatioInstance()
 {

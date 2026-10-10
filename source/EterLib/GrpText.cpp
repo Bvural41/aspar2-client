@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../eterBase/Utils.h"
+#include "../EterBase/Utils.h"
 #include "GrpText.h"
 
 CGraphicText::CGraphicText(const char* c_szFileName) : CResource(c_szFileName)

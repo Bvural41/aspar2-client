@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "StdAfx.h"
 
 #ifdef interface
 #undef interface

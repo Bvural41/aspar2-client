@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterBase/MappedFile.h"
-#include "../eterPack/EterPackManager.h"
+#include "../EterBase/MappedFile.h"
+#include "../EterPack/EterPackManager.h"
 #include "GrpImageTexture.h"
 
 #if defined(USE_OPENGL_ES)

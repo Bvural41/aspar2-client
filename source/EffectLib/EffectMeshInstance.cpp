@@ -1,8 +1,8 @@
 #include "StdAfx.h"
-#include "../eterLib/StateManager.h"
-#include "../eterLib/ResourceManager.h"
+#include "../EterLib/StateManager.h"
+#include "../EterLib/ResourceManager.h"
 #include "EffectMeshInstance.h"
-#include "../eterlib/GrpMath.h"
+#include "../EterLib/GrpMath.h"
 
 CDynamicPool<CEffectMeshInstance>		CEffectMeshInstance::ms_kPool;
 

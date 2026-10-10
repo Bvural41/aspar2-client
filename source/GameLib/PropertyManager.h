@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterPack/EterPack.h"
+#include "../EterPack/EterPack.h"
 
 class CPropertyManager : public CSingleton<CPropertyManager>
 {

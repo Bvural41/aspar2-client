@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "MapOutdoor.h"
 
-#include "../eterlib/StateManager.h"
+#include "../EterLib/StateManager.h"
 #include "../ScriptLib/StdAfx.h"
 #include "../UserInterface/PythonSystem.h"
 

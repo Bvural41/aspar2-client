@@ -4,7 +4,7 @@
 #include <deque>
 #include "Thread.h"
 #include "Mutex.h"
-#include "../eterBase/MappedFile.h"
+#include "../EterBase/MappedFile.h"
 
 class CFileLoaderThread 
 {

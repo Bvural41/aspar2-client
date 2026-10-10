@@ -2,8 +2,8 @@
 #include "PythonSystem.h"
 #include "PythonBackground.h"
 #include "PythonCharacterManager.h"
-#include "../eterlib/StateManager.h"
-#include "../gamelib/MapOutDoor.h"
+#include "../EterLib/StateManager.h"
+#include "../GameLib/MapOutDoor.h"
 
 PyObject * backgroundIsSoftwareTiling(PyObject * poSelf, PyObject * poArgs)
 {

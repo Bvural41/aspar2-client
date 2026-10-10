@@ -3,8 +3,8 @@
 #if defined(USE_OPENGL_ES)
 #include "../ShadersRender/ShadersRender.h"
 #endif
-#include "../eterBase/Stl.h"
-#include "../eterBase/Debug.h"
+#include "../EterBase/Stl.h"
+#include "../EterBase/Debug.h"
 
 bool GRAPHICS_CAPS_CAN_NOT_DRAW_LINE = false;
 bool GRAPHICS_CAPS_CAN_NOT_DRAW_SHADOW = false;

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #ifdef ENABLE_MESSENGER_RENEWAL
 
@@ -7,7 +7,7 @@
 #include "PythonNetworkStream.h"
 #include "PythonCharacterManager.h"
 #include "InstanceBase.h"
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 namespace
 {

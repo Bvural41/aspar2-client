@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "StdAfx.h"
-#include "../eterBase/Utils.h"
+#include "../EterBase/Utils.h"
 #include "../UserInterface/Locale_inc.h"
 #include "Camera.h"
 

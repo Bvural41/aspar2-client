@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "PythonApplication.h"
-#include "../eterlib/Camera.h"
+#include "../EterLib/Camera.h"
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 #ifdef CEF_BROWSER
 #include "CefWebBrowser.h"

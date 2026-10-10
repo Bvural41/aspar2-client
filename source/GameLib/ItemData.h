@@ -1,6 +1,6 @@
 #pragma once
-#include "../eterLib/GrpSubImage.h"
-#include "../eterGrnLib/Thing.h"
+#include "../EterLib/GrpSubImage.h"
+#include "../EterGrnLib/Thing.h"
 #include "../UserInterface/Locale_inc.h"
 #ifdef ENABLE_INGAME_WIKI
 #include "InGameWiki.h"

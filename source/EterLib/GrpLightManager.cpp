@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include <algorithm>
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 #include "GrpLightManager.h"
 #include "StateManager.h"

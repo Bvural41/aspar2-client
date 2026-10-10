@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef _IMPROVED_PACKET_ENCRYPTION_
-#include "../eterBase/cipher.h"
+#include "../EterBase/cipher.h"
 #endif
-#include "../eterBase/tea.h"
+#include "../EterBase/tea.h"
 #include "NetSocket.h"
 #include "NetAddress.h"
 

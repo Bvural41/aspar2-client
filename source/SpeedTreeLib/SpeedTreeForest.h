@@ -33,7 +33,7 @@
 //	Include Files
 #include <SpeedTreeRT.h>
 #include "SpeedTreeWrapper.h"
-#include "../eterBase/Singleton.h"
+#include "../EterBase/Singleton.h"
 
 #include <vector>
 #include <map>

@@ -2,9 +2,9 @@
 #include "AndroidTouchControls.h"
 #include "PythonApplication.h"
 #include "PythonPlayer.h"
-#include "../eterlib/Camera.h"
-#include "../eterlib/StateManager.h"
-#include "../eterpythonlib/PythonGraphic.h"
+#include "../EterLib/Camera.h"
+#include "../EterLib/StateManager.h"
+#include "../EterPythonLib/PythonGraphic.h"
 #include <SDL2/SDL.h>
 #include <cmath>
 #include <vector>

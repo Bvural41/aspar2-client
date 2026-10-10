@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterLib/StateManager.h"
-#include "../eterLib/JpegFile.h"
+#include "../EterLib/StateManager.h"
+#include "../EterLib/JpegFile.h"
 #include "PythonGraphic.h"
 
 bool g_isScreenShotKey = false;

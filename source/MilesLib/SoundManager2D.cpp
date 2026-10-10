@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "StdAfx.h"
 #include "SoundManager2D.h"
 
 CSoundInstance2D CSoundManager2D::ms_Instances[INSTANCE_MAX_COUNT];

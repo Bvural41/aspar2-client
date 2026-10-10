@@ -19,13 +19,13 @@
 #endif
 
 #include "../UserInterface/Locale_inc.h"
-#include "../eterBase/Utils.h"
-#include "../eterBase/CRC32.h"
-#include "../eterBase/Random.h"
+#include "../EterBase/Utils.h"
+#include "../EterBase/CRC32.h"
+#include "../EterBase/Random.h"
 
-#include "../eterLib/StdAfx.h"
-#include "../milesLib/StdAfx.h"
-#include "../effectLib/StdAfx.h"
+#include "../EterLib/StdAfx.h"
+#include "../MilesLib/StdAfx.h"
+#include "../EffectLib/StdAfx.h"
 
 #include "GameType.h"
 #include "GameUtil.h"

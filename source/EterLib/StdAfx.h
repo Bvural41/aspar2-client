@@ -51,9 +51,9 @@
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "SDL2.lib")
 
-#include "../eterBase/StdAfx.h"
-#include "../eterBase/Debug.h"
-#include "../eterLocale/CodePageId.h"
+#include "../EterBase/StdAfx.h"
+#include "../EterBase/Debug.h"
+#include "../EterLocale/CodePageId.h"
 
 #include "NetSocket.h"
 

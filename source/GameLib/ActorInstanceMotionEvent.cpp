@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "../EffectLib/EffectManager.h"
-#include "../milesLib/SoundManager.h"
+#include "../MilesLib/SoundManager.h"
 
 #include "ActorInstance.h"
 #include "FlyingObjectManager.h"

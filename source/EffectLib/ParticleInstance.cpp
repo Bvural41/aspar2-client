@@ -2,9 +2,9 @@
 #include "ParticleInstance.h"
 #include "ParticleProperty.h"
 
-#include "../eterBase/Random.h"
-#include "../eterLib/Camera.h"
-#include "../eterLib/StateManager.h"
+#include "../EterBase/Random.h"
+#include "../EterLib/Camera.h"
+#include "../EterLib/StateManager.h"
 
 CDynamicPool<CParticleInstance> CParticleInstance::ms_kPool;
 

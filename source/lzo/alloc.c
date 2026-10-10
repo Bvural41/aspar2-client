@@ -24,7 +24,7 @@
    <markus@oberhumer.com>
  */
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "lzo_conf.h"
 #include <lzoutil.h>
 

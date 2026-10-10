@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "SoundInstance.h"
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 CSoundInstance3D::CSoundInstance3D() : m_pSoundData(NULL), m_bSoundInitialized(false)
 {

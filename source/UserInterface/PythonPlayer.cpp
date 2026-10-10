@@ -3,7 +3,7 @@
 #include "PythonPlayerEventHandler.h"
 #include "PythonApplication.h"
 #include "PythonItem.h"
-#include "../eterbase/Timer.h"
+#include "../EterBase/Timer.h"
 #include "AbstractPlayer.h"
 using std::make_pair;
 #ifdef ENABLE_AUTO_PICKUP_SYSTEM

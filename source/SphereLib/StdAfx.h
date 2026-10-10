@@ -13,4 +13,4 @@
 #include <assert.h>
 #include <math.h>
 
-#include "../eterBase/StdAfx.h"
+#include "../EterBase/StdAfx.h"

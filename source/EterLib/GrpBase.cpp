@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterBase/Utils.h"
-#include "../eterBase/Timer.h"
+#include "../EterBase/Utils.h"
+#include "../EterBase/Timer.h"
 #include "GrpBase.h"
 #if defined(USE_OPENGL_ES)
 unsigned int CGraphicBase::ms_uPDTVBO = 0;

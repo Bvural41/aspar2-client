@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterLib/NetStream.h"
+#include "../EterLib/NetStream.h"
 
 class CServerStateChecker : public CSingleton<CServerStateChecker>
 {

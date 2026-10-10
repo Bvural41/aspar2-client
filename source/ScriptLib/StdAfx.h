@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../eterLib/StdAfx.h"
-#include "../eterGrnLib/StdAfx.h"
+#include "../EterLib/StdAfx.h"
+#include "../EterGrnLib/StdAfx.h"
 
 //#include <crtdbg.h>
 #ifdef _DEBUG
 	#undef _DEBUG
-	#include <Python-2.7/python.h>
+	#include <Python-2.7/Python.h>
 	#define _DEBUG
 #else
-	#include <Python-2.7/python.h>
+	#include <Python-2.7/Python.h>
 #endif
 #include <Python-2.7/node.h>
 #include <Python-2.7/grammar.h>

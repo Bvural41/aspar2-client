@@ -10,9 +10,9 @@
 #include "packet.h"
 #include "Locale_inc.h"
 #include "PythonSystem.h"
-#include "../eterlib/StateManager.h"
-#include "../gamelib/ItemManager.h"
-#include "../gamelib/RaceManager.h"
+#include "../EterLib/StateManager.h"
+#include "../GameLib/ItemManager.h"
+#include "../GameLib/RaceManager.h"
 #ifdef ENABLE_GRAPHIC_ON_OFF
 #include "PythonSystem.h"
 #endif

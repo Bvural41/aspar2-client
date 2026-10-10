@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Type.h"
-#include "../eterbase/Random.h"
-#include "../eterlib/Pool.h"
+#include "../EterBase/Random.h"
+#include "../EterLib/Pool.h"
 class CParticleInstance;
 
 namespace NEffectUpdateDecorator

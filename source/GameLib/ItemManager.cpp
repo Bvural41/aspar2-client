@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterPack/EterPackManager.h"
-#include "../eterLib/ResourceManager.h"
+#include "../EterPack/EterPackManager.h"
+#include "../EterLib/ResourceManager.h"
 
 #include "ItemManager.h"
 

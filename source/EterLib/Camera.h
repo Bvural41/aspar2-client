@@ -11,7 +11,7 @@
 
 #include <map>
 
-#include "../eterBase/Singleton.h"
+#include "../EterBase/Singleton.h"
 #include "../UserInterface/Locale_inc.h"
 #include "Ray.h"
 

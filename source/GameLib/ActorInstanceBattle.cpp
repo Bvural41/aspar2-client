@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../effectLib/EffectManager.h"
-#include "../milesLib/SoundManager.h"
+#include "../EffectLib/EffectManager.h"
+#include "../MilesLib/SoundManager.h"
 #include "../UserInterface/PythonNonPlayer.h"
 #include "../UserInterface/Locale_inc.h"
 #include "ActorInstance.h"

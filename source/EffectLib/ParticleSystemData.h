@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../eterLib/TextFileLoader.h"
+#include "../EterLib/TextFileLoader.h"
 
 #include "EffectElementBase.h"
 #include "EmitterProperty.h"

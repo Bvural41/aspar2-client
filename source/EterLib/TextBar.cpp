@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TextBar.h"
-#include "../eterlib/Util.h"
+#include "../EterLib/Util.h"
 
 void CTextBar::__SetFont(int fontSize, bool isBold)
 {

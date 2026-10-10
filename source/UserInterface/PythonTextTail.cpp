@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "InstanceBase.h"
 #include "resource.h"
 #include "PythonTextTail.h"

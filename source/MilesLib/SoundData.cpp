@@ -2,7 +2,7 @@
 #include "SoundData.h"
 
 #include "../EterPack/EterPackManager.h"
-#include "../eterBase/Timer.h"
+#include "../EterBase/Timer.h"
 
 const char * CSoundData::GetFileName()
 {

@@ -4,7 +4,7 @@
 #include "PythonBackground.h"
 #include "PythonApplication.h"
 #include "AbstractPlayer.h"
-#include "../gamelib/ActorInstance.h"
+#include "../GameLib/ActorInstance.h"
 #ifdef ENABLE_MULTI_LANGUAGE_SYSTEM
 #include "InstanceBase.h"
 #endif

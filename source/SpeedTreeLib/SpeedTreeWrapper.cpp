@@ -36,14 +36,14 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../eterBase/Debug.h"
-#include "../eterBase/Timer.h"
-#include "../eterBase/Filename.h"
-#include "../eterLib/ResourceManager.h"
-#include "../eterLib/Camera.h"
-#include "../eterLib/StateManager.h"
+#include "../EterBase/Debug.h"
+#include "../EterBase/Timer.h"
+#include "../EterBase/Filename.h"
+#include "../EterLib/ResourceManager.h"
+#include "../EterLib/Camera.h"
+#include "../EterLib/StateManager.h"
 #if defined(USE_OPENGL_ES)
-#include "../eterLib/GL_Loader.h"
+#include "../EterLib/GL_Loader.h"
 #endif
 
 #include "SpeedTreeConfig.h"

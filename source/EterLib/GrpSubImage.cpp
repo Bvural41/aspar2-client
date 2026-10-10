@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "../eterBase/Stl.h"
-#include "../eterBase/FileLoader.h"
+#include "../EterBase/Stl.h"
+#include "../EterBase/FileLoader.h"
 #include "GrpSubImage.h"
 #include "ResourceManager.h"
 
