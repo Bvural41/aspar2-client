@@ -206,25 +206,26 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	initskillpet();
 #endif
 
-	if (!g_strBundlePath.empty() && !g_strDocsPath.empty()) {
-		std::string pyPath = g_strDocsPath + "/lib:" + g_strBundlePath + "/lib:" + g_strBundlePath;
-		setenv("PYTHONPATH", pyPath.c_str(), 1);
-		setenv("PYTHONHOME", g_strBundlePath.c_str(), 1);
+	if (!g_strDocsPath.empty()) {
+		std::string hook = 
+			"import __builtin__, os\n"
+			"_orig_open = __builtin__.open\n"
+			"def _safe_open(name, mode='r', *args, **kwargs):\n"
+			"    try:\n"
+			"        return _orig_open(name, mode, *args, **kwargs)\n"
+			"    except IOError:\n"
+			"        if any(m in mode for m in ('w', 'a', '+')):\n"
+			"            doc_path = os.path.join('" + g_strDocsPath + "', os.path.basename(name))\n"
+			"            try:\n"
+			"                return _orig_open(doc_path, mode, *args, **kwargs)\n"
+			"            except Exception:\n"
+			"                pass\n"
+			"        raise\n"
+			"__builtin__.open = _safe_open\n";
+		pyLauncher.RunLine(hook.c_str());
 	}
 
 	pyLauncher.RunLine("import sys");
-	if (!g_strBundlePath.empty()) {
-		std::string s1 = "sys.path.append('" + g_strBundlePath + "')";
-		pyLauncher.RunLine(s1.c_str());
-		std::string s2 = "sys.path.append('" + g_strBundlePath + "/lib')";
-		pyLauncher.RunLine(s2.c_str());
-	}
-	if (!g_strDocsPath.empty()) {
-		std::string s3 = "sys.path.append('" + g_strDocsPath + "')";
-		pyLauncher.RunLine(s3.c_str());
-		std::string s4 = "sys.path.append('" + g_strDocsPath + "/lib')";
-		pyLauncher.RunLine(s4.c_str());
-	}
 	pyLauncher.RunLine("sys.path.append('lib')");
 	pyLauncher.RunLine("__DEBUG__ = 1");
 	pyLauncher.RunLine("import sys, types");
@@ -232,45 +233,6 @@ static bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	pyLauncher.RunLine("__COMMAND_LINE__ = \"\"");
 
 	return pyLauncher.RunFile("system.py");
-}
-
-static void IOS_SyncBundleToDocuments(const std::string& bundlePath, const std::string& docsPath) {
-	if (bundlePath.empty() || docsPath.empty()) return;
-
-	NSFileManager* fm = [NSFileManager defaultManager];
-	NSString* nsBundle = [NSString stringWithUTF8String:bundlePath.c_str()];
-	NSString* nsDocs = [NSString stringWithUTF8String:docsPath.c_str()];
-
-	NSError* err = nil;
-	NSArray* contents = [fm contentsOfDirectoryAtPath:nsBundle error:&err];
-	if (!contents) return;
-
-	NSSet* skipSet = [NSSet setWithObjects:@"_CodeSignature", @"Info.plist", @"PkgInfo", @"embedded.mobileprovision", @"Aspar2", nil];
-
-	for (NSString* item in contents) {
-		if ([skipSet containsObject:item]) continue;
-		if ([item hasPrefix:@"AppIcon"] || [item hasPrefix:@"Icon"]) continue;
-
-		NSString* src = [nsBundle stringByAppendingPathComponent:item];
-		NSString* dst = [nsDocs stringByAppendingPathComponent:item];
-
-		if ([fm fileExistsAtPath:dst]) {
-			continue;
-		}
-
-		NSDictionary* attrs = [fm attributesOfItemAtPath:dst error:nil];
-		if (attrs) {
-			[fm removeItemAtPath:dst error:nil];
-		}
-
-		NSError* linkErr = nil;
-		if (![fm createSymbolicLinkAtPath:dst withDestinationPath:src error:&linkErr]) {
-			NSLog(@"[Aspar2 iOS] Symlink failed for %@ -> %@: %@. Copying...", item, src, linkErr);
-			[fm copyItemAtPath:src toPath:dst error:nil];
-		} else {
-			NSLog(@"[Aspar2 iOS] Linked %@ to %@", item, dst);
-		}
-	}
 }
 
 extern "C" {
@@ -295,15 +257,28 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	g_nAndroidMouseX = width / 2;
 	g_nAndroidMouseY = height / 2;
 
-	if (!g_strDocsPath.empty()) {
-		IOS_SyncBundleToDocuments(g_strBundlePath, g_strDocsPath);
-		chdir(g_strDocsPath.c_str());
-		NSLog(@"[Aspar2 iOS] Working directory set to Documents: %s", g_strDocsPath.c_str());
-		std::string userDataDir = g_strDocsPath + "/UserData";
-		mkdir(userDataDir.c_str(), 0755);
-	} else if (!g_strBundlePath.empty()) {
+	if (!g_strBundlePath.empty()) {
 		chdir(g_strBundlePath.c_str());
 		NSLog(@"[Aspar2 iOS] Working directory set to Bundle: %s", g_strBundlePath.c_str());
+	} else if (!g_strDocsPath.empty()) {
+		chdir(g_strDocsPath.c_str());
+		NSLog(@"[Aspar2 iOS] Working directory set to Documents: %s", g_strDocsPath.c_str());
+	}
+
+	// Clean up any old symlinks in Documents
+	if (!g_strDocsPath.empty()) {
+		NSFileManager* fm = [NSFileManager defaultManager];
+		NSString* nsDocs = [NSString stringWithUTF8String:g_strDocsPath.c_str()];
+		NSArray* contents = [fm contentsOfDirectoryAtPath:nsDocs error:nil];
+		for (NSString* item in contents) {
+			NSString* p = [nsDocs stringByAppendingPathComponent:item];
+			NSDictionary* attrs = [fm attributesOfItemAtPath:p error:nil];
+			if (attrs && [attrs[NSFileType] isEqualToString:NSFileTypeSymbolicLink]) {
+				[fm removeItemAtPath:p error:nil];
+			}
+		}
+		std::string userDataDir = g_strDocsPath + "/UserData";
+		mkdir(userDataDir.c_str(), 0755);
 	}
 
 	static CLZO lzo;
