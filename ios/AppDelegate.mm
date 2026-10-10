@@ -20,7 +20,15 @@ static void UncaughtExceptionHandler(NSException *exception) {
     }
 }
 
-static void SignalHandler(int sig) {
+static char s_szCrashBreadcrumb[256] = "Initialized";
+
+extern "C" void IOS_SetBreadcrumb(const char* breadcrumb) {
+    if (breadcrumb) {
+        snprintf(s_szCrashBreadcrumb, sizeof(s_szCrashBreadcrumb), "%s", breadcrumb);
+    }
+}
+
+static void SignalHandler(int sig, siginfo_t *info, void *ucontext) {
     signal(sig, SIG_DFL);
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *docsPath = paths.firstObject;
@@ -28,7 +36,10 @@ static void SignalHandler(int sig) {
         NSString *logPath = [docsPath stringByAppendingPathComponent:@"syserr.txt"];
         NSArray *stackSymbols = [NSThread callStackSymbols];
         NSString *stackStr = [stackSymbols componentsJoinedByString:@"\n"];
-        NSString *errorLog = [NSString stringWithFormat:@"\n=== CRASH SIGNAL %d ===\nStack Trace:\n%@\n", sig, stackStr];
+        void *faultAddr = info ? info->si_addr : NULL;
+        int code = info ? info->si_code : 0;
+        NSString *errorLog = [NSString stringWithFormat:@"\n=== CRASH SIGNAL %d (code=%d, addr=%p, breadcrumb='%s') ===\nStack Trace:\n%@\n",
+                              sig, code, faultAddr, s_szCrashBreadcrumb, stackStr];
         FILE *f = fopen([logPath UTF8String], "a");
         if (f) {
             fputs([errorLog UTF8String], f);
@@ -42,12 +53,17 @@ static void SignalHandler(int sig) {
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSSetUncaughtExceptionHandler(&UncaughtExceptionHandler);
-    signal(SIGABRT, SignalHandler);
-    signal(SIGILL, SignalHandler);
-    signal(SIGSEGV, SignalHandler);
-    signal(SIGFPE, SignalHandler);
-    signal(SIGBUS, SignalHandler);
-    signal(SIGPIPE, SignalHandler);
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_sigaction = SignalHandler;
+    sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
+    sigaction(SIGABRT, &sa, NULL);
+    sigaction(SIGILL, &sa, NULL);
+    sigaction(SIGSEGV, &sa, NULL);
+    sigaction(SIGFPE, &sa, NULL);
+    sigaction(SIGBUS, &sa, NULL);
+    sigaction(SIGPIPE, &sa, NULL);
 
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[GameViewController alloc] init];

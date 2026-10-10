@@ -62,7 +62,20 @@ int32x GRANNY GetFileSize(char const *FileName)
 
 char const *GRANNY GetTemporaryDirectory(void)
 {
+#if defined(__APPLE__)
+    static char s_tmp[512] = {0};
+    if (s_tmp[0] == '\0') {
+        const char *tmpEnv = getenv("TMPDIR");
+        if (tmpEnv && strlen(tmpEnv) > 0) {
+            snprintf(s_tmp, sizeof(s_tmp), "%s", tmpEnv);
+        } else {
+            snprintf(s_tmp, sizeof(s_tmp), "/tmp/");
+        }
+    }
+    return s_tmp;
+#else
     return "/data/local/tmp/";
+#endif
 }
 
 static int32x ANSISeek(FILE *ANSIFileHandle, int32x Offset, int32x MoveMethod)

@@ -82,7 +82,8 @@ const granny_int32x* CGrannyModelInstance::__GetMeshBoneIndices(unsigned int iMe
 #error "unknown granny version"
 #endif
 {
-	assert(iMeshBinding<m_vct_pgrnMeshBinding.size());
+	if (iMeshBinding >= m_vct_pgrnMeshBinding.size() || !m_vct_pgrnMeshBinding[iMeshBinding])
+		return nullptr;
 	return GrannyGetMeshBindingToBoneIndices(m_vct_pgrnMeshBinding[iMeshBinding]);
 }
 
@@ -267,11 +268,13 @@ bool CGrannyModelInstance::GetBoneIndexByName(const char * c_szBoneName, int * p
 
 const float * CGrannyModelInstance::GetBoneMatrixPointer(int iBone) const
 {
-	const float* bones = GrannyGetWorldPose4x4(__GetWorldPosePtr(), iBone);
+	granny_world_pose* pWorldPose = __GetWorldPosePtr();
+	if (!pWorldPose)
+		return nullptr;
+
+	const float* bones = GrannyGetWorldPose4x4(pWorldPose, iBone);
 	if (!bones)
 	{
-		granny_model* pModel = m_pModel->GetGrannyModelPointer();
-		//TraceError("GrannyModelInstance(%s).GetBoneMatrixPointer(boneIndex(%d)).NOT_FOUND_BONE", pModel->Name, iBone);
 		return nullptr;
 	}
 	return bones;
@@ -279,7 +282,11 @@ const float * CGrannyModelInstance::GetBoneMatrixPointer(int iBone) const
 
 const float * CGrannyModelInstance::GetCompositeBoneMatrixPointer(int iBone) const
 {
-	return GrannyGetWorldPoseComposite4x4(__GetWorldPosePtr(), iBone);
+	granny_world_pose* pWorldPose = __GetWorldPosePtr();
+	if (!pWorldPose)
+		return nullptr;
+
+	return GrannyGetWorldPoseComposite4x4(pWorldPose, iBone);
 }
 
 void CGrannyModelInstance::ReloadTexture() const

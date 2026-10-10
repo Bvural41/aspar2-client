@@ -44,7 +44,9 @@ add_compile_options(
     $<$<COMPILE_LANGUAGE:CXX>:-frtti>
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions>
     -O3
-    -fomit-frame-pointer
+    $<$<PLATFORM_ID:iOS>:-fno-omit-frame-pointer>
+    $<$<NOT:$<PLATFORM_ID:iOS>>:-fomit-frame-pointer>
+    -g
     -fdeclspec
     -fms-extensions
     -fno-strict-aliasing
@@ -437,6 +439,10 @@ elseif(APPLE)
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
         XCODE_ATTRIBUTE_SKIP_INSTALL "NO"
         XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
+        XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS "YES"
+        XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym"
+        XCODE_ATTRIBUTE_COPY_PHASE_STRIP "NO"
+        XCODE_ATTRIBUTE_STRIP_INSTALLED_PRODUCT "NO"
     )
 
     install(TARGETS Aspar2 BUNDLE DESTINATION Applications RUNTIME DESTINATION Applications)

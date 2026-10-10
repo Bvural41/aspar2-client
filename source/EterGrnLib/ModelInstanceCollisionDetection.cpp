@@ -69,10 +69,14 @@ bool CGrannyModelInstance::Intersect(const D3DXMATRIX * c_pMatrix,
 		{
 			const granny_bone_binding& rgrnBoneBinding = pgrnMesh->BoneBindings[b];
 
-			TBoundBox * pBoundBox = s_boundBoxPool.alloc();
-
 			// WORK
-			const float * Transform = GrannyGetWorldPose4x4(__GetWorldPosePtr(), __GetMeshBoneIndices(m)[b]);
+			granny_world_pose* pWorldPose = __GetWorldPosePtr();
+			const granny_int32x* boneIndices = __GetMeshBoneIndices(m);
+			if (!pWorldPose || !boneIndices)
+				continue;
+			const float * Transform = GrannyGetWorldPose4x4(pWorldPose, boneIndices[b]);
+			if (!Transform)
+				continue;
 			// END_OF_WORK
 
 			MakeBoundBox(pBoundBox,
@@ -205,12 +209,20 @@ void CGrannyModelInstance::GetBoundBox(D3DXVECTOR3* vtMin, D3DXVECTOR3* vtMax)
 		// WORK
 		const granny_int32x* boneIndices = __GetMeshBoneIndices(m);
 		// END_OF_WORK
+		granny_world_pose* pWorldPose = __GetWorldPosePtr();
+		if (!pWorldPose || !boneIndices)
+			continue;
+
 		for (int b = 0; b < pgrnMesh->BoneBindingCount; ++b)
 		{
 			const granny_bone_binding& rgrnBoneBinding = pgrnMesh->BoneBindings[b];
 
+			const float* pMatrix = GrannyGetWorldPose4x4(pWorldPose, boneIndices[b]);
+			if (!pMatrix)
+				continue;
+
 			MakeBoundBox(&BoundBox,
-						 GrannyGetWorldPose4x4(__GetWorldPosePtr(), boneIndices[b]),
+						 pMatrix,
 						 rgrnBoneBinding.OBBMin, rgrnBoneBinding.OBBMax, vtMin, vtMax);
 		}
 	}
@@ -218,19 +230,23 @@ void CGrannyModelInstance::GetBoundBox(D3DXVECTOR3* vtMin, D3DXVECTOR3* vtMax)
 
 bool CGrannyModelInstance::GetMeshMatrixPointer(int iMesh, const D3DXMATRIX ** c_ppMatrix) const
 {
-	if (!m_pgrnModelInstance)
+	if (!m_pgrnModelInstance || !m_pModel || !c_ppMatrix)
 		return false;
 
 	const int meshCount = m_pModel->GetMeshCount();
 
-	if (meshCount <= 0)
+	if (meshCount <= 0 || iMesh < 0 || iMesh >= meshCount)
 		return false;
 
-	// WORK
-	//const CGrannyMesh * pMesh = m_pModel->GetMeshPointer(iMesh);
-	*c_ppMatrix = (D3DXMATRIX *)GrannyGetWorldPose4x4(__GetWorldPosePtr(), __GetMeshBoneIndices(iMesh)[0]);
-	// END_OF_WORK
+	granny_world_pose* pWorldPose = __GetWorldPosePtr();
+	if (!pWorldPose)
+		return false;
 
-	return true;
+	const granny_int32x* boneIndices = __GetMeshBoneIndices(iMesh);
+	if (!boneIndices)
+		return false;
+
+	*c_ppMatrix = (D3DXMATRIX *)GrannyGetWorldPose4x4(pWorldPose, boneIndices[0]);
+	return (*c_ppMatrix != nullptr);
 }
 

@@ -47,15 +47,31 @@ PyObject * chrUpdate(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#if defined(__APPLE__)
+extern "C" void IOS_SetBreadcrumb(const char*);
+#endif
+
 PyObject * chrDeform(PyObject * poSelf, PyObject * poArgs)
 {
+#if defined(__APPLE__)
+	IOS_SetBreadcrumb("chrDeform");
+#endif
 	CPythonCharacterManager::Instance().Deform();
+#if defined(__APPLE__)
+	IOS_SetBreadcrumb("chrDeform done");
+#endif
 	return Py_BuildNone();
 }
 
 PyObject * chrRender(PyObject * poSelf, PyObject * poArgs)
 {
+#if defined(__APPLE__)
+	IOS_SetBreadcrumb("chrRender");
+#endif
 	CPythonCharacterManager::Instance().Render();
+#if defined(__APPLE__)
+	IOS_SetBreadcrumb("chrRender done");
+#endif
 	return Py_BuildNone();
 }
 
