@@ -140,13 +140,22 @@ bool CGrannyMaterial::IsEqual(granny_material* pgrnMaterial) const
 
 LPDIRECT3DTEXTURE9 CGrannyMaterial::GetD3DTexture(int iStage) const
 {
+	if (iStage < 0 || iStage >= 2)
+		return nullptr;
+
 	const CGraphicImage::TRef & ratImage = m_roImage[iStage];
 
 	if (ratImage.IsNull())
 		return nullptr;
 
 	CGraphicImage * pImage = ratImage.GetPointer();
+	if (!pImage)
+		return nullptr;
+
 	const CGraphicTexture * pTexture = pImage->GetTexturePointer();
+	if (!pTexture)
+		return nullptr;
+
 	return pTexture->GetD3DTexture();
 }
 
@@ -397,7 +406,9 @@ void CGrannyMaterialPalette::Clear()
 
 CGrannyMaterial& CGrannyMaterialPalette::GetMaterialRef(DWORD mtrlIndex) const
 {
-	assert(mtrlIndex<m_mtrlVector.size());
+	static CGrannyMaterial s_defaultMaterial;
+	if (mtrlIndex >= m_mtrlVector.size() || m_mtrlVector[mtrlIndex].IsNull())
+		return s_defaultMaterial;
 	return *m_mtrlVector[mtrlIndex].GetPointer();
 }
 

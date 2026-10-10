@@ -2131,17 +2131,20 @@ HRESULT CStateManager::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT Prim
 HRESULT CStateManager::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT minIndex, UINT NumVertices, UINT startIndex, UINT primCount, INT baseVertexIndex) const
 {
 #if defined(USE_OPENGL_ES)
+	if (primCount == 0)
+		return S_OK;
+
 	UINT stride = m_CurrentState.m_StreamData[0].m_Stride;
 	bool isOrtho = (fabs(m_CurrentState.m_Matrices[D3DTS_PROJECTION]._34) < 0.001f);
 	if ((stride == sizeof(TPNTVertex) || stride == sizeof(TPNT2Vertex)) && CGraphicBase::ms_uMeshShaderProgram != 0)
 	{
+		if (!m_CurrentState.m_StreamData[0].m_lpStreamData || !m_CurrentState.m_IndexData.m_lpIndexData)
+			return S_OK;
+
 		SetupMeshShaderAndStates(m_CurrentState);
 
-		if (m_CurrentState.m_StreamData[0].m_lpStreamData)
-			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_StreamData[0].m_lpStreamData);
-
-		if (m_CurrentState.m_IndexData.m_lpIndexData)
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_IndexData.m_lpIndexData);
+		glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_StreamData[0].m_lpStreamData);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_IndexData.m_lpIndexData);
 
 		uintptr_t baseOffset = (uintptr_t)(baseVertexIndex * (int)stride);
 
@@ -2178,13 +2181,13 @@ HRESULT CStateManager::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT
 	}
 	else if (stride == 24 && (m_CurrentState.m_dwFVF & D3DFVF_NORMAL) != 0 && CGraphicBase::ms_uTerrainShaderProgram != 0)
 	{
+		if (!m_CurrentState.m_StreamData[0].m_lpStreamData || !m_CurrentState.m_IndexData.m_lpIndexData)
+			return S_OK;
+
 		SetupTerrainShaderAndStates(m_CurrentState);
 
-		if (m_CurrentState.m_StreamData[0].m_lpStreamData)
-			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_StreamData[0].m_lpStreamData);
-
-		if (m_CurrentState.m_IndexData.m_lpIndexData)
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_IndexData.m_lpIndexData);
+		glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_StreamData[0].m_lpStreamData);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_IndexData.m_lpIndexData);
 
 		uintptr_t baseOffset = (uintptr_t)(baseVertexIndex * (int)stride);
 
@@ -2209,13 +2212,13 @@ HRESULT CStateManager::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT
 	}
 	else if (CGraphicBase::IsSpeedTreeMode() && CGraphicBase::ms_uSpeedTreeShaderProgram != 0)
 	{
+		if (!m_CurrentState.m_StreamData[0].m_lpStreamData || !m_CurrentState.m_IndexData.m_lpIndexData)
+			return S_OK;
+
 		SetupSpeedTreeShaderAndStates(m_CurrentState);
 
-		if (m_CurrentState.m_StreamData[0].m_lpStreamData)
-			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_StreamData[0].m_lpStreamData);
-
-		if (m_CurrentState.m_IndexData.m_lpIndexData)
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_IndexData.m_lpIndexData);
+		glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_StreamData[0].m_lpStreamData);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)(uintptr_t)m_CurrentState.m_IndexData.m_lpIndexData);
 
 		if (stride == 0)
 			stride = (m_CurrentState.m_StreamData[0].m_Stride != 0) ? m_CurrentState.m_StreamData[0].m_Stride : 32;

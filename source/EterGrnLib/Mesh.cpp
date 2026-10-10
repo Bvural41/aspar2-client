@@ -44,16 +44,22 @@ void CGrannyMesh::NEW_LoadVertices(void * dstBaseVertices) const
 
 void CGrannyMesh::DeformPNTVertices(void * dstBaseVertices, D3DXMATRIX * boneMatrices, granny_mesh_binding* pgrnMeshBinding) const
 {
-	assert(dstBaseVertices != nullptr);
-	assert(boneMatrices != nullptr);
-	assert(m_pgrnMeshDeformer != nullptr);
+	if (!dstBaseVertices || !boneMatrices || !m_pgrnMeshDeformer || !pgrnMeshBinding)
+		return;
 
 	const granny_mesh * pgrnMesh = GetGrannyMeshPointer();
+	if (!pgrnMesh)
+		return;
 
 	const auto srcVertices = (TPNTVertex *) GrannyGetMeshVertices(pgrnMesh);
+	if (!srcVertices)
+		return;
+
 	TPNTVertex * dstVertices = ((TPNTVertex *) dstBaseVertices) + m_vtxBasePos;
 
 	const int vtxCount = GrannyGetMeshVertexCount(pgrnMesh);
+	if (vtxCount <= 0)
+		return;
 
 	// WORK
 #if GrannyProductMinorVersion==4
@@ -64,6 +70,9 @@ void CGrannyMesh::DeformPNTVertices(void * dstBaseVertices, D3DXMATRIX * boneMat
 #error "unknown granny version"
 #endif
 	// END_OF_WORK
+
+	if (!boneIndices)
+		return;
 
 	GrannyDeformVertices(
 		m_pgrnMeshDeformer,
@@ -91,7 +100,8 @@ const CGrannyMesh::TTriGroupNode * CGrannyMesh::GetTriGroupNodeList(CGrannyMater
 
 int CGrannyMesh::GetVertexCount() const
 {
-	assert(m_pgrnMesh!=nullptr);
+	if (!m_pgrnMesh)
+		return 0;
 	return GrannyGetMeshVertexCount(m_pgrnMesh);
 }
 

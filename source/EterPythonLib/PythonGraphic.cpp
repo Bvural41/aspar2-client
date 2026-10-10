@@ -124,6 +124,9 @@ void CPythonGraphic::SetViewport(float fx, float fy, float fWidth, float fHeight
 	m_backupViewport.Width = vp[2];
 	m_backupViewport.Height = vp[3];
 
+	if (fWidth <= 0.0f || fHeight <= 0.0f)
+		return;
+
 	GLint curFbo = 0;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &curFbo);
 	if (curFbo != 0)

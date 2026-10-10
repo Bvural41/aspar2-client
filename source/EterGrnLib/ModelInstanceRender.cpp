@@ -194,16 +194,25 @@ void CGrannyModelInstance::RenderWithoutTexture()
 // With One Texture
 void CGrannyModelInstance::RenderMeshNodeListWithOneTexture(CGrannyMesh::EType eMeshType, CGrannyMaterial::EType eMtrlType) const
 {
-	assert(m_pModel != nullptr);
+	if (!m_pModel || !m_meshMatrices)
+		return;
 
 	const LPDIRECT3DINDEXBUFFER9 lpd3dIdxBuf = m_pModel->GetD3DIndexBuffer();
-	assert(lpd3dIdxBuf != nullptr);
+	if (!lpd3dIdxBuf)
+		return;
 
+	const int maxMeshCount = m_pModel->GetMeshCount();
 	const CGrannyModel::TMeshNode * pMeshNode = m_pModel->GetMeshNodeList(eMeshType, eMtrlType);
 
 	while (pMeshNode)
 	{
 		const CGrannyMesh * pMesh = pMeshNode->pMesh;
+		if (!pMesh || pMeshNode->iMesh < 0 || pMeshNode->iMesh >= maxMeshCount)
+		{
+			pMeshNode = pMeshNode->pNextMeshNode;
+			continue;
+		}
+
 		const int vtxMeshBasePos = pMesh->GetVertexBasePosition();
 
 		STATEMANAGER.SetIndices(lpd3dIdxBuf, vtxMeshBasePos);
@@ -214,18 +223,21 @@ void CGrannyModelInstance::RenderMeshNodeListWithOneTexture(CGrannyMesh::EType e
 		const int vtxCount = pMesh->GetVertexCount();
 		while (pTriGroupNode)
 		{
-			ms_faceCount += pTriGroupNode->triCount;
-
-			CGrannyMaterial& rkMtrl=m_kMtrlPal.GetMaterialRef(pTriGroupNode->mtrlIndex);
-
-			if (!m_material_data.pImage) // @fixme057
+			if (pTriGroupNode->triCount > 0)
 			{
-				rkMtrl.SetSpecularInfo(m_material_data.isSpecularEnable, m_material_data.fSpecularPower, m_material_data.bSphereMapIndex);
-			}
+				ms_faceCount += pTriGroupNode->triCount;
 
-			rkMtrl.ApplyRenderState();
-			STATEMANAGER.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vtxCount, pTriGroupNode->idxPos, pTriGroupNode->triCount, vtxMeshBasePos);
-			rkMtrl.RestoreRenderState();
+				CGrannyMaterial& rkMtrl=m_kMtrlPal.GetMaterialRef(pTriGroupNode->mtrlIndex);
+
+				if (!m_material_data.pImage) // @fixme057
+				{
+					rkMtrl.SetSpecularInfo(m_material_data.isSpecularEnable, m_material_data.fSpecularPower, m_material_data.bSphereMapIndex);
+				}
+
+				rkMtrl.ApplyRenderState();
+				STATEMANAGER.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vtxCount, pTriGroupNode->idxPos, pTriGroupNode->triCount, vtxMeshBasePos);
+				rkMtrl.RestoreRenderState();
+			}
 
 			pTriGroupNode = pTriGroupNode->pNextTriGroupNode;
 		}
@@ -238,16 +250,25 @@ void CGrannyModelInstance::RenderMeshNodeListWithOneTexture(CGrannyMesh::EType e
 // With Two Texture
 void CGrannyModelInstance::RenderMeshNodeListWithTwoTexture(CGrannyMesh::EType eMeshType, CGrannyMaterial::EType eMtrlType) const
 {
-	assert(m_pModel != nullptr);
+	if (!m_pModel || !m_meshMatrices)
+		return;
 
 	const LPDIRECT3DINDEXBUFFER9 lpd3dIdxBuf = m_pModel->GetD3DIndexBuffer();
-	assert(lpd3dIdxBuf != nullptr);
+	if (!lpd3dIdxBuf)
+		return;
 
+	const int maxMeshCount = m_pModel->GetMeshCount();
 	const CGrannyModel::TMeshNode * pMeshNode = m_pModel->GetMeshNodeList(eMeshType, eMtrlType);
 
 	while (pMeshNode)
 	{
 		const CGrannyMesh * pMesh = pMeshNode->pMesh;
+		if (!pMesh || pMeshNode->iMesh < 0 || pMeshNode->iMesh >= maxMeshCount)
+		{
+			pMeshNode = pMeshNode->pNextMeshNode;
+			continue;
+		}
+
 		const int vtxMeshBasePos = pMesh->GetVertexBasePosition();
 
 		STATEMANAGER.SetIndices(lpd3dIdxBuf, vtxMeshBasePos);
@@ -258,12 +279,15 @@ void CGrannyModelInstance::RenderMeshNodeListWithTwoTexture(CGrannyMesh::EType e
 		const int vtxCount = pMesh->GetVertexCount();
 		while (pTriGroupNode)
 		{
-			ms_faceCount += pTriGroupNode->triCount;
+			if (pTriGroupNode->triCount > 0)
+			{
+				ms_faceCount += pTriGroupNode->triCount;
 
-			const CGrannyMaterial& rkMtrl=m_kMtrlPal.GetMaterialRef(pTriGroupNode->mtrlIndex);
-			STATEMANAGER.SetTexture(0, rkMtrl.GetD3DTexture(0));
-			STATEMANAGER.SetTexture(1, rkMtrl.GetD3DTexture(1));
-			STATEMANAGER.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vtxCount, pTriGroupNode->idxPos, pTriGroupNode->triCount, vtxMeshBasePos);
+				const CGrannyMaterial& rkMtrl=m_kMtrlPal.GetMaterialRef(pTriGroupNode->mtrlIndex);
+				STATEMANAGER.SetTexture(0, rkMtrl.GetD3DTexture(0));
+				STATEMANAGER.SetTexture(1, rkMtrl.GetD3DTexture(1));
+				STATEMANAGER.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vtxCount, pTriGroupNode->idxPos, pTriGroupNode->triCount, vtxMeshBasePos);
+			}
 			pTriGroupNode = pTriGroupNode->pNextTriGroupNode;
 		}
 		/////
@@ -275,16 +299,25 @@ void CGrannyModelInstance::RenderMeshNodeListWithTwoTexture(CGrannyMesh::EType e
 // Without Texture
 void CGrannyModelInstance::RenderMeshNodeListWithoutTexture(CGrannyMesh::EType eMeshType, CGrannyMaterial::EType eMtrlType) const
 {
-	assert(m_pModel != nullptr);
+	if (!m_pModel || !m_meshMatrices)
+		return;
 
 	const LPDIRECT3DINDEXBUFFER9 lpd3dIdxBuf = m_pModel->GetD3DIndexBuffer();
-	assert(lpd3dIdxBuf != nullptr);
+	if (!lpd3dIdxBuf)
+		return;
 
+	const int maxMeshCount = m_pModel->GetMeshCount();
 	const CGrannyModel::TMeshNode * pMeshNode = m_pModel->GetMeshNodeList(eMeshType, eMtrlType);
 
 	while (pMeshNode)
 	{
 		const CGrannyMesh * pMesh = pMeshNode->pMesh;
+		if (!pMesh || pMeshNode->iMesh < 0 || pMeshNode->iMesh >= maxMeshCount)
+		{
+			pMeshNode = pMeshNode->pNextMeshNode;
+			continue;
+		}
+
 		const int vtxMeshBasePos = pMesh->GetVertexBasePosition();
 
 		STATEMANAGER.SetIndices(lpd3dIdxBuf, vtxMeshBasePos);
@@ -296,8 +329,11 @@ void CGrannyModelInstance::RenderMeshNodeListWithoutTexture(CGrannyMesh::EType e
 
 		while (pTriGroupNode)
 		{
-			ms_faceCount += pTriGroupNode->triCount;
-			STATEMANAGER.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vtxCount, pTriGroupNode->idxPos, pTriGroupNode->triCount, vtxMeshBasePos);
+			if (pTriGroupNode->triCount > 0)
+			{
+				ms_faceCount += pTriGroupNode->triCount;
+				STATEMANAGER.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, vtxCount, pTriGroupNode->idxPos, pTriGroupNode->triCount, vtxMeshBasePos);
+			}
 			pTriGroupNode = pTriGroupNode->pNextTriGroupNode;
 		}
 		/////

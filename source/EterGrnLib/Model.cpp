@@ -35,11 +35,15 @@ bool CGrannyModel::CanDeformPNTVertices() const
 
 void CGrannyModel::DeformPNTVertices(void * dstBaseVertices, D3DXMATRIX * boneMatrices, const std::vector<granny_mesh_binding*>& c_rvct_pgrnMeshBinding) const
 {
+	if (!dstBaseVertices || !boneMatrices || !m_meshs)
+		return;
+
 	const int meshCount = GetMeshCount();
 
 	for (int iMesh = 0; iMesh < meshCount; ++iMesh)
 	{
-		assert(iMesh < c_rvct_pgrnMeshBinding.size());
+		if (iMesh >= (int)c_rvct_pgrnMeshBinding.size())
+			break;
 
 		CGrannyMesh & rMesh = m_meshs[iMesh];
 		if (rMesh.CanDeformPNTVertices())

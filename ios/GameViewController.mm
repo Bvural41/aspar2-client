@@ -102,7 +102,13 @@ static GameViewController *s_sharedInstance = nil;
     }
     [EAGLContext setCurrentContext:_context];
 
+    CGFloat screenScale = [UIScreen mainScreen].nativeScale;
+    if (screenScale <= 0.0) screenScale = [UIScreen mainScreen].scale;
+    if (screenScale <= 0.0) screenScale = 2.0;
+
+    self.view.contentScaleFactor = screenScale;
     CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.view.layer;
+    eaglLayer.contentsScale = screenScale;
     eaglLayer.opaque = YES;
     eaglLayer.drawableProperties = @{
         kEAGLDrawablePropertyRetainedBacking: @(NO),
@@ -394,6 +400,12 @@ static GameViewController *s_sharedInstance = nil;
     glGenFramebuffers(1, &_defaultFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFramebuffer);
 
+    CGFloat screenScale = [UIScreen mainScreen].nativeScale;
+    if (screenScale <= 0.0) screenScale = [UIScreen mainScreen].scale;
+    if (screenScale <= 0.0) screenScale = 2.0;
+    self.view.contentScaleFactor = screenScale;
+    ((CAEAGLLayer *)self.view.layer).contentsScale = screenScale;
+
     glGenRenderbuffers(1, &_colorRenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
     [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.view.layer];
@@ -404,9 +416,8 @@ static GameViewController *s_sharedInstance = nil;
 
     if (_framebufferWidth <= 0 || _framebufferHeight <= 0) {
         CGSize sz = self.view.bounds.size;
-        CGFloat scale = [UIScreen mainScreen].scale;
-        _framebufferWidth = (GLint)(sz.width * scale);
-        _framebufferHeight = (GLint)(sz.height * scale);
+        _framebufferWidth = (GLint)(sz.width * screenScale);
+        _framebufferHeight = (GLint)(sz.height * screenScale);
     }
 
     glGenRenderbuffers(1, &_depthRenderbuffer);
