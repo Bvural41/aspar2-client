@@ -13,6 +13,8 @@ local.properties
 *.aab
 *.so
 vs_files/**/Distribute/
+vs_files/**/Distribute_Android/
+vs_files/**/Debug_Android/
 
 # Visual Studio / Windows build artifacts
 /Debug/

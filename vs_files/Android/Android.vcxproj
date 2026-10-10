@@ -40,6 +40,10 @@
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir>$(SolutionDir).vs\Android\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir).vs\Android\$(Configuration)\</IntDir>
+  </PropertyGroup>
 
   <!-- Windows configurations do nothing for Android project -->
   <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(Configuration)'=='Distribute' or '$(Configuration)'=='Debug_GLES' or '$(Configuration)'=='Distribute_GLES'">
