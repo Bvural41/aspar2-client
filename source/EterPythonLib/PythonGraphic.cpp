@@ -137,8 +137,6 @@ void CPythonGraphic::SetViewport(float fx, float fy, float fWidth, float fHeight
 	bool isOnScreen = (curFbo == 0);
 	if (g_nDefaultFramebuffer != 0 && (GLuint)curFbo == g_nDefaultFramebuffer)
 		isOnScreen = true;
-	if (m_backupViewport.Width > 0 && m_backupViewport.Width != ms_iWidth)
-		isOnScreen = true;
 
 	if (!isOnScreen)
 	{

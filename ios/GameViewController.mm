@@ -581,7 +581,17 @@ static GameViewController *s_sharedInstance = nil;
 #pragma mark - Virtual Keyboard
 
 - (void)showKeyboard:(const char *)initialText {
-    NSString *initStr = initialText ? [NSString stringWithUTF8String:initialText] : @"";
+    NSString *initStr = @"";
+    if (initialText && strlen(initialText) > 0) {
+        initStr = [NSString stringWithUTF8String:initialText];
+        if (!initStr) {
+            initStr = [NSString stringWithCString:initialText encoding:NSWindowsCP1254StringEncoding];
+        }
+        if (!initStr) {
+            initStr = [NSString stringWithCString:initialText encoding:NSISOLatin1StringEncoding];
+        }
+        if (!initStr) initStr = @"";
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_ignoreTextChange = YES;
         self->_hiddenTextField.text = initStr;

@@ -91,14 +91,16 @@ void CIME::SetText(const char* c_szText, int len) {
     ms_curpos = wcslen(m_wText);
     ms_lastpos = ms_curpos;
 }
+extern DWORD GetDefaultCodePage();
+
 int CIME::GetText(std::string & rstrText, bool addCodePage) {
     char szBuf[IMESTR_MAXLEN*4] = {0};
-    WideCharToMultiByte(CP_UTF8, 0, m_wText, -1, szBuf, sizeof(szBuf), NULL, NULL);
+    WideCharToMultiByte(GetDefaultCodePage(), 0, m_wText, -1, szBuf, sizeof(szBuf), NULL, NULL);
     rstrText = szBuf;
     return rstrText.length();
 }
-const char* CIME::GetCodePageText() { return "UTF-8"; }
-int CIME::GetCodePage() { return CP_UTF8; }
+const char* CIME::GetCodePageText() { return "1254"; }
+int CIME::GetCodePage() { return GetDefaultCodePage(); }
 
 int CIME::GetCandidateCount() { return 0; }
 int CIME::GetCandidatePageCount() { return 0; }

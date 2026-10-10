@@ -1271,12 +1271,63 @@ inline uintptr_t _beginthreadex(void* security, unsigned stack_size, PTHREAD_STA
 inline int MultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar) {
     if (!lpMultiByteStr) return 0;
     if (cbMultiByte < 0) cbMultiByte = (int)strlen(lpMultiByteStr);
-    if (cchWideChar == 0) return cbMultiByte;
-    int count = (cbMultiByte < cchWideChar) ? cbMultiByte : cchWideChar;
-    if (lpWideCharStr) {
-        for (int i = 0; i < count; ++i) {
-            unsigned char c = (unsigned char)lpMultiByteStr[i];
-            wchar_t wc = c;
+    if (cbMultiByte == 0) {
+        if (cchWideChar > 0 && lpWideCharStr) lpWideCharStr[0] = 0;
+        return 0;
+    }
+
+    int outCount = 0;
+    int i = 0;
+    while (i < cbMultiByte) {
+        unsigned char c = (unsigned char)lpMultiByteStr[i];
+        wchar_t wc = 0;
+
+        // Check for UTF-8 sequence (either explicitly requested or auto-detected multibyte)
+        if (CodePage == 65001 /* CP_UTF8 */ || (c >= 0xC0)) {
+            if (c < 0x80) {
+                wc = c;
+                i += 1;
+            } else if ((c & 0xE0) == 0xC0 && i + 1 < cbMultiByte && ((unsigned char)lpMultiByteStr[i+1] & 0xC0) == 0x80) {
+                wc = ((c & 0x1F) << 6) | ((unsigned char)lpMultiByteStr[i+1] & 0x3F);
+                i += 2;
+            } else if ((c & 0xF0) == 0xE0 && i + 2 < cbMultiByte &&
+                       ((unsigned char)lpMultiByteStr[i+1] & 0xC0) == 0x80 &&
+                       ((unsigned char)lpMultiByteStr[i+2] & 0xC0) == 0x80) {
+                wc = ((c & 0x0F) << 12) |
+                     (((unsigned char)lpMultiByteStr[i+1] & 0x3F) << 6) |
+                     ((unsigned char)lpMultiByteStr[i+2] & 0x3F);
+                i += 3;
+            } else if ((c & 0xF8) == 0xF0 && i + 3 < cbMultiByte &&
+                       ((unsigned char)lpMultiByteStr[i+1] & 0xC0) == 0x80 &&
+                       ((unsigned char)lpMultiByteStr[i+2] & 0xC0) == 0x80 &&
+                       ((unsigned char)lpMultiByteStr[i+3] & 0xC0) == 0x80) {
+                uint32_t cp = ((c & 0x07) << 18) |
+                              (((unsigned char)lpMultiByteStr[i+1] & 0x3F) << 12) |
+                              (((unsigned char)lpMultiByteStr[i+2] & 0x3F) << 6) |
+                              ((unsigned char)lpMultiByteStr[i+3] & 0x3F);
+                wc = (wchar_t)cp;
+                i += 4;
+            } else {
+                // Fallback to single-byte CP1254 (Turkish ANSI)
+                switch (c) {
+                    case 0xD0: wc = 0x011E; break; // Ğ
+                    case 0xF0: wc = 0x011F; break; // ğ
+                    case 0xDD: wc = 0x0130; break; // İ
+                    case 0xFD: wc = 0x0131; break; // ı
+                    case 0xDE: wc = 0x015E; break; // Ş
+                    case 0xFE: wc = 0x015F; break; // ş
+                    case 0xC7: wc = 0x00C7; break; // Ç
+                    case 0xE7: wc = 0x00E7; break; // ç
+                    case 0xD6: wc = 0x00D6; break; // Ö
+                    case 0xF6: wc = 0x00F6; break; // ö
+                    case 0xDC: wc = 0x00DC; break; // Ü
+                    case 0xFC: wc = 0x00FC; break; // ü
+                    default:   wc = c; break;
+                }
+                i += 1;
+            }
+        } else {
+            // Single-byte CP1254 (Turkish ANSI)
             switch (c) {
                 case 0xD0: wc = 0x011E; break; // Ğ
                 case 0xF0: wc = 0x011F; break; // ğ
@@ -1284,24 +1335,81 @@ inline int MultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteS
                 case 0xFD: wc = 0x0131; break; // ı
                 case 0xDE: wc = 0x015E; break; // Ş
                 case 0xFE: wc = 0x015F; break; // ş
-                default: wc = c; break;
+                case 0xC7: wc = 0x00C7; break; // Ç
+                case 0xE7: wc = 0x00E7; break; // ç
+                case 0xD6: wc = 0x00D6; break; // Ö
+                case 0xF6: wc = 0x00F6; break; // ö
+                case 0xDC: wc = 0x00DC; break; // Ü
+                case 0xFC: wc = 0x00FC; break; // ü
+                default:   wc = c; break;
             }
-            lpWideCharStr[i] = wc;
+            i += 1;
         }
-        if (count < cchWideChar && cbMultiByte == count) lpWideCharStr[count] = 0;
+
+        if (cchWideChar > 0 && lpWideCharStr && outCount < cchWideChar) {
+            lpWideCharStr[outCount] = wc;
+        }
+        outCount++;
     }
-    return count;
+
+    if (cchWideChar > 0 && lpWideCharStr) {
+        if (outCount < cchWideChar) lpWideCharStr[outCount] = 0;
+        return (outCount < cchWideChar) ? outCount : cchWideChar;
+    }
+    return outCount;
 }
 
 inline int WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR lpWideCharStr, int cchWideChar, LPSTR lpMultiByteStr, int cbMultiByte, LPCSTR lpDefaultChar, LPBOOL lpUsedDefaultChar) {
     if (!lpWideCharStr) return 0;
     if (cchWideChar < 0) cchWideChar = (int)wcslen(lpWideCharStr);
-    if (cbMultiByte == 0) return cchWideChar;
-    int count = (cchWideChar < cbMultiByte) ? cchWideChar : cbMultiByte;
-    if (lpMultiByteStr) {
+    if (cchWideChar == 0) {
+        if (cbMultiByte > 0 && lpMultiByteStr) lpMultiByteStr[0] = 0;
+        return 0;
+    }
+
+    if (CodePage == 65001 /* CP_UTF8 */) {
+        int outCount = 0;
+        for (int i = 0; i < cchWideChar; ++i) {
+            uint32_t wc = (uint32_t)lpWideCharStr[i];
+            if (wc < 0x80) {
+                if (cbMultiByte > 0 && lpMultiByteStr && outCount < cbMultiByte) lpMultiByteStr[outCount] = (char)wc;
+                outCount += 1;
+            } else if (wc < 0x800) {
+                if (cbMultiByte > 0 && lpMultiByteStr) {
+                    if (outCount < cbMultiByte) lpMultiByteStr[outCount] = (char)(0xC0 | (wc >> 6));
+                    if (outCount + 1 < cbMultiByte) lpMultiByteStr[outCount + 1] = (char)(0x80 | (wc & 0x3F));
+                }
+                outCount += 2;
+            } else if (wc < 0x10000) {
+                if (cbMultiByte > 0 && lpMultiByteStr) {
+                    if (outCount < cbMultiByte) lpMultiByteStr[outCount] = (char)(0xE0 | (wc >> 12));
+                    if (outCount + 1 < cbMultiByte) lpMultiByteStr[outCount + 1] = (char)(0x80 | ((wc >> 6) & 0x3F));
+                    if (outCount + 2 < cbMultiByte) lpMultiByteStr[outCount + 2] = (char)(0x80 | (wc & 0x3F));
+                }
+                outCount += 3;
+            } else {
+                if (cbMultiByte > 0 && lpMultiByteStr) {
+                    if (outCount < cbMultiByte) lpMultiByteStr[outCount] = (char)(0xF0 | (wc >> 18));
+                    if (outCount + 1 < cbMultiByte) lpMultiByteStr[outCount + 1] = (char)(0x80 | ((wc >> 12) & 0x3F));
+                    if (outCount + 2 < cbMultiByte) lpMultiByteStr[outCount + 2] = (char)(0x80 | ((wc >> 6) & 0x3F));
+                    if (outCount + 3 < cbMultiByte) lpMultiByteStr[outCount + 3] = (char)(0x80 | (wc & 0x3F));
+                }
+                outCount += 4;
+            }
+        }
+        if (cbMultiByte > 0 && lpMultiByteStr) {
+            if (outCount < cbMultiByte) lpMultiByteStr[outCount] = 0;
+            return (outCount < cbMultiByte) ? outCount : cbMultiByte;
+        }
+        return outCount;
+    }
+
+    // Single-byte / CP1254 (Turkish ANSI)
+    int count = (cbMultiByte > 0 && cchWideChar > cbMultiByte) ? cbMultiByte : cchWideChar;
+    if (lpMultiByteStr && cbMultiByte > 0) {
         for (int i = 0; i < count; ++i) {
             wchar_t wc = lpWideCharStr[i];
-            char c = (char)(wc & 0xff);
+            char c;
             switch (wc) {
                 case 0x011E: c = (char)0xD0; break; // Ğ
                 case 0x011F: c = (char)0xF0; break; // ğ
@@ -1309,13 +1417,19 @@ inline int WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR lpWideCharS
                 case 0x0131: c = (char)0xFD; break; // ı
                 case 0x015E: c = (char)0xDE; break; // Ş
                 case 0x015F: c = (char)0xFE; break; // ş
-                default: c = (char)(wc & 0xff); break;
+                case 0x00C7: c = (char)0xC7; break; // Ç
+                case 0x00E7: c = (char)0xE7; break; // ç
+                case 0x00D6: c = (char)0xD6; break; // Ö
+                case 0x00F6: c = (char)0xF6; break; // ö
+                case 0x00DC: c = (char)0xDC; break; // Ü
+                case 0x00FC: c = (char)0xFC; break; // ü
+                default:     c = (wc < 256) ? (char)wc : '?'; break;
             }
             lpMultiByteStr[i] = c;
         }
         if (count < cbMultiByte && cchWideChar == count) lpMultiByteStr[count] = 0;
     }
-    return count;
+    return (cbMultiByte == 0) ? cchWideChar : count;
 }
 
 #define BI_RGB 0

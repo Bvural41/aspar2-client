@@ -819,7 +819,21 @@ void Android_ShowKeyboard(const char* initialText) {
 	if (!clazz) return;
 	jmethodID mid = env->GetStaticMethodID(clazz, "showKeyboard", "(Ljava/lang/String;)V");
 	if (mid) {
-		jstring jstr = env->NewStringUTF(initialText ? initialText : "");
+		std::string utf8Str = "";
+		if (initialText && initialText[0]) {
+			int wLen = MultiByteToWideChar(1254, 0, initialText, -1, NULL, 0);
+			if (wLen > 0) {
+				std::vector<wchar_t> wbuf(wLen);
+				MultiByteToWideChar(1254, 0, initialText, -1, wbuf.data(), wLen);
+				int uLen = WideCharToMultiByte(65001, 0, wbuf.data(), -1, NULL, 0, NULL, NULL);
+				if (uLen > 0) {
+					std::vector<char> ubuf(uLen);
+					WideCharToMultiByte(65001, 0, wbuf.data(), -1, ubuf.data(), uLen, NULL, NULL);
+					utf8Str = ubuf.data();
+				}
+			}
+		}
+		jstring jstr = env->NewStringUTF(utf8Str.c_str());
 		env->CallStaticVoidMethod(clazz, mid, jstr);
 		env->DeleteLocalRef(jstr);
 	}
