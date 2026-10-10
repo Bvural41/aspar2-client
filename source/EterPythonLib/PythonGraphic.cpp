@@ -114,6 +114,10 @@ void CPythonGraphic::SetOmniLight()
 #endif
 }
 
+#if defined(USE_OPENGL_ES)
+GLuint g_nDefaultFramebuffer = 0;
+#endif
+
 void CPythonGraphic::SetViewport(float fx, float fy, float fWidth, float fHeight)
 {
 #if defined(USE_OPENGL_ES)
@@ -129,7 +133,14 @@ void CPythonGraphic::SetViewport(float fx, float fy, float fWidth, float fHeight
 
 	GLint curFbo = 0;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &curFbo);
-	if (curFbo != 0)
+
+	bool isOnScreen = (curFbo == 0);
+	if (g_nDefaultFramebuffer != 0 && (GLuint)curFbo == g_nDefaultFramebuffer)
+		isOnScreen = true;
+	if (m_backupViewport.Width > 0 && m_backupViewport.Width != ms_iWidth)
+		isOnScreen = true;
+
+	if (!isOnScreen)
 	{
 		glViewport((GLint)fx, (GLint)fy, (GLsizei)fWidth, (GLsizei)fHeight);
 	}

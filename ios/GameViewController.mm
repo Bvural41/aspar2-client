@@ -4,6 +4,8 @@
 #import <WebKit/WebKit.h>
 #import <AVFoundation/AVFoundation.h>
 
+extern GLuint g_nDefaultFramebuffer;
+
 @interface EAGLView : UIView
 @end
 
@@ -399,6 +401,7 @@ static GameViewController *s_sharedInstance = nil;
 
     glGenFramebuffers(1, &_defaultFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFramebuffer);
+    g_nDefaultFramebuffer = _defaultFramebuffer;
 
     CGFloat screenScale = [UIScreen mainScreen].nativeScale;
     if (screenScale <= 0.0) screenScale = [UIScreen mainScreen].scale;
