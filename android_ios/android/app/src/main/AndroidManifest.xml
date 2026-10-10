@@ -15,9 +15,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:appCategory="game"
-        android:isGame="true"
-        android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity"
@@ -25,7 +22,6 @@
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:windowSoftInputMode="adjustPan|stateHidden"
-            android:windowLayoutInDisplayCutoutMode="shortEdges"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
