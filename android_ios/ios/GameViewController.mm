@@ -324,9 +324,8 @@ static GameViewController *s_sharedInstance = nil;
                     BOOL initOk = IOS_Init([bundlePath UTF8String], [docsPath UTF8String], self->_targetWidth, self->_targetHeight);
                     if (initOk) {
                         self->_initialized = YES;
-                        [UIView animateWithDuration:0.65 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+                        [UIView animateWithDuration:0.4 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                             self->_otopatchContainer.alpha = 0.0f;
-                            self->_otopatchContainer.transform = CGAffineTransformMakeScale(1.05f, 1.05f);
                         } completion:^(BOOL finished) {
                             [self->_otopatchContainer removeFromSuperview];
                             self->_otopatchContainer = nil;
@@ -458,6 +457,14 @@ static GameViewController *s_sharedInstance = nil;
 }
 
 - (BOOL)prefersHomeIndicatorAutoHidden {
+    return YES;
+}
+
+- (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
+    return UIRectEdgeAll;
+}
+
+- (BOOL)shouldAutorotate {
     return YES;
 }
 
@@ -717,26 +724,6 @@ static GameViewController *s_sharedInstance = nil;
     _joystickY = y;
     _joystickW = width;
     _joystickH = height;
-}
-
-- (BOOL)prefersStatusBarHidden {
-    return YES;
-}
-
-- (BOOL)prefersHomeIndicatorAutoHidden {
-    return YES;
-}
-
-- (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
-    return UIRectEdgeAll;
-}
-
-- (BOOL)shouldAutorotate {
-    return YES;
-}
-
-- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskLandscape;
 }
 
 - (void)dealloc {
