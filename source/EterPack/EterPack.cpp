@@ -569,7 +569,11 @@ bool CEterPack::Get(CMappedFile& out_file, const char * filename, LPCVOID * data
 	
 	// 기존에는 CEterPack에서 epk를 memory map에 올려놓고, 요청이 오면 그 부분을 링크해서 넘겨 줬었는데,
 	// 이제는 요청이 오면, 필요한 부분만 memory map에 올리고, 요청이 끝나면 해제하게 함.
-	out_file.Create(m_stDataFileName.c_str(), data, index->data_position, index->data_size);
+	if (!out_file.Create(m_stDataFileName.c_str(), data, index->data_position, index->data_size) && index->data_size > 0)
+	{
+		TraceError("CEterPack::Get2 map failed: %s (%s pos=%u size=%u)", filename, m_stDataFileName.c_str(), (unsigned)index->data_position, (unsigned)index->data_size);
+		return false;
+	}
 	bool bIsSecurityCheckRequired = ( index->compressed_type == COMPRESSED_TYPE_SECURITY ||
 									  index->compressed_type == COMPRESSED_TYPE_PANAMA );
 
@@ -688,7 +692,11 @@ bool CEterPack::Get2(CMappedFile& out_file, const char * filename, TEterPackInde
 	//	
 	//	m_bIsDataLoaded = true;
 	//}
-	out_file.Create(m_stDataFileName.c_str(), data, index->data_position, index->data_size);
+	if (!out_file.Create(m_stDataFileName.c_str(), data, index->data_position, index->data_size) && index->data_size > 0)
+	{
+		TraceError("CEterPack::Get2 map failed: %s (%s pos=%u size=%u)", filename, m_stDataFileName.c_str(), (unsigned)index->data_position, (unsigned)index->data_size);
+		return false;
+	}
 	bool bIsSecurityCheckRequired = ( index->compressed_type == COMPRESSED_TYPE_SECURITY ||
 									  index->compressed_type == COMPRESSED_TYPE_PANAMA );
 

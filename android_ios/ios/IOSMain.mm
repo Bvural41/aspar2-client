@@ -635,7 +635,7 @@ static bool IOS_IsJoystickZone(float x, float y) {
 		return false;
 	}
 	UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
-	long sh = rkWndMgr.GetScreenHeight();
+	long sh = rkWndMgr.GetHudScreenHeight();
 	float jx = s_fJoystickX;
 	float jy = (s_fJoystickY >= 0.0f) ? s_fJoystickY : (float)(sh - s_fJoystickH);
 	float jw = s_fJoystickW;
@@ -648,8 +648,8 @@ static bool IOS_IsHudZone(long x, long y) {
 		return false;
 	}
 	UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
-	long sw = rkWndMgr.GetScreenWidth();
-	long sh = rkWndMgr.GetScreenHeight();
+	long sw = rkWndMgr.GetHudScreenWidth();
+	long sh = rkWndMgr.GetHudScreenHeight();
 	return IOS_IsJoystickZone((float)x, (float)y) || (x > sw - 370 && y > sh - 320) || (y < 65);
 }
 

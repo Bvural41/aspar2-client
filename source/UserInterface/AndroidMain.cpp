@@ -14,7 +14,16 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+
 #define LOG_TAG "Metin2Mobile"
+
+std::string g_strAndroidExternalPath = "";
+
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
@@ -41,9 +50,18 @@ static _Unwind_Reason_Code unwind_callback(struct _Unwind_Context* context, void
     return _URC_NO_REASON;
 }
 
+static void CrashLine(const char* fmt, ...) {
+    char buf[600];
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vsnprintf(buf, sizeof(buf) - 2, fmt, ap);
+    va_end(ap);
+    if (n < 0) return;
+    __android_log_print(ANDROID_LOG_FATAL, "Metin2Crash", "%s", buf);
+}
+
 static void sigsegv_handler(int sig, siginfo_t* info, void* ucontext) {
-    __android_log_print(ANDROID_LOG_FATAL, "Metin2Crash",
-        "=== SIGSEGV at addr=%p, si_code=%d ===", info->si_addr, info->si_code);
+    CrashLine("=== CRASH signal=%d addr=%p si_code=%d ===", sig, info->si_addr, info->si_code);
 
     void* buffer[64];
     BacktraceState state = {buffer, buffer + 64};
@@ -53,14 +71,13 @@ static void sigsegv_handler(int sig, siginfo_t* info, void* ucontext) {
     for (int i = 0; i < count; i++) {
         Dl_info dli;
         if (dladdr(buffer[i], &dli)) {
-            __android_log_print(ANDROID_LOG_FATAL, "Metin2Crash",
-                "#%02d pc %p  %s (%s+0x%lx)",
+            CrashLine("#%02d pc %p  %s (%s+0x%lx)",
                 i, (void*)((uintptr_t)buffer[i] - (uintptr_t)dli.dli_fbase),
                 dli.dli_fname ? dli.dli_fname : "???",
                 dli.dli_sname ? dli.dli_sname : "???",
                 dli.dli_sname ? (unsigned long)((uintptr_t)buffer[i] - (uintptr_t)dli.dli_saddr) : 0UL);
         } else {
-            __android_log_print(ANDROID_LOG_FATAL, "Metin2Crash", "#%02d pc %p  ???", i, buffer[i]);
+            CrashLine("#%02d pc %p  ???", i, buffer[i]);
         }
     }
 
@@ -68,20 +85,19 @@ static void sigsegv_handler(int sig, siginfo_t* info, void* ucontext) {
     ucontext_t* uc = (ucontext_t*)ucontext;
 #if defined(__x86_64__)
     uintptr_t* sp = (uintptr_t*)uc->uc_mcontext.gregs[REG_RSP];
-    __android_log_print(ANDROID_LOG_FATAL, "Metin2Crash", "RIP=%p, RSP=%p", (void*)uc->uc_mcontext.gregs[REG_RIP], (void*)sp);
+    CrashLine("RIP=%p, RSP=%p", (void*)uc->uc_mcontext.gregs[REG_RIP], (void*)sp);
 #elif defined(__aarch64__)
     uintptr_t* sp = (uintptr_t*)uc->uc_mcontext.sp;
-    __android_log_print(ANDROID_LOG_FATAL, "Metin2Crash", "PC=%p, SP=%p", (void*)uc->uc_mcontext.pc, (void*)sp);
+    CrashLine("PC=%p, SP=%p, LR=%p", (void*)uc->uc_mcontext.pc, (void*)sp, (void*)uc->uc_mcontext.regs[30]);
 #else
     uintptr_t* sp = nullptr;
 #endif
     if (sp) {
-        for (int s = 0; s < 64; s++) {
+        for (int s = 0; s < 96; s++) {
             uintptr_t val = sp[s];
             Dl_info dli;
             if (dladdr((void*)val, &dli) && dli.dli_fname) {
-                __android_log_print(ANDROID_LOG_FATAL, "Metin2Crash",
-                    "STACK[%02d]=%p pc=%p in %s (%s+0x%lx)", s, (void*)val,
+                CrashLine("STACK[%02d]=%p pc=%p in %s (%s+0x%lx)", s, (void*)val,
                     (void*)(val - (uintptr_t)dli.dli_fbase),
                     dli.dli_fname, dli.dli_sname ? dli.dli_sname : "???",
                     dli.dli_sname ? (unsigned long)(val - (uintptr_t)dli.dli_saddr) : 0UL);
@@ -91,11 +107,12 @@ static void sigsegv_handler(int sig, siginfo_t* info, void* ucontext) {
 
     // Re-raise to get the default crash dump
     struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
     sa.sa_handler = SIG_DFL;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sigaction(SIGSEGV, &sa, NULL);
-    raise(SIGSEGV);
+    sigaction(sig, &sa, NULL);
+    raise(sig);
 }
 
 static void install_sigsegv_handler() {
@@ -105,7 +122,11 @@ static void install_sigsegv_handler() {
     sa.sa_flags = SA_SIGINFO;
     sigemptyset(&sa.sa_mask);
     sigaction(SIGSEGV, &sa, NULL);
-    __android_log_print(ANDROID_LOG_INFO, "Metin2Crash", "Custom SIGSEGV handler installed");
+    sigaction(SIGABRT, &sa, NULL);
+    sigaction(SIGBUS, &sa, NULL);
+    sigaction(SIGILL, &sa, NULL);
+    sigaction(SIGFPE, &sa, NULL);
+    __android_log_print(ANDROID_LOG_INFO, "Metin2Crash", "Custom crash handlers installed");
 }
 
 #include "../EterPack/EterPackManager.h"
@@ -309,8 +330,6 @@ bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine) {
 	return true;
 }
 
-std::string g_strAndroidExternalPath = "";
-
 extern "C" {
 
 int g_nAndroidScreenWidth = 1067;
@@ -345,6 +364,12 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 		if (pathStr) {
 			LOGI("Setting working directory to: %s", pathStr);
 			chdir(pathStr);
+			// Sifirdan kurulumda yazilabilir klasorler yoksa olustur
+			mkdir("UserData", 0777);
+			mkdir("UserData/chatting", 0777);
+			mkdir("UserData/offline_shop", 0777);
+			mkdir("UserData/leftseat", 0777);
+			mkdir("UserData/auto_sell", 0777);
 			env->ReleaseStringUTFChars(internalPath, pathStr);
 		}
 	}
@@ -645,7 +670,7 @@ static float s_fJoystickH = 194.0f;
 
 bool Android_IsJoystickZone(float x, float y) {
 	UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
-	long sh = rkWndMgr.GetScreenHeight();
+	long sh = rkWndMgr.GetHudScreenHeight();
 	float jx = s_fJoystickX;
 	float jy = (s_fJoystickY >= 0.0f) ? s_fJoystickY : (float)(sh - s_fJoystickH);
 	float jw = s_fJoystickW;
@@ -656,8 +681,8 @@ bool Android_IsJoystickZone(float x, float y) {
 // Same HUD zones that game.py uses to decide between "camera touch" and "HUD touch".
 static bool Android_IsHudZone(long x, long y) {
 	UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
-	long sw = rkWndMgr.GetScreenWidth();
-	long sh = rkWndMgr.GetScreenHeight();
+	long sw = rkWndMgr.GetHudScreenWidth();
+	long sh = rkWndMgr.GetHudScreenHeight();
 	return Android_IsJoystickZone((float)x, (float)y) || (x > sw - 370 && y > sh - 320) || (y < 65);
 }
 

@@ -269,7 +269,7 @@ void CPythonApplication::RenderGame()
 	
 		{
 			long lx, ly;
-			m_kWndMgr.GetMousePosition(lx, ly);
+			m_kWndMgr.GetHudMousePosition(lx, ly);
 			m_pyGraphic.SetCursorPosition(lx, ly);
 		}
 	
@@ -323,10 +323,20 @@ void CPythonApplication::UpdateGame()
 	POINT ptMouse;
 	GetMousePosition(&ptMouse);
 
-	CGraphicTextInstance::Hyperlink_UpdateMousePos(ptMouse.x, ptMouse.y);
+	// Mouse position in UI space (the mobile UI zoom shrinks the logical screen), used for text / hyperlink hit tests.
+	POINT ptUIMouse = ptMouse;
+	if (m_kWndMgr.GetUIScale() != 1.0f)
+	{
+		long lUIMouseX, lUIMouseY;
+		m_kWndMgr.GetMousePosition(lUIMouseX, lUIMouseY);
+		ptUIMouse.x = lUIMouseX;
+		ptUIMouse.y = lUIMouseY;
+	}
+
+	CGraphicTextInstance::Hyperlink_UpdateMousePos(ptUIMouse.x, ptUIMouse.y);
 
 #ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-	CGraphicTextInstance::UpdateMousePos(ptMouse.x, ptMouse.y);
+	CGraphicTextInstance::UpdateMousePos(ptUIMouse.x, ptUIMouse.y);
 #endif
 
 	DWORD t2 = ELTimer_GetMSec();

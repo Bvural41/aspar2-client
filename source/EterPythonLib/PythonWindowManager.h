@@ -31,6 +31,15 @@ namespace UI
 			void		SetMouseHandler(PyObject * poMouseHandler);
 			long		GetScreenWidth()		{ return m_lWidth; }
 			long		GetScreenHeight()		{ return m_lHeight; }
+
+			// Mobile UI zoom: GetScreenWidth/Height are the *logical* UI size (physical / scale).
+			// HUD space windows (FLAG_HUD_SPACE) use the physical size instead.
+			long		GetHudScreenWidth()		{ return m_lPhysWidth ? m_lPhysWidth : m_lWidth; }
+			long		GetHudScreenHeight()	{ return m_lPhysHeight ? m_lPhysHeight : m_lHeight; }
+			float		GetUIScale()			{ return m_fUIScale; }
+			void		SetUIScale(float fScale);
+			void		GetHudMousePosition(long & rx, long & ry);
+			void		ToHudSpace(long lx, long ly, long & rx, long & ry);
 			void		GetMousePosition(long & rx, long & ry);
 			BOOL		IsDragging();
 
@@ -165,6 +174,10 @@ namespace UI
 
 		private:
 			void		SetMousePosition(long x, long y);
+			void		__SetLogicalScreenSize(long lWidth, long lHeight);
+			void		__GetMouseFor(CWindow * pWin, long & rlMouseX, long & rlMouseY, long & rlScrW, long & rlScrH);
+			CWindow *	__PickWindowAtScreen(long x, long y);
+			void		__RunCaptureDragAt(CWindow * pWin, long lDragX, long lDragY, long lMouseX, long lMouseY, long lScrW, long lScrH);
 			CWindow *	__PickWindow(long x, long y);
 			void		__RunCaptureDrag(CWindow * pWin, long lDragX, long lDragY);
 			
@@ -179,6 +192,9 @@ namespace UI
 			int						m_iHres;
 
 			long					m_lMouseX, m_lMouseY;
+			long					m_lHudMouseX, m_lHudMouseY;
+			long					m_lPhysWidth, m_lPhysHeight;
+			float					m_fUIScale;
 			long					m_lDragX, m_lDragY;
 			long					m_lPickedX, m_lPickedY;
 

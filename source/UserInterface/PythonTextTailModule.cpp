@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "PythonTextTail.h"
 #include "PythonCharacterManager.h"
+#include "../EterPythonLib/PythonWindowManager.h"
 
 PyObject * textTailClear(PyObject * poSelf, PyObject * poArgs)
 {
@@ -22,7 +23,22 @@ PyObject * textTailUpdateShowingTextTail(PyObject * poSelf, PyObject * poArgs)
 
 PyObject * textTailRender(PyObject * poSelf, PyObject * poArgs)
 {
+	// Name tags are placed from world->screen projected (physical pixel) coordinates, so they are drawn without the UI zoom.
+	CPythonGraphic& rkGraphic = CPythonGraphic::Instance();
+	const float fPrevScale = rkGraphic.GetInterfaceScale();
+	if (fPrevScale != 1.0f)
+	{
+		rkGraphic.SetInterfaceScale(1.0f);
+		rkGraphic.SetInterfaceRenderState();
+	}
+
 	CPythonTextTail::Instance().Render();
+
+	if (fPrevScale != 1.0f)
+	{
+		rkGraphic.SetInterfaceScale(fPrevScale);
+		rkGraphic.SetInterfaceRenderState();
+	}
 	return Py_BuildNone();
 }
 
@@ -60,6 +76,14 @@ PyObject * textTailGetPosition(PyObject * poSelf, PyObject * poArgs)
 			CPythonGraphic::Instance().ProjectPosition(c_rv3Position.x, c_rv3Position.y, c_rv3Position.z, &x, &y);	
 		}
 	}	
+
+	// Python windows (e.g. the player gauge) are laid out in UI (zoomed) space
+	const float fUIScale = UI::CWindowManager::Instance().GetUIScale();
+	if (fUIScale > 1.0f)
+	{
+		x /= fUIScale;
+		y /= fUIScale;
+	}
 
 	return Py_BuildValue("fff", x, y, z);
 }
@@ -173,7 +197,10 @@ PyObject * textTailPick(PyObject * poSelf, PyObject * poArgs)
 	if (!PyTuple_GetInteger(poArgs, 1, &iy))
 		return Py_BuildException();
 
-	int iValue = CPythonTextTail::Instance().Pick(ix, iy);
+	// The mouse position comes in UI (zoomed) space, name tags live in physical pixels
+	long lHudX, lHudY;
+	UI::CWindowManager::Instance().ToHudSpace(ix, iy, lHudX, lHudY);
+	int iValue = CPythonTextTail::Instance().Pick(lHudX, lHudY);
 	return Py_BuildValue("i", iValue);
 }
 

@@ -45,6 +45,7 @@ namespace UI
 			FLAG_ALPHA_SENSITIVE	= (1 << 12),	// flag for activating alpha sensitive
 			FLAG_REMOVE_LIMIT	= (1 << 13),	// flag for activating remove limit
 			FLAG_IS_BOARD_WITHOUT_ALPHA	= (1 << 14),
+			FLAG_HUD_SPACE = (1 << 15),	// subtree laid out in physical pixels, ignores the global UI scale (mobile HUD)
 		};
 
 		enum WindowTypes // window type flags to recognize expanded_image class
@@ -106,6 +107,13 @@ namespace UI
 		bool			IsIn(long x, long y);
 		bool			IsIn();
 		CWindow* PickWindow(long x, long y);
+		CWindow* __PickWindowInSpace(long x, long y);
+
+		// UI scale helpers
+		bool			IsInHudSpace();
+		void			GetSpaceMousePosition(long& rlx, long& rly);
+		void			RelayoutTopLevelChildren(long lOldW, long lOldH, long lNewW, long lNewH);
+		void			KeepMovableChildrenReachable(long lScrW, long lScrH);
 		CWindow* PickTopWindow(long x, long y);	// NOTE : Children으로 내려가지 않고 상위에서만 
 														//        체크 하는 특화된 함수
 

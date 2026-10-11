@@ -633,6 +633,38 @@ PyObject* wndMgrGetMousePosition(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildValue("ii", lx, ly);
 }
 
+PyObject* wndMgrGetHudMousePosition(PyObject* poSelf, PyObject* poArgs)
+{
+	long lx, ly;
+	UI::CWindowManager::Instance().GetHudMousePosition(lx, ly);
+	return Py_BuildValue("ii", lx, ly);
+}
+
+PyObject* wndMgrGetHudScreenWidth(PyObject* poSelf, PyObject* poArgs)
+{
+	return Py_BuildValue("i", UI::CWindowManager::Instance().GetHudScreenWidth());
+}
+
+PyObject* wndMgrGetHudScreenHeight(PyObject* poSelf, PyObject* poArgs)
+{
+	return Py_BuildValue("i", UI::CWindowManager::Instance().GetHudScreenHeight());
+}
+
+PyObject* wndMgrSetUIScale(PyObject* poSelf, PyObject* poArgs)
+{
+	float fScale;
+	if (!PyTuple_GetFloat(poArgs, 0, &fScale))
+		return Py_BuildException();
+
+	UI::CWindowManager::Instance().SetUIScale(fScale);
+	return Py_BuildNone();
+}
+
+PyObject* wndMgrGetUIScale(PyObject* poSelf, PyObject* poArgs)
+{
+	return Py_BuildValue("f", UI::CWindowManager::Instance().GetUIScale());
+}
+
 PyObject* wndMgrIsDragging(PyObject* poSelf, PyObject* poArgs)
 {
 	return Py_BuildValue("i", UI::CWindowManager::Instance().IsDragging());
@@ -695,6 +727,8 @@ PyObject* wndMgrAddFlag(PyObject* poSelf, PyObject* poArgs)
 			pWin->AddFlag(UI::CWindow::FLAG_ALPHA_SENSITIVE);
 		else if (!stricmp(pszFlag, "remove_limit"))
 			pWin->AddFlag(UI::CWindow::FLAG_REMOVE_LIMIT);
+		else if (!stricmp(pszFlag, "hud_space"))
+			pWin->AddFlag(UI::CWindow::FLAG_HUD_SPACE);
 		else if (!stricmp(pszFlag, "window_without_alpha"))
 			pWin->AddFlag(UI::CWindow::FLAG_IS_BOARD_WITHOUT_ALPHA);
 		else
@@ -3355,6 +3389,11 @@ void initwndMgr()
 		{ "RegisterBar3D",				wndMgrRegisterBar3D,				METH_VARARGS },
 		{ "RegisterNumberLine",			wndMgrRegisterNumberLine,			METH_VARARGS },
 		{ "Destroy",					wndMgrDestroy,						METH_VARARGS },
+		{ "SetUIScale",					wndMgrSetUIScale,					METH_VARARGS },
+		{ "GetUIScale",					wndMgrGetUIScale,					METH_VARARGS },
+		{ "GetHudScreenWidth",			wndMgrGetHudScreenWidth,			METH_VARARGS },
+		{ "GetHudScreenHeight",			wndMgrGetHudScreenHeight,			METH_VARARGS },
+		{ "GetHudMousePosition",		wndMgrGetHudMousePosition,			METH_VARARGS },
 		{ "AddFlag",					wndMgrAddFlag,						METH_VARARGS },
 		{ "IsRTL",						wndMgrIsRTL,						METH_VARARGS },
 

@@ -53,7 +53,7 @@ void CPythonPlayer::NEW_SetMouseCameraState(int eMBS)
 
 			long lMouseX;
 			long lMouseY;
-			rkWndMgr.GetMousePosition(lMouseX, lMouseY);
+			rkWndMgr.GetHudMousePosition(lMouseX, lMouseY);
 
 			pkCmrCur->BeginDrag(lMouseX, lMouseY);
 

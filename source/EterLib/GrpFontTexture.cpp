@@ -9,7 +9,6 @@
 #include <stb_truetype.h>
 #include <vector>
 #include <string>
-#include "../EterPack/EterPackManager.h"
 
 #if defined(__ANDROID__)
 #include <android/log.h>
@@ -19,7 +18,6 @@ extern AAssetManager* g_pAssetManager;
 #else
 #include <stdio.h>
 #define FONT_LOG(...) printf("[Metin2Font] " __VA_ARGS__)
-extern std::string g_strDocsPath;
 extern std::string g_strBundlePath;
 #endif
 
@@ -32,170 +30,45 @@ static bool EnsureFontLoaded()
 	if (s_fontLoaded)
 		return true;
 
-	// 0. Try loading Tahoma/Arial font from Metin2 pack via CEterPackManager
-	CMappedFile mapFile;
-	LPCVOID pData = nullptr;
-	const char* packFontPaths[] = {
-		"locale/common/font/tahoma.ttf",
-		"locale/common/font/arial.ttf",
-		"tahoma.ttf",
-		"arial.ttf"
-	};
-	for (const char* pFont : packFontPaths)
-	{
-		if (CEterPackManager::Instance().Get(mapFile, pFont, &pData) && pData && mapFile.Size() > 0)
-		{
-			s_fontBuffer.assign((const unsigned char*)pData, (const unsigned char*)pData + mapFile.Size());
-			int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
-			if (offset < 0) offset = 0;
-			if (stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
-			{
-				s_fontLoaded = true;
-				FONT_LOG("Successfully loaded %s from pack! (%zu bytes)\n", pFont, s_fontBuffer.size());
-				return true;
-			}
-		}
-	}
+	// tahoma.ttf is shipped inside the APK assets (Android) / the app bundle (iOS)
+	bool bRead = false;
 
 #if defined(__ANDROID__)
-	// 1. Try loading Tahoma font from APK assets via AAssetManager
-	if (g_pAssetManager)
+	AAsset* asset = g_pAssetManager ? AAssetManager_open(g_pAssetManager, "tahoma.ttf", AASSET_MODE_BUFFER) : nullptr;
+	if (asset)
 	{
-		const char* assetNames[] = { "tahoma.ttf", "arial.ttf" };
-		for (const char* assetName : assetNames)
+		const off_t sz = AAsset_getLength(asset);
+		if (sz > 0)
 		{
-			AAsset* asset = AAssetManager_open(g_pAssetManager, assetName, AASSET_MODE_BUFFER);
-			if (asset)
-			{
-				off_t sz = AAsset_getLength(asset);
-				if (sz > 0)
-				{
-					s_fontBuffer.resize(sz);
-					int readBytes = AAsset_read(asset, s_fontBuffer.data(), sz);
-					AAsset_close(asset);
-					int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
-					if (offset < 0) offset = 0;
-					if (readBytes == sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
-					{
-						s_fontLoaded = true;
-						FONT_LOG("Successfully loaded %s from APK assets! (%ld bytes)\n", assetName, (long)sz);
-						return true;
-					}
-				}
-				else
-				{
-					AAsset_close(asset);
-				}
-			}
+			s_fontBuffer.resize(sz);
+			bRead = (AAsset_read(asset, s_fontBuffer.data(), sz) == sz);
 		}
+		AAsset_close(asset);
 	}
-#endif
-
-	// 2. Try loading font from filesystem
-	std::vector<std::string> filePaths = {
-		"pack/tahoma.ttf",
-		"tahoma.ttf",
-		"pack/arial.ttf",
-		"arial.ttf"
-	};
-#if defined(__ANDROID__)
-	filePaths.push_back("/sdcard/aspar2/tahoma.ttf");
-	filePaths.push_back("/storage/emulated/0/aspar2/tahoma.ttf");
-	filePaths.push_back("/sdcard/metin2/tahoma.ttf");
-	filePaths.push_back("/storage/emulated/0/metin2/tahoma.ttf");
-#endif
-#if defined(__APPLE__) || defined(__IOS__)
-	if (!g_strDocsPath.empty()) {
-		filePaths.push_back(g_strDocsPath + "/tahoma.ttf");
-		filePaths.push_back(g_strDocsPath + "/pack/tahoma.ttf");
-		filePaths.push_back(g_strDocsPath + "/arial.ttf");
-		filePaths.push_back(g_strDocsPath + "/aspar2/pack/tahoma.ttf");
-	}
-	if (!g_strBundlePath.empty()) {
-		filePaths.push_back(g_strBundlePath + "/tahoma.ttf");
-		filePaths.push_back(g_strBundlePath + "/arial.ttf");
-		filePaths.push_back(g_strBundlePath + "/assets/tahoma.ttf");
-	}
-#endif
-
-	for (const std::string& path : filePaths)
-	{
-		FILE* f = fopen(path.c_str(), "rb");
-		if (f)
-		{
-			fseek(f, 0, SEEK_END);
-			long sz = ftell(f);
-			fseek(f, 0, SEEK_SET);
-			if (sz > 0)
-			{
-				s_fontBuffer.resize(sz);
-				size_t readBytes = fread(s_fontBuffer.data(), 1, sz, f);
-				fclose(f);
-				int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
-				if (offset < 0) offset = 0;
-				if (readBytes == (size_t)sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
-				{
-					s_fontLoaded = true;
-					FONT_LOG("Successfully loaded font from: %s (%ld bytes)\n", path.c_str(), sz);
-					return true;
-				}
-			}
-			else
-			{
-				fclose(f);
-			}
-		}
-	}
-
-	// 3. Fallback to system fonts
-#if defined(__ANDROID__)
-	const char* fontPaths[] = {
-		"/system/fonts/Roboto-Regular.ttf",
-		"/system/fonts/RobotoStatic-Regular.ttf",
-		"/system/fonts/DroidSans.ttf"
-	};
-#elif defined(__APPLE__) || defined(__IOS__)
-	const char* fontPaths[] = {
-		"/System/Library/Fonts/Core/Arial.ttf",
-		"/System/Library/Fonts/CoreAddition/Arial.ttf",
-		"/System/Library/Fonts/Cache/Arial.ttf",
-		"/System/Library/Fonts/Helvetica.ttc",
-		"/System/Library/Fonts/AppleSDGothicNeo.ttc"
-	};
 #else
-	const char* fontPaths[] = {};
+	FILE* f = fopen((g_strBundlePath + "/tahoma.ttf").c_str(), "rb");
+	if (f)
+	{
+		fseek(f, 0, SEEK_END);
+		const long sz = ftell(f);
+		fseek(f, 0, SEEK_SET);
+		if (sz > 0)
+		{
+			s_fontBuffer.resize(sz);
+			bRead = (fread(s_fontBuffer.data(), 1, sz, f) == (size_t)sz);
+		}
+		fclose(f);
+	}
 #endif
 
-	for (const char* path : fontPaths)
+	if (bRead && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), 0))
 	{
-		FILE* f = fopen(path, "rb");
-		if (f)
-		{
-			fseek(f, 0, SEEK_END);
-			long sz = ftell(f);
-			fseek(f, 0, SEEK_SET);
-			if (sz > 0)
-			{
-				s_fontBuffer.resize(sz);
-				size_t readBytes = fread(s_fontBuffer.data(), 1, sz, f);
-				fclose(f);
-				int offset = stbtt_GetFontOffsetForIndex(s_fontBuffer.data(), 0);
-				if (offset < 0) offset = 0;
-				if (readBytes == (size_t)sz && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), offset))
-				{
-					s_fontLoaded = true;
-					FONT_LOG("Fallback: loaded system font: %s (%ld bytes)\n", path, sz);
-					return true;
-				}
-			}
-			else
-			{
-				fclose(f);
-			}
-		}
+		s_fontLoaded = true;
+		FONT_LOG("Loaded tahoma.ttf (%zu bytes)\n", s_fontBuffer.size());
+		return true;
 	}
 
-	FONT_LOG("ERROR: Failed to load any font!\n");
+	FONT_LOG("ERROR: Failed to load tahoma.ttf!\n");
 	return false;
 }
 #endif

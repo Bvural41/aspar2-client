@@ -25,8 +25,8 @@ void CPythonGraphic::SetInterfaceRenderState()
 	STATEMANAGER.SetTransform(D3DTS_VIEW, &ms_matIdentity);
 	STATEMANAGER.SetTransform(D3DTS_WORLD, &ms_matIdentity);
 
-	STATEMANAGER.SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_NONE);
-	STATEMANAGER.SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_NONE);
+	STATEMANAGER.SetSamplerState(0, D3DSAMP_MINFILTER, (m_fInterfaceScale != 1.0f) ? D3DTEXF_LINEAR : D3DTEXF_NONE);
+	STATEMANAGER.SetSamplerState(0, D3DSAMP_MAGFILTER, (m_fInterfaceScale != 1.0f) ? D3DTEXF_LINEAR : D3DTEXF_NONE);
 	STATEMANAGER.SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
 
 	STATEMANAGER.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -39,9 +39,15 @@ void CPythonGraphic::SetInterfaceRenderState()
 #endif
 
 	CPythonGraphic::Instance().SetBlendOperation();
-	CPythonGraphic::Instance().SetOrtho2D(ms_iWidth, ms_iHeight, GetOrthoDepth());
+	ApplyInterfaceProjection();
 
 	STATEMANAGER.SetRenderState(D3DRS_LIGHTING, FALSE);
+}
+
+void CPythonGraphic::ApplyInterfaceProjection()
+{
+	const float fScale = (m_fInterfaceScale > 0.0f) ? m_fInterfaceScale : 1.0f;
+	CPythonGraphic::Instance().SetOrtho2D(ms_iWidth / fScale, ms_iHeight / fScale, GetOrthoDepth());
 }
 
 void CPythonGraphic::SetGameRenderState()
@@ -859,6 +865,7 @@ CPythonGraphic::CPythonGraphic()
 	memset(&m_backupViewport, 0, sizeof(D3DVIEWPORT9));
 
 	m_fOrthoDepth = 1000.0f;
+	m_fInterfaceScale = 1.0f;
 }
 
 CPythonGraphic::~CPythonGraphic()

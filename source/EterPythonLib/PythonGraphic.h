@@ -22,6 +22,11 @@ class CPythonGraphic : public CScreen, public CSingleton<CPythonGraphic>
 
 		float GetOrthoDepth();
 		void SetInterfaceRenderState();
+
+		// Global UI scale (mobile UI zoom). The interface projection covers (screen / scale) logical pixels.
+		void SetInterfaceScale(float fScale) { m_fInterfaceScale = fScale; }
+		float GetInterfaceScale() const { return m_fInterfaceScale; }
+		void ApplyInterfaceProjection();
 		void SetGameRenderState();
 
 		void SetCursorPosition(int x, int y);
@@ -67,4 +72,5 @@ class CPythonGraphic : public CScreen, public CSingleton<CPythonGraphic>
 		D3DVIEWPORT9							m_backupViewport;
 
 		float									m_fOrthoDepth;
+		float									m_fInterfaceScale;
 };

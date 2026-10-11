@@ -168,6 +168,20 @@ namespace UI
 		if (!IsShow())
 			return;
 
+		// HUD space: this subtree is laid out in physical pixels, draw it without the global UI scale.
+		float fHudPrevScale = 1.0f;
+		const bool bHudSpace = IsFlag(FLAG_HUD_SPACE);
+		if (bHudSpace)
+		{
+			fHudPrevScale = CPythonGraphic::Instance().GetInterfaceScale();
+			if (fHudPrevScale != 1.0f)
+			{
+				CPythonGraphic::Instance().SetInterfaceScale(1.0f);
+				CPythonGraphic::Instance().ApplyInterfaceProjection();
+			}
+		}
+
+		// Own drawing (e.g. bars, images) must use the HUD projection as well
 		OnRender();
 
 		if (g_bOutlineBoxEnable)
@@ -177,6 +191,12 @@ namespace UI
 		}
 
 		std::for_each(m_pChildList.begin(), m_pChildList.end(), std::void_mem_fun(&CWindow::Render));
+
+		if (bHudSpace && fHudPrevScale != 1.0f)
+		{
+			CPythonGraphic::Instance().SetInterfaceScale(fHudPrevScale);
+			CPythonGraphic::Instance().ApplyInterfaceProjection();
+		}
 
 	}
 
@@ -249,16 +269,25 @@ namespace UI
 
 	long CWindow::UpdateRect()
 	{
+		// A HUD space window directly below a UI space window is aligned inside the physical screen, not the zoomed logical one.
+		long lParentW = 0, lParentH = 0;
+		if (m_pParent)
+		{
+			const bool bHudScreen = IsFlag(FLAG_HUD_SPACE) && !m_pParent->IsInHudSpace();
+			lParentW = bHudScreen ? CWindowManager::Instance().GetHudScreenWidth() : m_pParent->GetWidth();
+			lParentH = bHudScreen ? CWindowManager::Instance().GetHudScreenHeight() : m_pParent->GetHeight();
+		}
+
 		m_rect.top = m_y;
 		if (m_pParent)
 		{
 			switch (m_VerticalAlign)
 			{
 			case VERTICAL_ALIGN_BOTTOM:
-				m_rect.top = m_pParent->GetHeight() - m_rect.top;
+				m_rect.top = lParentH - m_rect.top;
 				break;
 			case VERTICAL_ALIGN_CENTER:
-				m_rect.top = (m_pParent->GetHeight() - GetHeight()) / 2 + m_rect.top;
+				m_rect.top = (lParentH - GetHeight()) / 2 + m_rect.top;
 				break;
 			}
 			m_rect.top += m_pParent->m_rect.top;
@@ -272,14 +301,14 @@ namespace UI
 		}
 		else {
 			if (m_pParent->IsFlag(UI::CWindow::FLAG_RTL) == true) {
-				m_rect.left = m_pParent->GetWidth() - m_lWidth - m_x;
+				m_rect.left = lParentW - m_lWidth - m_x;
 				switch (m_HorizontalAlign)
 				{
 				case HORIZONTAL_ALIGN_RIGHT:
 					m_rect.left = -m_x;
 					break;
 				case HORIZONTAL_ALIGN_CENTER:
-					m_rect.left = m_pParent->GetWidth() / 2 - GetWidth() - m_x;
+					m_rect.left = lParentW / 2 - GetWidth() - m_x;
 					break;
 				}
 				m_rect.left += m_pParent->m_rect.left;
@@ -290,10 +319,10 @@ namespace UI
 				switch (m_HorizontalAlign)
 				{
 				case HORIZONTAL_ALIGN_RIGHT:
-					m_rect.left = m_pParent->GetWidth() - m_rect.left;
+					m_rect.left = lParentW - m_rect.left;
 					break;
 				case HORIZONTAL_ALIGN_CENTER:
-					m_rect.left = (m_pParent->GetWidth() - GetWidth()) / 2 + m_rect.left;
+					m_rect.left = (lParentW - GetWidth()) / 2 + m_rect.left;
 					break;
 				}
 				m_rect.left += m_pParent->m_rect.left;
@@ -307,13 +336,13 @@ namespace UI
 			switch (m_HorizontalAlign)
 			{
 			case HORIZONTAL_ALIGN_RIGHT:
-				m_rect.left = ::abs(m_pParent->GetWidth()) - m_rect.left;
+				m_rect.left = ::abs(lParentW) - m_rect.left;
 				break;
 			case HORIZONTAL_ALIGN_CENTER:
-				m_rect.left = m_pParent->GetWidth() / 2 - GetWidth() / 2 + m_rect.left;
+				m_rect.left = lParentW / 2 - GetWidth() / 2 + m_rect.left;
 				break;
 			}
-			m_rect.left += 0L < m_pParent->GetWidth() ? m_pParent->m_rect.left : m_pParent->m_rect.right + ::abs(m_pParent->GetWidth());
+			m_rect.left += 0L < m_pParent->GetWidth() ? m_pParent->m_rect.left : m_pParent->m_rect.right + ::abs(lParentW);
 		}
 		m_rect.right = m_rect.left + m_lWidth;
 #endif
@@ -336,7 +365,7 @@ namespace UI
 
 	void CWindow::GetMouseLocalPosition(long& rlx, long& rly)
 	{
-		CWindowManager::Instance().GetMousePosition(rlx, rly);
+		GetSpaceMousePosition(rlx, rly);
 		rlx = rlx - m_rect.left;
 		rly = rly - m_rect.top;
 	}
@@ -1047,12 +1076,139 @@ namespace UI
 	bool CWindow::IsIn()
 	{
 		long lx, ly;
-		UI::CWindowManager::Instance().GetMousePosition(lx, ly);
+		GetSpaceMousePosition(lx, ly);
 
 		return IsIn(lx, ly);
 	}
 
+	bool CWindow::IsInHudSpace()
+	{
+		for (CWindow* pWin = this; pWin; pWin = pWin->m_pParent)
+		{
+			if (pWin->IsFlag(FLAG_HUD_SPACE))
+				return true;
+		}
+		return false;
+	}
+
+	// Mouse position in the coordinate space this window lives in (UI space or HUD/physical space).
+	void CWindow::GetSpaceMousePosition(long& rlx, long& rly)
+	{
+		if (IsInHudSpace())
+			CWindowManager::Instance().GetHudMousePosition(rlx, rly);
+		else
+			CWindowManager::Instance().GetMousePosition(rlx, rly);
+	}
+
+	// Called by the window manager after the UI scale (= logical screen size) changed. Keeps top level windows
+	// docked to the edge they were closest to and keeps them inside the new, smaller/larger logical screen.
+	void CWindow::RelayoutTopLevelChildren(long lOldW, long lOldH, long lNewW, long lNewH)
+	{
+		if (lOldW <= 0 || lOldH <= 0 || (lOldW == lNewW && lOldH == lNewH))
+			return;
+
+		for (TWindowContainer::iterator it = m_pChildList.begin(); it != m_pChildList.end(); ++it)
+		{
+			CWindow* pWin = *it;
+			if (!pWin || pWin->IsFlag(FLAG_HUD_SPACE))
+				continue;
+
+			const long w = pWin->GetWidth();
+			const long h = pWin->GetHeight();
+			long x = pWin->m_x;
+			long y = pWin->m_y;
+			bool bMoved = false;
+
+			// Windows that were not fully on screen (hidden off screen on purpose) are left alone.
+			if (pWin->m_HorizontalAlign == HORIZONTAL_ALIGN_LEFT && w > 0 && w < lOldW && x >= 0 && x + w <= lOldW)
+			{
+				const long cx = x + w / 2;
+				if (labs(cx - lOldW / 2) <= lOldW / 20)
+					x += (lNewW - lOldW) / 2;
+				else if (cx > lOldW / 2)
+					x += (lNewW - lOldW);
+
+				if (x + w > lNewW)
+					x = lNewW - w;
+				if (x < 0)
+					x = 0;
+				bMoved = bMoved || (x != pWin->m_x);
+			}
+
+			if (pWin->m_VerticalAlign == VERTICAL_ALIGN_TOP && h > 0 && h < lOldH && y >= 0 && y + h <= lOldH)
+			{
+				const long cy = y + h / 2;
+				if (labs(cy - lOldH / 2) <= lOldH / 20)
+					y += (lNewH - lOldH) / 2;
+				else if (cy > lOldH / 2)
+					y += (lNewH - lOldH);
+
+				if (y + h > lNewH)
+					y = lNewH - h;
+				if (y < 0)
+					y = 0;
+				bMoved = bMoved || (y != pWin->m_y);
+			}
+
+			if (bMoved)
+				pWin->SetPosition(x, y);
+		}
+
+		// Windows that attach other windows to themselves (belt inventory, quest slide ...) re-dock in OnMoveWindow.
+		// This runs after every window was placed, because the logical screen size changed even for windows that did not move.
+		for (TWindowContainer::iterator it = m_pChildList.begin(); it != m_pChildList.end(); ++it)
+		{
+			CWindow* pWin = *it;
+			if (pWin && !pWin->IsFlag(FLAG_HUD_SPACE) && pWin->IsShow())
+				pWin->OnMoveWindow(pWin->m_x, pWin->m_y);
+		}
+	}
+
+	// Movable top level windows must keep a part of themselves on screen (their title can always be grabbed),
+	// e.g. after a big zoom made the logical screen smaller than the window.
+	void CWindow::KeepMovableChildrenReachable(long lScrW, long lScrH)
+	{
+		const long lGrip = 60;
+
+		for (TWindowContainer::iterator it = m_pChildList.begin(); it != m_pChildList.end(); ++it)
+		{
+			CWindow* pWin = *it;
+			if (!pWin || !pWin->IsShow() || !pWin->IsFlag(FLAG_MOVABLE) || pWin->IsFlag(FLAG_HUD_SPACE))
+				continue;
+			if (pWin->m_HorizontalAlign != HORIZONTAL_ALIGN_LEFT || pWin->m_VerticalAlign != VERTICAL_ALIGN_TOP)
+				continue;
+
+			const long w = pWin->GetWidth();
+			const long h = pWin->GetHeight();
+			if (w <= 0 || h <= 0)
+				continue;
+
+			// A window taller than the screen may still be dragged up to show its bottom, but its top never leaves the screen.
+			long x = min(max(pWin->m_x, lGrip - w), lScrW - lGrip);
+			long y = min(max(pWin->m_y, min(0L, lScrH - h)), lScrH - lGrip);
+
+			if (x != pWin->m_x || y != pWin->m_y)
+			{
+				pWin->SetPosition(x, y);
+				pWin->OnMoveWindow(x, y);
+			}
+		}
+	}
+
 	CWindow* CWindow::PickWindow(long x, long y)
+	{
+		// HUD space windows are laid out in physical pixels while the incoming point is in UI space.
+		if (IsFlag(FLAG_HUD_SPACE))
+		{
+			long hx, hy;
+			CWindowManager::Instance().ToHudSpace(x, y, hx, hy);
+			return __PickWindowInSpace(hx, hy);
+		}
+
+		return __PickWindowInSpace(x, y);
+	}
+
+	CWindow* CWindow::__PickWindowInSpace(long x, long y)
 	{
 		std::list<CWindow*>::reverse_iterator ritor = m_pChildList.rbegin();
 		for (; ritor != m_pChildList.rend(); ++ritor)

@@ -3,6 +3,7 @@
 #include "PythonSlotWindow.h"
 #include "PythonGridSlotWindow.h"
 #include "PythonWindowManager.h"
+#include "PythonGraphic.h"
 #include "../UserInterface/Locale_inc.h"
 
 //#define __WINDOW_LEAK_CHECK__
@@ -40,6 +41,11 @@ namespace UI
 		m_poMouseHandler(NULL),
 		m_iHres(0),
 		m_iVres(0),
+		m_lHudMouseX(0),
+		m_lHudMouseY(0),
+		m_lPhysWidth(0),
+		m_lPhysHeight(0),
+		m_fUIScale(1.0f),
 		m_bOnceIgnoreMouseLeftButtonUpEventFlag(FALSE)
 	{		
 		m_pRootWindow = new CWindow(NULL);
@@ -728,6 +734,47 @@ namespace UI
 
 	void CWindowManager::SetScreenSize(long lWidth, long lHeight)
 	{
+		// The values given here are always the physical (render surface) size.
+		m_lPhysWidth = lWidth;
+		m_lPhysHeight = lHeight;
+
+		if (m_fUIScale > 1.0f)
+			__SetLogicalScreenSize((long)(lWidth / m_fUIScale + 0.5f), (long)(lHeight / m_fUIScale + 0.5f));
+		else
+			__SetLogicalScreenSize(lWidth, lHeight);
+	}
+
+	void CWindowManager::SetUIScale(float fScale)
+	{
+		if (fScale < 1.0f)
+			fScale = 1.0f;
+		if (fScale > 2.0f)
+			fScale = 2.0f;
+
+		if (fabsf(fScale - m_fUIScale) < 0.001f)
+			return;
+
+		const long lOldW = m_lWidth;
+		const long lOldH = m_lHeight;
+
+		m_fUIScale = fScale;
+		CPythonGraphic::Instance().SetInterfaceScale(fScale);
+
+		if (m_lPhysWidth <= 0 || m_lPhysHeight <= 0)
+			return;
+
+		const long lNewW = (long)(m_lPhysWidth / fScale + 0.5f);
+		const long lNewH = (long)(m_lPhysHeight / fScale + 0.5f);
+		__SetLogicalScreenSize(lNewW, lNewH);
+
+		for (TWindowContainer::iterator itor = m_LayerWindowList.begin(); itor != m_LayerWindowList.end(); ++itor)
+		{
+			(*itor)->RelayoutTopLevelChildren(lOldW, lOldH, lNewW, lNewH);
+		}
+	}
+
+	void CWindowManager::__SetLogicalScreenSize(long lWidth, long lHeight)
+	{
 		m_lWidth	= lWidth;
 		m_lHeight	= lHeight;
 
@@ -755,6 +802,12 @@ namespace UI
 	{
 		__ClearReserveDeleteWindowList();
 		
+		if (!m_pLeftCaptureWindow)
+		{
+			for (TWindowContainer::iterator itor = m_LayerWindowList.begin(); itor != m_LayerWindowList.end(); ++itor)
+				(*itor)->KeepMovableChildrenReachable(m_lWidth, m_lHeight);
+		}
+
 		m_pRootWindow->Update();
 	}
 
@@ -765,7 +818,7 @@ namespace UI
 
 	bool CWindowManager::IsUIWindowAt(long x, long y)
 	{
-		CWindow * pWin = __PickWindow(x, y);
+		CWindow * pWin = __PickWindowAtScreen(x, y);
 		if (!pWin)
 			return false;
 		if (pWin->GetName() && !strcmp(pWin->GetName(), "MobileVirtualJoystick"))
@@ -776,7 +829,7 @@ namespace UI
 	// True when the point is over the 3D world: nothing picked, or only the "game" window picked.
 	bool CWindowManager::IsGameWorldAt(long x, long y)
 	{
-		CWindow * pWin = __PickWindow(x, y);
+		CWindow * pWin = __PickWindowAtScreen(x, y);
 		if (!pWin)
 			return true;
 		const char * c_szName = pWin->GetName();
@@ -822,6 +875,80 @@ namespace UI
 
 		m_lMouseX = m_lWidth * x / m_iHres;
 		m_lMouseY = m_lHeight * y / m_iVres;
+
+		// Same point in physical (HUD space) pixels.
+		m_lHudMouseX = GetHudScreenWidth() * x / m_iHres;
+		m_lHudMouseY = GetHudScreenHeight() * y / m_iVres;
+	}
+
+	void CWindowManager::GetHudMousePosition(long & rx, long & ry)
+	{
+		rx = m_lHudMouseX;
+		ry = m_lHudMouseY;
+	}
+
+	// UI space point -> HUD (physical) space point.
+	void CWindowManager::ToHudSpace(long lx, long ly, long & rx, long & ry)
+	{
+		// Exact value when it is the current mouse position (avoids the rounding of the logical mouse).
+		if (lx == m_lMouseX && ly == m_lMouseY)
+		{
+			rx = m_lHudMouseX;
+			ry = m_lHudMouseY;
+			return;
+		}
+
+		rx = (long)(lx * m_fUIScale + 0.5f);
+		ry = (long)(ly * m_fUIScale + 0.5f);
+	}
+
+	// Mouse position (+ screen size) in the space the given window lives in.
+	void CWindowManager::__GetMouseFor(CWindow * pWin, long & rlMouseX, long & rlMouseY, long & rlScrW, long & rlScrH)
+	{
+		if (pWin && pWin->IsInHudSpace())
+		{
+			rlMouseX = m_lHudMouseX;
+			rlMouseY = m_lHudMouseY;
+			rlScrW = GetHudScreenWidth();
+			rlScrH = GetHudScreenHeight();
+		}
+		else
+		{
+			rlMouseX = m_lMouseX;
+			rlMouseY = m_lMouseY;
+			rlScrW = m_lWidth;
+			rlScrH = m_lHeight;
+		}
+	}
+
+	// Pick at a raw touch / surface position (physical pixels) without touching the stored mouse state.
+	CWindow * CWindowManager::__PickWindowAtScreen(long x, long y)
+	{
+		const long lOldMouseX = m_lMouseX, lOldMouseY = m_lMouseY;
+		const long lOldHudX = m_lHudMouseX, lOldHudY = m_lHudMouseY;
+
+		if (m_iHres > 0 && m_iVres > 0)
+		{
+			m_lMouseX = m_lWidth * x / m_iHres;
+			m_lMouseY = m_lHeight * y / m_iVres;
+			m_lHudMouseX = GetHudScreenWidth() * x / m_iHres;
+			m_lHudMouseY = GetHudScreenHeight() * y / m_iVres;
+		}
+		else
+		{
+			m_lMouseX = (long)(x / m_fUIScale);
+			m_lMouseY = (long)(y / m_fUIScale);
+			m_lHudMouseX = x;
+			m_lHudMouseY = y;
+		}
+
+		CWindow * pWin = __PickWindow(m_lMouseX, m_lMouseY);
+
+		m_lMouseX = lOldMouseX;
+		m_lMouseY = lOldMouseY;
+		m_lHudMouseX = lOldHudX;
+		m_lHudMouseY = lOldHudY;
+		return pWin;
 	}
 
 	void CWindowManager::GetMousePosition(long & rx, long & ry)
@@ -835,10 +962,20 @@ namespace UI
 		if (!pWin)
 			return;
 
+		long lMouseX, lMouseY, lScrW, lScrH;
+		__GetMouseFor(pWin, lMouseX, lMouseY, lScrW, lScrH);
+		__RunCaptureDragAt(pWin, lDragX, lDragY, lMouseX, lMouseY, lScrW, lScrH);
+	}
+
+	void CWindowManager::__RunCaptureDragAt(CWindow * pWin, long lDragX, long lDragY, long lMouseX, long lMouseY, long lScrW, long lScrH)
+	{
+		if (!pWin)
+			return;
+
 		if (pWin->IsFlag(CWindow::FLAG_MOVABLE))
 		{
-			long x = m_lMouseX - lDragX;
-			long y = m_lMouseY - lDragY;
+			long x = lMouseX - lDragX;
+			long y = lMouseY - lDragY;
 			if (pWin->HasParent())
 			{
 				x -= pWin->GetParent()->GetRect().left;
@@ -860,8 +997,8 @@ namespace UI
 			{
 				RECT limitRect = pWin->GetLimitBias();
 
-				limitRect.right = m_lWidth - limitRect.right;
-				limitRect.bottom = m_lHeight - limitRect.bottom;
+				limitRect.right = lScrW - limitRect.right;
+				limitRect.bottom = lScrH - limitRect.bottom;
 
 				if (x < limitRect.left)
 					x = limitRect.left;
@@ -879,8 +1016,8 @@ namespace UI
 		}
 		else if (pWin->IsFlag(CWindow::FLAG_DRAGABLE))
 		{
-			long x = m_lMouseX - lDragX;
-			long y = m_lMouseY - lDragY;
+			long x = lMouseX - lDragX;
+			long y = lMouseY - lDragY;
 			pWin->OnMouseDrag(x, y);
 		}
 	}
@@ -903,8 +1040,10 @@ namespace UI
 		if (!pWin->IsFlag(CWindow::FLAG_NOT_CAPTURE))
 			m_pSecondCaptureWindow = pWin;
 
-		m_lSecondDragX = m_lMouseX - pWin->GetRect().left;
-		m_lSecondDragY = m_lMouseY - pWin->GetRect().top;
+		long lDragMouseX, lDragMouseY, lDragScrW, lDragScrH;
+		__GetMouseFor(pWin, lDragMouseX, lDragMouseY, lDragScrW, lDragScrH);
+		m_lSecondDragX = lDragMouseX - pWin->GetRect().left;
+		m_lSecondDragY = lDragMouseY - pWin->GetRect().top;
 
 		pWin->OnMouseLeftButtonDown();
 	}
@@ -998,8 +1137,10 @@ namespace UI
 		if (!pWin->IsFlag(CWindow::FLAG_NOT_CAPTURE))
 			m_pLeftCaptureWindow = pWin;
 
-		m_lDragX = m_lMouseX - pWin->GetRect().left;
-		m_lDragY = m_lMouseY - pWin->GetRect().top;
+		long lDragMouseX, lDragMouseY, lDragScrW, lDragScrH;
+		__GetMouseFor(pWin, lDragMouseX, lDragMouseY, lDragScrW, lDragScrH);
+		m_lDragX = lDragMouseX - pWin->GetRect().left;
+		m_lDragY = lDragMouseY - pWin->GetRect().top;
 		m_lPickedX = m_lMouseX;
 		m_lPickedY = m_lMouseY;
 

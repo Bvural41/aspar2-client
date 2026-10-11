@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "PythonCharacterManager.h"
 #include "PythonNonPlayer.h"
+#include "../EterPythonLib/PythonWindowManager.h"
 
 PyObject * chrRaceToJob(PyObject * poSelf, PyObject * poArgs)
 {
@@ -893,6 +894,14 @@ PyObject * chrGetProjectPosition(PyObject* poSelf, PyObject* poArgs)
 
 	if (1 == int(fz))
 		return Py_BuildValue("ii", -100, -100);
+
+	// Python windows (shop signs ...) are laid out in UI (zoomed) space
+	const float fUIScale = UI::CWindowManager::Instance().GetUIScale();
+	if (fUIScale > 1.0f)
+	{
+		fx /= fUIScale;
+		fy /= fUIScale;
+	}
 
 	return Py_BuildValue("ii", int(fx), int(fy));
 }

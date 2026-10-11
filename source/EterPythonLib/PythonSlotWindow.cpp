@@ -1759,7 +1759,7 @@ BOOL CSlotWindow::GetSelectedSlotPointer(TSlot** ppSlot)
 BOOL CSlotWindow::GetPickedSlotPointer(TSlot** ppSlot)
 {
 	long lx, ly;
-	CWindowManager::Instance().GetMousePosition(lx, ly);
+	GetSpaceMousePosition(lx, ly);
 
 	int ixLocal = lx - m_rect.left;
 	int iyLocal = ly - m_rect.top;
