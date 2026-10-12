@@ -267,6 +267,8 @@ class CGraphicBase
 		static int						ms_iLocMeshAmbientColor;
 		static int						ms_iLocMeshAlphaTest;
 		static int						ms_iLocMeshAlphaRef;
+		static int						ms_iLocMeshAlphaFromFactor;
+		static int						ms_iLocMeshFactorAlpha;
 		static int						ms_iLocMeshFogColor;
 		static int						ms_iLocMeshFogRange;
 		static int						ms_iLocMeshFogEnable;

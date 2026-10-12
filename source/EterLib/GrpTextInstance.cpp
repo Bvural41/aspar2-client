@@ -99,6 +99,11 @@ std::string & CGraphicTextInstance::GetTextFromMousePos()
 
 int CGraphicTextInstance::__DrawCharacter(CGraphicFontTexture * pFontTexture, WORD codePage, wchar_t text, DWORD dwColor)
 {
+	// Control characters (CR, LF, ...) have no glyph and would be drawn as a missing-glyph box.
+	// 0x08 is kept because the font texture maps it to a space.
+	if (text < L' ' && text != 0x08)
+		return 0;
+
 	CGraphicFontTexture::TCharacterInfomation* pInsCharInfo = pFontTexture->GetCharacterInfomation(codePage, text);
 
 	if (pInsCharInfo)
@@ -1609,6 +1614,7 @@ WORD CGraphicTextInstance::GetTextLineCount()
 
 void CGraphicTextInstance::GetTextSize(int* pRetWidth, int* pRetHeight)
 {
+	Update();
 	*pRetWidth = m_textWidth;
 	*pRetHeight = m_textHeight;
 }

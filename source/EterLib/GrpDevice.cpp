@@ -678,6 +678,8 @@ int CGraphicDevice::Create(HWND hWnd, int iHres, int iVres, bool Windowed, int /
 	ms_iLocMeshUseTexture2 = glGetUniformLocation(ms_uMeshShaderProgram, "u_useTexture2");
 	ms_iLocMeshAlphaTest = glGetUniformLocation(ms_uMeshShaderProgram, "u_alphaTest");
 	ms_iLocMeshAlphaRef = glGetUniformLocation(ms_uMeshShaderProgram, "u_alphaRef");
+	ms_iLocMeshAlphaFromFactor = glGetUniformLocation(ms_uMeshShaderProgram, "u_alphaFromFactor");
+	ms_iLocMeshFactorAlpha = glGetUniformLocation(ms_uMeshShaderProgram, "u_factorAlpha");
 	ms_iLocMeshLightDir = glGetUniformLocation(ms_uMeshShaderProgram, "u_lightDir");
 	ms_iLocMeshLightColor = glGetUniformLocation(ms_uMeshShaderProgram, "u_lightColor");
 	ms_iLocMeshAmbientColor = glGetUniformLocation(ms_uMeshShaderProgram, "u_ambientColor");

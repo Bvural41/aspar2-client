@@ -11,13 +11,10 @@
 #include <string>
 
 #if defined(__ANDROID__)
-#include <android/log.h>
 #include <android/asset_manager.h>
-#define FONT_LOG(...) __android_log_print(ANDROID_LOG_INFO, "Metin2Font", __VA_ARGS__)
 extern AAssetManager* g_pAssetManager;
 #else
 #include <stdio.h>
-#define FONT_LOG(...) printf("[Metin2Font] " __VA_ARGS__)
 extern std::string g_strBundlePath;
 #endif
 
@@ -64,11 +61,10 @@ static bool EnsureFontLoaded()
 	if (bRead && stbtt_InitFont(&s_fontInfo, s_fontBuffer.data(), 0))
 	{
 		s_fontLoaded = true;
-		FONT_LOG("Loaded tahoma.ttf (%zu bytes)\n", s_fontBuffer.size());
 		return true;
 	}
 
-	FONT_LOG("ERROR: Failed to load tahoma.ttf!\n");
+	TraceError("Failed to load tahoma.ttf!");
 	return false;
 }
 #endif

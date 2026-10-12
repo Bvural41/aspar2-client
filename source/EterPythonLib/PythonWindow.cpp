@@ -1152,6 +1152,8 @@ namespace UI
 
 			if (bMoved)
 				pWin->SetPosition(x, y);
+			else
+				pWin->UpdateRect();
 		}
 
 		// Windows that attach other windows to themselves (belt inventory, quest slide ...) re-dock in OnMoveWindow.

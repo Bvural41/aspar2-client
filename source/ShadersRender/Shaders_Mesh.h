@@ -84,6 +84,8 @@ uniform int u_isShadowPass;
 uniform int u_isPCBlockerPass;
 uniform int u_alphaTest;
 uniform float u_alphaRef;
+uniform int u_alphaFromFactor;
+uniform float u_factorAlpha;
 uniform vec3 u_lightDir;
 uniform vec3 u_lightColor;
 uniform vec3 u_ambientColor;
@@ -130,14 +132,15 @@ void main()
             vec4 tex2 = texture(u_texture2, v_texCoord2);
             texColor *= tex2;
         }
-        if (u_alphaTest != 0 && texColor.a < u_alphaRef)
+        float srcAlpha = (u_alphaFromFactor != 0) ? u_factorAlpha : texColor.a;
+        if (u_alphaTest != 0 && srcAlpha < u_alphaRef)
             discard;
         vec3 N = normalize(v_worldNormal);
         float NdotL = max(dot(N, u_lightDir), 0.0);
         vec3 lighting = (u_isDungeonMap != 0 || u_useTexture2 != 0) ? vec3(1.0) : (u_ambientColor + u_lightColor * NdotL);
         vec3 litColor = texColor.rgb * lighting;
         vec3 finalColor = ApplyModernFog(litColor, v_fogDist, u_fogRange, u_fogEnable, u_fogColor);
-        float outAlpha = (u_useTexture != 0) ? texColor.a : 1.0;
+        float outAlpha = (u_alphaFromFactor != 0) ? u_factorAlpha : ((u_useTexture != 0) ? texColor.a : 1.0);
         if (u_isPCBlockerPass != 0)
         {
             vec2 bUV = clamp(v_blockerUV, 0.0, 1.0);

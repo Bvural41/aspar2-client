@@ -992,6 +992,22 @@ static void SetupMeshShaderAndStates(const CStateManagerState& state)
 	glUniform1i(CGraphicBase::ms_iLocMeshAlphaTest, alphaTest);
 	glUniform1f(CGraphicBase::ms_iLocMeshAlphaRef, alphaRef);
 
+	if (CGraphicBase::ms_iLocMeshAlphaFromFactor != -1 && CGraphicBase::ms_iLocMeshFactorAlpha != -1)
+	{
+		const DWORD alphaOp = state.m_TextureStates[0][D3DTSS_ALPHAOP];
+		const bool bBlendOn = state.m_RenderStates[D3DRS_ALPHABLENDENABLE] && state.m_RenderStates[D3DRS_ALPHABLENDENABLE] != 0x7FFFFFFF;
+		const bool bAlphaFromFactor = bBlendOn && !isShadowPass && !isPCBlockerPass &&
+			((alphaOp == D3DTOP_SELECTARG1 && state.m_TextureStates[0][D3DTSS_ALPHAARG1] == D3DTA_TFACTOR) ||
+			 (alphaOp == D3DTOP_SELECTARG2 && state.m_TextureStates[0][D3DTSS_ALPHAARG2] == D3DTA_TFACTOR));
+
+		DWORD tfactor = state.m_RenderStates[D3DRS_TEXTUREFACTOR];
+		if (tfactor == 0x7FFFFFFF)
+			tfactor = 0xFFFFFFFF;
+
+		glUniform1i(CGraphicBase::ms_iLocMeshAlphaFromFactor, bAlphaFromFactor ? 1 : 0);
+		glUniform1f(CGraphicBase::ms_iLocMeshFactorAlpha, float((tfactor >> 24) & 0xFF) / 255.0f);
+	}
+
 	if (g_bRenderingCharacterShadow)
 	{
 		glDisable(GL_BLEND);

@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #ifdef __ANDROID__
 #include <android/log.h>
+#include <string>
+extern std::string g_strAndroidExternalPath;
 #endif
 
 #include <time.h>
@@ -246,12 +248,22 @@ void TraceError(const char* c_szFormat, ...)
 			s_pSysErrFile = fopen(docPath, "a");
 		}
 #endif
+#if defined(__ANDROID__)
+		// User-visible locations first (same folders the packs/config are read from); the working
+		// directory is the app's private storage, which the user cannot browse.
+		static const char* const c_apszSysErrPath[] = {
+			"/sdcard/aspar2/syserr.txt",
+			"/storage/emulated/0/aspar2/syserr.txt",
+			"syserr.txt",
+		};
+		for (size_t i = 0; !s_pSysErrFile && i < sizeof(c_apszSysErrPath) / sizeof(c_apszSysErrPath[0]); ++i)
+			s_pSysErrFile = fopen(c_apszSysErrPath[i], "a");
+		if (!s_pSysErrFile && !g_strAndroidExternalPath.empty())
+			s_pSysErrFile = fopen((g_strAndroidExternalPath + "/syserr.txt").c_str(), "a");
+#else
 		if (!s_pSysErrFile)
 			s_pSysErrFile = fopen("syserr.txt", "a");
-		if (!s_pSysErrFile)
-			s_pSysErrFile = fopen("/sdcard/aspar2/syserr.txt", "a");
-		if (!s_pSysErrFile)
-			s_pSysErrFile = fopen("/storage/emulated/0/aspar2/syserr.txt", "a");
+#endif
 	}
 	if (s_pSysErrFile)
 	{

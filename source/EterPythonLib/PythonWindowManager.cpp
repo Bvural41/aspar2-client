@@ -1071,10 +1071,17 @@ namespace UI
 	{
 		if (IsAttaching())
 		{
-			if (x > m_lWidth)
-				x = m_lWidth;
-			if (y > m_lHeight)
-				y = m_lHeight;
+			const long lMaxW = m_iHres > 0 ? m_iHres : GetHudScreenWidth();
+			const long lMaxH = m_iVres > 0 ? m_iVres : GetHudScreenHeight();
+			if (x < 0)
+				x = 0;
+			else if (x > lMaxW)
+				x = lMaxW;
+
+			if (y < 0)
+				y = 0;
+			else if (y > lMaxH)
+				y = lMaxH;
 		}
 
 		SetMousePosition(x, y);
