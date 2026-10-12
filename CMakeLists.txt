@@ -459,6 +459,11 @@ elseif(APPLE)
         XCODE_ATTRIBUTE_STRIP_INSTALLED_PRODUCT "YES"
     )
 
+    set(IOS_ASSET_CATALOG ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Assets.xcassets)
+    target_sources(Aspar2 PRIVATE ${IOS_ASSET_CATALOG})
+    set_source_files_properties(${IOS_ASSET_CATALOG} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set_target_properties(Aspar2 PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+
     install(TARGETS Aspar2 BUNDLE DESTINATION Applications RUNTIME DESTINATION Applications)
 
     add_custom_command(TARGET Aspar2 POST_BUILD
