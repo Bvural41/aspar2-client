@@ -26,6 +26,10 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app
           xcodebuild -version
 
+      - name: Set Build Number
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ github.run_number }}" android_ios/ios/Info.plist
+
       - name: Configure CMake for iOS
         run: |
           cmake -B build-ios -G Xcode \
@@ -45,16 +49,52 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             archive
 
-      - name: Package IPA
+      - name: Prepare App Store Connect API Key
+        env:
+          APPSTORE_API_KEY_P8: ${{ secrets.APPSTORE_API_KEY_P8 }}
         run: |
-          mkdir -p build-ios/Payload
-          cp -r build-ios/Aspar2.xcarchive/Products/Applications/Aspar2.app build-ios/Payload/
-          cd build-ios
-          zip -r Aspar2.ipa Payload
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APPSTORE_API_KEY_P8" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8
+
+      - name: Export Signed IPA
+        run: |
+          cat > build-ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>${{ secrets.APPLE_TEAM_ID }}</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>destination</key>
+              <string>export</string>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath build-ios/Aspar2.xcarchive \
+            -exportPath build-ios/export \
+            -exportOptionsPlist build-ios/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8 \
+            -authenticationKeyID ${{ secrets.APPSTORE_KEY_ID }} \
+            -authenticationKeyIssuerID ${{ secrets.APPSTORE_ISSUER_ID }}
+          ls -la build-ios/export
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Aspar2-iOS-Release
-          path: build-ios/Aspar2.ipa
+          path: build-ios/export/*.ipa
           retention-days: 14
+
+      - name: Upload to TestFlight
+        run: |
+          xcrun altool --upload-app \
+            -f build-ios/export/Aspar2.ipa \
+            --type ios \
+            --apiKey ${{ secrets.APPSTORE_KEY_ID }} \
+            --apiIssuer ${{ secrets.APPSTORE_ISSUER_ID }}
