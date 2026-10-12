@@ -44,3 +44,8 @@ extern/library/Cryptopp_lib_debug.lib
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Android imza dosyalari (asla commit etme)
+*.jks
+*.keystore
+keystore.properties
