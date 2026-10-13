@@ -79,7 +79,14 @@ void CEffectInstance::OnUpdate()
 #ifdef WORLD_EDITOR
 	FEffectUpdator f(CTimer::Instance().GetElapsedSecond());
 #else
-	FEffectUpdator f(CTimer::Instance().GetCurrentSecond()-m_fLastTime);
+	float fEffectElapsed = CTimer::Instance().GetCurrentSecond()-m_fLastTime;
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+	if (fEffectElapsed < 0.0f)
+		fEffectElapsed = 0.0f;
+	else if (fEffectElapsed > 0.1f)
+		fEffectElapsed = 0.1f;
+#endif
+	FEffectUpdator f(fEffectElapsed);
 #endif
 	f = std::for_each(m_ParticleInstanceVector.begin(), m_ParticleInstanceVector.end(),f);
 	f = std::for_each(m_MeshInstanceVector.begin(), m_MeshInstanceVector.end(),f);

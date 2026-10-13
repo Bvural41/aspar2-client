@@ -28,6 +28,8 @@ class CTimer : public CSingleton<CTimer>
 		float	m_fCurrentTime;
 		DWORD	m_dwElapsedTime;
 		int		m_index;
+		DWORD	m_dwLastRealTime;
+		bool	m_bRealClockInit;
 };
 
 BOOL	ELTimer_Init();

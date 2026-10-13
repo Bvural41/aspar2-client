@@ -79,6 +79,9 @@ CTimer::CTimer()
 		m_dwElapsedTime = 0;
 
 		m_fCurrentTime = 0.0f;
+
+		m_dwLastRealTime = 0;
+		m_bRealClockInit = false;
 	}
 	NANOEND
 }
@@ -96,6 +99,22 @@ void CTimer::Advance()
 {
 	if (!m_bUseRealTime)
 	{
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+		DWORD dwRealTime = ELTimer_GetMSec();
+
+		if (!m_bRealClockInit)
+		{
+			m_bRealClockInit = true;
+			m_dwLastRealTime = dwRealTime;
+		}
+
+		DWORD dwDelta = dwRealTime - m_dwLastRealTime;
+		m_dwLastRealTime = dwRealTime;
+
+		m_dwElapsedTime = (dwDelta > 100) ? 100 : dwDelta;
+		m_dwCurrentTime += dwDelta;
+		m_fCurrentTime = m_dwCurrentTime / 1000.0f;
+#else
 		++m_index;
 
 		if (m_index == 1)
@@ -103,6 +122,7 @@ void CTimer::Advance()
 
 		m_dwCurrentTime += 16 + (m_index & 1);
 		m_fCurrentTime = m_dwCurrentTime / 1000.0f;
+#endif
 	}
 	else
 	{
@@ -146,8 +166,10 @@ float CTimer::GetElapsedSecond()
 
 DWORD CTimer::GetElapsedMilliecond()
 {
+#if !defined(__ANDROID__) && !defined(__APPLE__) && !defined(__IOS__)
 	if (!m_bUseRealTime)
 		return 16 + (m_index & 1);
+#endif
 
 	return m_dwElapsedTime;
 }

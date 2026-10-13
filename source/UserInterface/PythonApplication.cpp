@@ -615,12 +615,17 @@ bool CPythonApplication::Process()
 		int dt = dwCurrentTime - s_uiNextFrameTime;
 		int nAdjustTime = (uiFrameTime > 0) ? (int)(((float)dt / (float)uiFrameTime) * uiFrameTime) : dt;
 
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+		s_uiNextFrameTime = dwCurrentTime;
+		(void)nAdjustTime;
+#else
 		if ( dt >= 500 )
 		{
 			s_uiNextFrameTime += nAdjustTime; 
 			printf("FrameSkip 보정 %d\n",nAdjustTime);
 			CTimer::Instance().Adjust(nAdjustTime);
 		}
+#endif
 
 		s_bFrameSkip = true;
 		bCurrentLateUpdate = TRUE;

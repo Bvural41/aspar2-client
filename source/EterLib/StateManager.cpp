@@ -1314,7 +1314,7 @@ static void SetupParticleShaderAndStates(const CStateManagerState& state, bool h
 	glUniformMatrix4fv(CGraphicBase::ms_iLocParticleWVP, 1, GL_FALSE, (const float*)&s_matWVP);
 
 	DWORD tfactor = state.m_RenderStates[D3DRS_TEXTUREFACTOR];
-	if (tfactor == 0 || tfactor == 0x7FFFFFFF)
+	if (tfactor == 0x7FFFFFFF)
 		tfactor = 0xFFFFFFFF;
 	float a = float((tfactor >> 24) & 0xFF) / 255.0f;
 	float r = float((tfactor >> 16) & 0xFF) / 255.0f;
