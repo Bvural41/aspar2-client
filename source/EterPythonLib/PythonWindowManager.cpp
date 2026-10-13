@@ -826,6 +826,22 @@ namespace UI
 		return true;
 	}
 
+	bool CWindowManager::IsUIDialogAt(long x, long y)
+	{
+		CWindow * pWin = __PickWindowAtScreen(x, y);
+		if (!pWin)
+			return false;
+		for (CWindow* pCur = pWin; pCur; pCur = pCur->GetParent())
+		{
+			if (pCur->GetName() && !strcmp(pCur->GetName(), "MobileVirtualJoystick"))
+				return false;
+		}
+		const char * c_szName = pWin->GetName();
+		if (c_szName && !strcmp(c_szName, "game"))
+			return false;
+		return true;
+	}
+
 	// True when the point is over the 3D world: nothing picked, or only the "game" window picked.
 	bool CWindowManager::IsGameWorldAt(long x, long y)
 	{

@@ -663,7 +663,35 @@ static void IOS_RotateCamera(float deltaX, float deltaY) {
 	}
 }
 
+static bool s_bJoystickRoutedToUI_iOS = false;
+
 void IOS_JoystickTouch(int action, float x, float y) {
+	int ix = static_cast<int>(x);
+	int iy = static_cast<int>(y);
+
+	if (action == 0) { // ACTION_DOWN
+		UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
+		if (rkWndMgr.IsUIDialogAt(ix, iy)) {
+			s_bJoystickRoutedToUI_iOS = true;
+			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			CPythonApplication::Instance().OnMouseLeftButtonDown(ix, iy);
+			return;
+		}
+		s_bJoystickRoutedToUI_iOS = false;
+	} else if (action == 2) { // ACTION_MOVE
+		if (s_bJoystickRoutedToUI_iOS) {
+			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			return;
+		}
+	} else if (action == 1 || action == 3) { // ACTION_UP / ACTION_CANCEL
+		if (s_bJoystickRoutedToUI_iOS) {
+			s_bJoystickRoutedToUI_iOS = false;
+			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			CPythonApplication::Instance().OnMouseLeftButtonUp(ix, iy);
+			return;
+		}
+	}
+
 	CPythonPlayer::Instance().OnMobileJoystick(action, x, y);
 }
 

@@ -627,7 +627,35 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_touchEvent(JNIEnv* env, 
 }
 
 
+static bool s_bJoystickRoutedToUI = false;
+
 JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_joystickTouch(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y) {
+	int ix = static_cast<int>(x);
+	int iy = static_cast<int>(y);
+
+	if (action == 0 || action == 5) { // ACTION_DOWN / ACTION_POINTER_DOWN
+		UI::CWindowManager & rkWndMgr = UI::CWindowManager::Instance();
+		if (rkWndMgr.IsUIDialogAt(ix, iy)) {
+			s_bJoystickRoutedToUI = true;
+			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			CPythonApplication::Instance().OnMouseLeftButtonDown(ix, iy);
+			return;
+		}
+		s_bJoystickRoutedToUI = false;
+	} else if (action == 2) { // ACTION_MOVE
+		if (s_bJoystickRoutedToUI) {
+			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			return;
+		}
+	} else if (action == 1 || action == 3 || action == 6) { // ACTION_UP / ACTION_CANCEL / ACTION_POINTER_UP
+		if (s_bJoystickRoutedToUI) {
+			s_bJoystickRoutedToUI = false;
+			CPythonApplication::Instance().OnMouseMove(ix, iy);
+			CPythonApplication::Instance().OnMouseLeftButtonUp(ix, iy);
+			return;
+		}
+	}
+
 	CPythonPlayer::Instance().OnMobileJoystick(action, x, y);
 }
 

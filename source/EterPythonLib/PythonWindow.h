@@ -68,10 +68,10 @@ namespace UI
 		void			Render();
 
 		void			SetName(const char* c_szName);
-		const char* GetName() { return m_strName.c_str(); }
+		const char* GetName() const { return m_strName.c_str(); }
 		void			SetSize(long width, long height);
-		long			GetWidth() { return m_lWidth; }
-		long			GetHeight() { return m_lHeight; }
+		long			GetWidth() const { return m_lWidth; }
+		long			GetHeight() const { return m_lHeight; }
 		void			SetHorizontalAlign(DWORD dwAlign);
 		void			SetVerticalAlign(DWORD dwAlign);
 		void			SetPosition(long x, long y);
@@ -114,6 +114,7 @@ namespace UI
 		void			GetSpaceMousePosition(long& rlx, long& rly);
 		void			RelayoutTopLevelChildren(long lOldW, long lOldH, long lNewW, long lNewH);
 		void			KeepMovableChildrenReachable(long lScrW, long lScrH);
+		bool			GetAutoFitScale(float& rfFitScale, long& rRenderX, long& rRenderY) const;
 		CWindow* PickTopWindow(long x, long y);	// NOTE : Children으로 내려가지 않고 상위에서만 
 														//        체크 하는 특화된 함수
 
@@ -121,7 +122,7 @@ namespace UI
 
 		void			AddFlag(DWORD flag) { SET_BIT(m_dwFlag, flag); }
 		void			RemoveFlag(DWORD flag) { REMOVE_BIT(m_dwFlag, flag); }
-		bool			IsFlag(DWORD flag) { return (m_dwFlag & flag) ? true : false; }
+		bool			IsFlag(DWORD flag) const { return (m_dwFlag & flag) ? true : false; }
 		/////////////////////////////////////
 
 		virtual void	OnRender();

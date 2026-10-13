@@ -164,6 +164,7 @@ namespace UI
 			void		RunPressExitKey();
 
 			bool		IsUIWindowAt(long x, long y);
+			bool		IsUIDialogAt(long x, long y);
 			bool		IsGameWorldAt(long x, long y);
 
 			// Multi-touch (mobile): a 2nd finger pressing/dragging a UI window while the 1st finger

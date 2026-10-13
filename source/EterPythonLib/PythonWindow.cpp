@@ -3,6 +3,7 @@
 #include "PythonWindow.h"
 #include "PythonSlotWindow.h"
 #include "PythonWindowManager.h"
+#include "../EterLib/StateManager.h"
 #include "../EterLib/CRenderTargetManager.h"
 #ifdef ENABLE_INGAME_WIKI
 #include "../EterLib/CWikiRenderTargetManager.h"
@@ -181,6 +182,21 @@ namespace UI
 			}
 		}
 
+		float fFitScale = 1.0f;
+		long renderX = m_x, renderY = m_y;
+		const bool bAutoFit = !bHudSpace && GetAutoFitScale(fFitScale, renderX, renderY);
+
+		if (bAutoFit)
+		{
+			D3DXMATRIX matWorld, matT1, matS, matT2;
+			D3DXMatrixTranslation(&matT1, -(float)m_x, -(float)m_y, 0.0f);
+			D3DXMatrixScaling(&matS, fFitScale, fFitScale, 1.0f);
+			D3DXMatrixTranslation(&matT2, (float)renderX, (float)renderY, 0.0f);
+			D3DXMatrixMultiply(&matWorld, &matT1, &matS);
+			D3DXMatrixMultiply(&matWorld, &matWorld, &matT2);
+			STATEMANAGER.SetTransform(D3DTS_WORLD, &matWorld);
+		}
+
 		// Own drawing (e.g. bars, images) must use the HUD projection as well
 		OnRender();
 
@@ -191,6 +207,13 @@ namespace UI
 		}
 
 		std::for_each(m_pChildList.begin(), m_pChildList.end(), std::void_mem_fun(&CWindow::Render));
+
+		if (bAutoFit)
+		{
+			D3DXMATRIX matIdentity;
+			D3DXMatrixIdentity(&matIdentity);
+			STATEMANAGER.SetTransform(D3DTS_WORLD, &matIdentity);
+		}
 
 		if (bHudSpace && fHudPrevScale != 1.0f)
 		{
@@ -1066,6 +1089,17 @@ namespace UI
 
 	bool CWindow::IsIn(long x, long y)
 	{
+		float fFitScale = 1.0f;
+		long renderX = m_x, renderY = m_y;
+		if (GetAutoFitScale(fFitScale, renderX, renderY))
+		{
+			long lRenderW = (long)(m_lWidth * fFitScale + 0.5f);
+			long lRenderH = (long)(m_lHeight * fFitScale + 0.5f);
+			if (x >= renderX && x <= renderX + lRenderW && y >= renderY && y <= renderY + lRenderH)
+				return true;
+			return false;
+		}
+
 		if (x >= m_rect.left && x <= m_rect.right)
 			if (y >= m_rect.top && y <= m_rect.bottom)
 				return true;
@@ -1095,9 +1129,26 @@ namespace UI
 	void CWindow::GetSpaceMousePosition(long& rlx, long& rly)
 	{
 		if (IsInHudSpace())
+		{
 			CWindowManager::Instance().GetHudMousePosition(rlx, rly);
-		else
-			CWindowManager::Instance().GetMousePosition(rlx, rly);
+			return;
+		}
+
+		CWindowManager::Instance().GetMousePosition(rlx, rly);
+
+		// Descendants of an auto-fit (down-scaled) window are laid out in unscaled space:
+		// map the screen mouse position back into that space.
+		for (CWindow* pAncestor = m_pParent; pAncestor; pAncestor = pAncestor->m_pParent)
+		{
+			float fFitScale = 1.0f;
+			long renderX = 0, renderY = 0;
+			if (pAncestor->GetAutoFitScale(fFitScale, renderX, renderY) && fFitScale > 0.0f)
+			{
+				rlx = pAncestor->m_x + (long)((float)(rlx - renderX) / fFitScale);
+				rly = pAncestor->m_y + (long)((float)(rly - renderY) / fFitScale);
+				break;
+			}
+		}
 	}
 
 	// Called by the window manager after the UI scale (= logical screen size) changed. Keeps top level windows
@@ -1197,6 +1248,67 @@ namespace UI
 		}
 	}
 
+	bool CWindow::GetAutoFitScale(float& rfFitScale, long& rRenderX, long& rRenderY) const
+	{
+		rfFitScale = 1.0f;
+		rRenderX = m_x;
+		rRenderY = m_y;
+
+		// Only top-level movable windows in the UI / TOP_MOST layers that are not HUD space
+		if (!m_pParent || IsFlag(FLAG_HUD_SPACE) || !IsFlag(FLAG_MOVABLE))
+			return false;
+
+		const char* pParentName = m_pParent->GetName();
+		if (!pParentName)
+			return false;
+
+		if (strcmp(pParentName, "UI") != 0 && strcmp(pParentName, "TOP_MOST") != 0)
+			return false;
+
+		const long w = m_lWidth;
+		const long h = m_lHeight;
+		if (w <= 0 || h <= 0)
+			return false;
+
+		long lScrW = CWindowManager::Instance().GetScreenWidth();
+		long lScrH = CWindowManager::Instance().GetScreenHeight();
+		if (lScrW <= 0 || lScrH <= 0)
+			return false;
+
+		if (w <= lScrW && h <= lScrH)
+			return false;
+
+		rfFitScale = min(1.0f, min((float)lScrW / (float)w, (float)lScrH / (float)h));
+		if (rfFitScale >= 0.999f)
+		{
+			rfFitScale = 1.0f;
+			return false;
+		}
+
+		long lRenderW = (long)(w * rfFitScale + 0.5f);
+		long lRenderH = (long)(h * rfFitScale + 0.5f);
+
+		if (lRenderW >= lScrW)
+			rRenderX = 0;
+		else if (m_x < 0)
+			rRenderX = (lScrW - lRenderW) / 2;
+		else if (m_x + lRenderW > lScrW)
+			rRenderX = lScrW - lRenderW;
+		else
+			rRenderX = m_x;
+
+		if (lRenderH >= lScrH)
+			rRenderY = 0;
+		else if (m_y < 0)
+			rRenderY = (lScrH - lRenderH) / 2;
+		else if (m_y + lRenderH > lScrH)
+			rRenderY = lScrH - lRenderH;
+		else
+			rRenderY = m_y;
+
+		return true;
+	}
+
 	CWindow* CWindow::PickWindow(long x, long y)
 	{
 		// HUD space windows are laid out in physical pixels while the incoming point is in UI space.
@@ -1205,6 +1317,20 @@ namespace UI
 			long hx, hy;
 			CWindowManager::Instance().ToHudSpace(x, y, hx, hy);
 			return __PickWindowInSpace(hx, hy);
+		}
+
+		float fFitScale = 1.0f;
+		long renderX = m_x, renderY = m_y;
+		if (GetAutoFitScale(fFitScale, renderX, renderY))
+		{
+			long lRenderW = (long)(m_lWidth * fFitScale + 0.5f);
+			long lRenderH = (long)(m_lHeight * fFitScale + 0.5f);
+			if (x < renderX || x > renderX + lRenderW || y < renderY || y > renderY + lRenderH)
+				return NULL;
+
+			long localX = m_x + (long)(((float)(x - renderX)) / fFitScale);
+			long localY = m_y + (long)(((float)(y - renderY)) / fFitScale);
+			return __PickWindowInSpace(localX, localY);
 		}
 
 		return __PickWindowInSpace(x, y);
