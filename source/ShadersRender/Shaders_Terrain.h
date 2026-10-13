@@ -139,9 +139,9 @@ void main()
     else
         N = vec3(0.0, 0.0, 1.0);
     float NdotL = max(dot(N, u_lightDir), 0.0);
-    vec3 lighting = (u_isDungeonMap != 0 || (u_ambientColor.r >= 0.99 && u_lightColor.r <= 0.01)) ? vec3(1.0) : clamp(u_ambientColor + u_lightColor * NdotL, 0.85, 1.0);
+    vec3 lighting = (u_ambientColor.r >= 0.99 && u_lightColor.r <= 0.01) ? vec3(1.0) : (u_ambientColor + u_lightColor * NdotL);
     vec3 litColor = tileColor.rgb * lighting;
-    vec3 finalColor = (u_isDungeonMap != 0) ? litColor : ApplyModernFog(litColor, v_fogDist, u_fogRange, u_fogEnable, u_fogColor);
+    vec3 finalColor = ApplyModernFog(litColor, v_fogDist, u_fogRange, u_fogEnable, u_fogColor);
     fragColor = vec4(finalColor, alpha);
 }
 )";
