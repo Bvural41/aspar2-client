@@ -34,7 +34,7 @@ android {
         applicationId "com.aspar2.client"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 3
+        versionCode 4
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
