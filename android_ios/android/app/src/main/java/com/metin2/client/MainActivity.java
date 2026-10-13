@@ -377,8 +377,6 @@ public class MainActivity extends Activity {
 
         hideSystemUI();
 
-        requestStoragePermission();
-
         mRootLayout = rootLayout;
         startPackUpdate();
     }
@@ -642,31 +640,6 @@ public class MainActivity extends Activity {
     }
 
     private void requestStoragePermission() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            if (!android.os.Environment.isExternalStorageManager()) {
-                try {
-                    android.content.Intent intent = new android.content.Intent(
-                        android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                        android.net.Uri.parse("package:" + getPackageName())
-                    );
-                    startActivity(intent);
-                } catch (Exception e) {
-                    try {
-                        android.content.Intent intent = new android.content.Intent(
-                            android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                        );
-                        startActivity(intent);
-                    } catch (Exception ignored) {}
-                }
-            }
-        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                }, 1001);
-            }
-        }
     }
 
     @Override
@@ -833,10 +806,8 @@ public class MainActivity extends Activity {
     /** Elle konmus (gelistirici) pack klasorleri varsa native bunlari once kullanir; o zaman indirme atlanir. */
     private boolean hasDevPackOverride() {
         String[] roots = {
-            "/sdcard/aspar2/pack/root.index",
-            "/storage/emulated/0/aspar2/pack/root.index",
-            "/sdcard/metin2/pack/root.index",
-            "/storage/emulated/0/metin2/pack/root.index"
+            "/sdcard/metin2mobile/pack/root.index",
+            "/storage/emulated/0/metin2mobile/pack/root.index"
         };
         for (String p : roots) {
             if (new File(p).canRead()) return true;

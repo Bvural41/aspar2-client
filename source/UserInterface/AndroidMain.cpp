@@ -401,31 +401,15 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 		size_t slashPos = baseName.find_last_of('/');
 		if (slashPos != std::string::npos) baseName = baseName.substr(slashPos + 1);
 
-		// 1. Check /sdcard/aspar2/pack/ and /storage/emulated/0/aspar2/pack/ first
-		std::string asparSdcard = "/sdcard/aspar2/pack/" + baseName;
-		if (access((asparSdcard + ".index").c_str(), R_OK) == 0) {
-			bool ok = CEterPackManager::Instance().RegisterPack(asparSdcard.c_str(), dirPrefix);
-			LOGI("RegisterPack (SDCARD-ASPAR2) %s [%s]: %s", asparSdcard.c_str(), dirPrefix, ok ? "OK" : "FAILED");
-			if (ok) return true;
-		}
-
-		std::string asparEmulated = "/storage/emulated/0/aspar2/pack/" + baseName;
-		if (access((asparEmulated + ".index").c_str(), R_OK) == 0) {
-			bool ok = CEterPackManager::Instance().RegisterPack(asparEmulated.c_str(), dirPrefix);
-			LOGI("RegisterPack (EMULATED-ASPAR2) %s [%s]: %s", asparEmulated.c_str(), dirPrefix, ok ? "OK" : "FAILED");
-			if (ok) return true;
-		}
-
-		// 1b. Fallback to /sdcard/metin2/pack/
-		std::string sdcardPath = "/sdcard/metin2/pack/" + baseName;
+		// 1. Check /sdcard/metin2mobile/pack/ and /storage/emulated/0/metin2mobile/pack/
+		std::string sdcardPath = "/sdcard/metin2mobile/pack/" + baseName;
 		if (access((sdcardPath + ".index").c_str(), R_OK) == 0) {
 			bool ok = CEterPackManager::Instance().RegisterPack(sdcardPath.c_str(), dirPrefix);
 			LOGI("RegisterPack (SDCARD) %s [%s]: %s", sdcardPath.c_str(), dirPrefix, ok ? "OK" : "FAILED");
 			if (ok) return true;
 		}
 
-		// 1c. Fallback to /storage/emulated/0/metin2/pack/
-		std::string emulatedPath = "/storage/emulated/0/metin2/pack/" + baseName;
+		std::string emulatedPath = "/storage/emulated/0/metin2mobile/pack/" + baseName;
 		if (access((emulatedPath + ".index").c_str(), R_OK) == 0) {
 			bool ok = CEterPackManager::Instance().RegisterPack(emulatedPath.c_str(), dirPrefix);
 			LOGI("RegisterPack (EMULATED) %s [%s]: %s", emulatedPath.c_str(), dirPrefix, ok ? "OK" : "FAILED");
@@ -448,19 +432,13 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 		return ok;
 	};
 
-	// Register root pack (check aspar2 sdcard/emulated, then legacy metin2, external, internal)
-	if (access("/sdcard/aspar2/pack/root.index", R_OK) == 0) {
-		CEterPackManager::Instance().RegisterRootPack("/sdcard/aspar2/pack/root");
-		LOGI("RegisterRootPack (SDCARD-ASPAR2) /sdcard/aspar2/pack/root: OK");
-	} else if (access("/storage/emulated/0/aspar2/pack/root.index", R_OK) == 0) {
-		CEterPackManager::Instance().RegisterRootPack("/storage/emulated/0/aspar2/pack/root");
-		LOGI("RegisterRootPack (EMULATED-ASPAR2) /storage/emulated/0/aspar2/pack/root: OK");
-	} else if (access("/sdcard/metin2/pack/root.index", R_OK) == 0) {
-		CEterPackManager::Instance().RegisterRootPack("/sdcard/metin2/pack/root");
-		LOGI("RegisterRootPack (SDCARD) /sdcard/metin2/pack/root: OK");
-	} else if (access("/storage/emulated/0/metin2/pack/root.index", R_OK) == 0) {
-		CEterPackManager::Instance().RegisterRootPack("/storage/emulated/0/metin2/pack/root");
-		LOGI("RegisterRootPack (EMULATED) /storage/emulated/0/metin2/pack/root: OK");
+	// Register root pack (check metin2mobile sdcard/emulated, external, internal)
+	if (access("/sdcard/metin2mobile/pack/root.index", R_OK) == 0) {
+		CEterPackManager::Instance().RegisterRootPack("/sdcard/metin2mobile/pack/root");
+		LOGI("RegisterRootPack (SDCARD) /sdcard/metin2mobile/pack/root: OK");
+	} else if (access("/storage/emulated/0/metin2mobile/pack/root.index", R_OK) == 0) {
+		CEterPackManager::Instance().RegisterRootPack("/storage/emulated/0/metin2mobile/pack/root");
+		LOGI("RegisterRootPack (EMULATED) /storage/emulated/0/metin2mobile/pack/root: OK");
 	} else if (!extPackDir.empty() && access((extPackDir + "root.index").c_str(), R_OK) == 0) {
 		std::string extRoot = extPackDir + "root";
 		CEterPackManager::Instance().RegisterRootPack(extRoot.c_str());
@@ -576,14 +554,10 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 		}
 	};
 
-	if (access("/sdcard/aspar2/pack", R_OK) == 0) {
-		scanDir("/sdcard/aspar2/pack");
-	} else if (access("/storage/emulated/0/aspar2/pack", R_OK) == 0) {
-		scanDir("/storage/emulated/0/aspar2/pack");
-	} else if (access("/sdcard/metin2/pack", R_OK) == 0) {
-		scanDir("/sdcard/metin2/pack");
-	} else if (access("/storage/emulated/0/metin2/pack", R_OK) == 0) {
-		scanDir("/storage/emulated/0/metin2/pack");
+	if (access("/sdcard/metin2mobile/pack", R_OK) == 0) {
+		scanDir("/sdcard/metin2mobile/pack");
+	} else if (access("/storage/emulated/0/metin2mobile/pack", R_OK) == 0) {
+		scanDir("/storage/emulated/0/metin2mobile/pack");
 	}
 	if (!extPackDir.empty()) {
 		scanDir(extPackDir);

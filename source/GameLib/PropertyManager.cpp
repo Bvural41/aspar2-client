@@ -32,14 +32,10 @@ bool CPropertyManager::Initialize(const char * c_pszPackFileName)
 #ifdef __ANDROID__
 		if (!bCreated)
 		{
-			if (access("/sdcard/aspar2/pack/property.index", R_OK) == 0)
-				bCreated = m_pack.Create(m_fileDict, "/sdcard/aspar2/pack/property", "", true);
-			else if (access("/storage/emulated/0/aspar2/pack/property.index", R_OK) == 0)
-				bCreated = m_pack.Create(m_fileDict, "/storage/emulated/0/aspar2/pack/property", "", true);
-			else if (access("/sdcard/metin2/pack/property.index", R_OK) == 0)
-				bCreated = m_pack.Create(m_fileDict, "/sdcard/metin2/pack/property", "", true);
-			else if (access("/storage/emulated/0/metin2/pack/property.index", R_OK) == 0)
-				bCreated = m_pack.Create(m_fileDict, "/storage/emulated/0/metin2/pack/property", "", true);
+			if (access("/sdcard/metin2mobile/pack/property.index", R_OK) == 0)
+				bCreated = m_pack.Create(m_fileDict, "/sdcard/metin2mobile/pack/property", "", true);
+			else if (access("/storage/emulated/0/metin2mobile/pack/property.index", R_OK) == 0)
+				bCreated = m_pack.Create(m_fileDict, "/storage/emulated/0/metin2mobile/pack/property", "", true);
 		}
 #endif
 

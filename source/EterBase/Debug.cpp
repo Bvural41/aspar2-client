@@ -249,17 +249,24 @@ void TraceError(const char* c_szFormat, ...)
 		}
 #endif
 #if defined(__ANDROID__)
-		// User-visible locations first (same folders the packs/config are read from); the working
-		// directory is the app's private storage, which the user cannot browse.
-		static const char* const c_apszSysErrPath[] = {
-			"/sdcard/aspar2/syserr.txt",
-			"/storage/emulated/0/aspar2/syserr.txt",
-			"syserr.txt",
-		};
-		for (size_t i = 0; !s_pSysErrFile && i < sizeof(c_apszSysErrPath) / sizeof(c_apszSysErrPath[0]); ++i)
-			s_pSysErrFile = fopen(c_apszSysErrPath[i], "a");
-		if (!s_pSysErrFile && !g_strAndroidExternalPath.empty())
-			s_pSysErrFile = fopen((g_strAndroidExternalPath + "/syserr.txt").c_str(), "a");
+		static bool s_bCheckedDevMode = false;
+		static bool s_bIsDevMode = false;
+		if (!s_bCheckedDevMode)
+		{
+			s_bCheckedDevMode = true;
+			s_bIsDevMode = (access("/sdcard/metin2mobile", F_OK) == 0 ||
+			                access("/storage/emulated/0/metin2mobile", F_OK) == 0);
+		}
+
+		if (s_bIsDevMode)
+		{
+			static const char* const c_apszSysErrPath[] = {
+				"/sdcard/metin2mobile/syserr.txt",
+				"/storage/emulated/0/metin2mobile/syserr.txt",
+			};
+			for (size_t i = 0; !s_pSysErrFile && i < sizeof(c_apszSysErrPath) / sizeof(c_apszSysErrPath[0]); ++i)
+				s_pSysErrFile = fopen(c_apszSysErrPath[i], "a");
+		}
 #else
 		if (!s_pSysErrFile)
 			s_pSysErrFile = fopen("syserr.txt", "a");
