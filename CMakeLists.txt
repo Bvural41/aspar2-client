@@ -396,7 +396,7 @@ elseif(APPLE)
         XCODE_EXPLICIT_FILE_TYPE "sourcecode.cpp.objcpp"
     )
 
-    add_executable(Aspar2 MACOSX_BUNDLE
+    add_executable(Metin2Mobile MACOSX_BUNDLE
 
         ${USER_INTERFACE_SOURCES}
         ${IOS_SOURCES}
@@ -422,7 +422,7 @@ elseif(APPLE)
         ${GRANNY_ALL_SOURCES}
     )
 
-    target_link_libraries(Aspar2
+    target_link_libraries(Metin2Mobile
         "-framework Foundation"
         "-framework UIKit"
         "-framework OpenGLES"
@@ -437,12 +437,23 @@ elseif(APPLE)
         m
     )
 
-    set_target_properties(Aspar2 PROPERTIES
-        OUTPUT_NAME "Aspar2"
-        XCODE_ATTRIBUTE_PRODUCT_NAME "Aspar2"
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/android_ios/common/config.json")
+        message(FATAL_ERROR "HATA: android_ios/common/config.json dosyasi bulunamadi! Lutfen bu dosyayi olusturun.")
+    endif()
+
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/android_ios/common/config.json" MOBILE_CONFIG_RAW)
+    string(JSON MOBILE_PATCHER_URL GET "${MOBILE_CONFIG_RAW}" patcher_url)
+    string(JSON MOBILE_CRCLIST GET "${MOBILE_CONFIG_RAW}" crclist_name)
+    string(JSON MOBILE_PACK_DIR GET "${MOBILE_CONFIG_RAW}" pack_dir_name)
+    string(JSON MOBILE_GAME_NAME GET "${MOBILE_CONFIG_RAW}" game_name)
+    string(JSON MOBILE_IOS_BUNDLE_ID GET "${MOBILE_CONFIG_RAW}" ios_bundle_id)
+
+    set_target_properties(Metin2Mobile PROPERTIES
+        OUTPUT_NAME "${MOBILE_GAME_NAME}"
+        XCODE_ATTRIBUTE_PRODUCT_NAME "${MOBILE_GAME_NAME}"
         MACOSX_BUNDLE YES
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Info.plist
-        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.aspar2.client.75PRBBQ3XW"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${MOBILE_IOS_BUNDLE_ID}"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
         XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC "YES"
         XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "14.0"
@@ -460,25 +471,32 @@ elseif(APPLE)
     )
 
     set(IOS_ASSET_CATALOG ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Assets.xcassets)
-    target_sources(Aspar2 PRIVATE ${IOS_ASSET_CATALOG})
+    target_sources(Metin2Mobile PRIVATE ${IOS_ASSET_CATALOG})
     set_source_files_properties(${IOS_ASSET_CATALOG} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    set_target_properties(Aspar2 PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+    set_target_properties(Metin2Mobile PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
 
-    install(TARGETS Aspar2 BUNDLE DESTINATION Applications RUNTIME DESTINATION Applications)
+    install(TARGETS Metin2Mobile BUNDLE DESTINATION Applications RUNTIME DESTINATION Applications)
 
-    add_custom_command(TARGET Aspar2 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/android/app/src/main/assets $<TARGET_BUNDLE_DIR:Aspar2>
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon@3x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-60@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-76@2x.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-1024.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Icon-60.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Icon-76.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/bg_loading.jpg $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/logo.png $<TARGET_BUNDLE_DIR:Aspar2>/
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications
-        COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:Aspar2> ${CMAKE_BINARY_DIR}/Aspar2.xcarchive/Products/Applications/Aspar2.app
+    target_compile_definitions(Metin2Mobile PRIVATE
+        MOBILE_PATCHER_URL="${MOBILE_PATCHER_URL}"
+        MOBILE_CRCLIST="${MOBILE_CRCLIST}"
+        MOBILE_PACK_DIR="${MOBILE_PACK_DIR}"
+        MOBILE_GAME_NAME="${MOBILE_GAME_NAME}"
+    )
+
+    add_custom_command(TARGET Metin2Mobile POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/common/assets $<TARGET_BUNDLE_DIR:Metin2Mobile>
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon@2x.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon@3x.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-60@2x.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-76@2x.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/AppIcon-1024.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Icon-60.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/ios/Icon-76.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/common/branding/bg_loading.jpg $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/android_ios/common/branding/logo.png $<TARGET_BUNDLE_DIR:Metin2Mobile>/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Metin2Mobile.xcarchive/Products/Applications
+        COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:Metin2Mobile> ${CMAKE_BINARY_DIR}/Metin2Mobile.xcarchive/Products/Applications/${MOBILE_GAME_NAME}.app
     )
 endif()

@@ -218,7 +218,7 @@ public class UpdateScreen extends FrameLayout {
     public void setDone() {
         mBar.setProgress(1000);
         mPercent.setText("%100");
-        mStatus.setText("Oyun başlatılıyor...");
+        mStatus.setText(BuildConfig.GAME_NAME + " başlatılıyor...");
         mDetail.setText("");
         mButtons.setVisibility(View.GONE);
     }

@@ -30,10 +30,10 @@ import java.util.zip.CRC32;
 public class PackUpdater {
     private static final String TAG = "PackUpdater";
 
-    /** crclist'in ve mobile_pack klasorunun bulundugu surum klasoru (sonunda / olmali). */
-    public static final String UPDATE_BASE_URL = "https://metin2plus.com/pe3qgb78x/patcher_01/0.0.0.1/";
-    public static final String CRCLIST_NAME = "mobile_crclist";
-    public static final String PACK_DIR_NAME = "mobile_pack/";
+    /** crclist'in ve mobile_pack klasorunun bulundugu surum klasoru (common/config.json'dan alinir). */
+    public static final String UPDATE_BASE_URL = BuildConfig.UPDATE_BASE_URL;
+    public static final String CRCLIST_NAME = BuildConfig.CRCLIST_NAME;
+    public static final String PACK_DIR_NAME = BuildConfig.PACK_DIR_NAME;
 
     private static final int CONNECT_TIMEOUT_MS = 15000;
     private static final int READ_TIMEOUT_MS = 20000;
@@ -99,7 +99,12 @@ public class PackUpdater {
     }
 
     public boolean hasLocalPacks() {
-        return new File(mPackDir, "root.index").exists() && new File(mPackDir, "root.data").exists();
+        File[] files = mPackDir.listFiles();
+        if (files == null) return false;
+        for (File f : files) {
+            if (f.getName().endsWith(".index") || f.getName().endsWith(".data")) return true;
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------------------------

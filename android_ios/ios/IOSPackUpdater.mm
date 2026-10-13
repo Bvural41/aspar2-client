@@ -4,9 +4,19 @@ extern "C" {
 #include "lzo1x.h"
 }
 
-static NSString * const kUpdateBaseURL = @"https://metin2plus.com/pe3qgb78x/patcher_01/0.0.0.1/";
-static NSString * const kCrcListName   = @"mobile_crclist";
-static NSString * const kPackDirName   = @"mobile_pack/";
+#ifndef MOBILE_PATCHER_URL
+#error "MOBILE_PATCHER_URL tanimli degil! android_ios/common/config.json kontrol edin."
+#endif
+#ifndef MOBILE_CRCLIST
+#error "MOBILE_CRCLIST tanimli degil! android_ios/common/config.json kontrol edin."
+#endif
+#ifndef MOBILE_PACK_DIR
+#error "MOBILE_PACK_DIR tanimli degil! android_ios/common/config.json kontrol edin."
+#endif
+
+static NSString * const kUpdateBaseURL = @MOBILE_PATCHER_URL;
+static NSString * const kCrcListName   = @MOBILE_CRCLIST;
+static NSString * const kPackDirName   = @MOBILE_PACK_DIR;
 
 @interface PackCrcItem : NSObject
 @property (nonatomic, assign) uint32_t crc;
@@ -253,19 +263,12 @@ static NSString * const kPackDirName   = @"mobile_pack/";
             });
         };
 
-        // Check if local pack directory already exists (.index and .data)
-        NSString *aspar2PackDir = [[docsPath stringByAppendingPathComponent:@"aspar2"] stringByAppendingPathComponent:@"pack"];
-        
-        BOOL hasLocalDocsPack = [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.index"]] &&
-                                [fm fileExistsAtPath:[self->_packDir stringByAppendingPathComponent:@"root.data"]];
-        BOOL hasLocalAspar2Pack = [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.index"]] &&
-                                  [fm fileExistsAtPath:[aspar2PackDir stringByAppendingPathComponent:@"root.data"]];
-
+        // Yerel pack klasöründe pack dosyaları var mı kontrol et
         NSArray *packFiles = [fm contentsOfDirectoryAtPath:self->_packDir error:nil];
-        BOOL hasGenericPacks = NO;
+        BOOL hasLocalPacks = NO;
         for (NSString *fName in packFiles) {
             if ([fName hasSuffix:@".index"] || [fName hasSuffix:@".data"]) {
-                hasGenericPacks = YES;
+                hasLocalPacks = YES;
                 break;
             }
         }
@@ -278,7 +281,7 @@ static NSString * const kPackDirName   = @"mobile_pack/";
         int httpCode = 0;
         
         if (![self downloadUrl:crcUrlStr toFile:tempCrcFile statusCode:&httpCode]) {
-            if (hasLocalDocsPack || hasLocalAspar2Pack || hasGenericPacks) {
+            if (hasLocalPacks) {
                 reportStatus(@"Sunucuya bağlanılamadı, yerel paketlerle başlatılıyor...");
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (completionBlock) completionBlock(YES, nil);

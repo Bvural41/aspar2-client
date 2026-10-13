@@ -1,4 +1,12 @@
 apply plugin: 'com.android.application'
+import groovy.json.JsonSlurper
+
+// Ortak yapilandirma dosyasi (common/config.json) - Tek ve zorunlu kaynak
+def configFile = rootProject.file("../common/config.json")
+if (!configFile.exists()) {
+    throw new GradleException("HATA: android_ios/common/config.json dosyasi bulunamadi!")
+}
+def mobileConfig = new JsonSlurper().parse(configFile)
 
 // Release imza bilgileri repoda tutulmaz (repo public). Yol ASPAR2_KEYSTORE_PROPS ortam
 // degiskeninden ya da android/keystore.properties dosyasindan okunur.
@@ -31,11 +39,17 @@ android {
             abiFilters 'arm64-v8a', 'x86_64'
         }
 
-        applicationId "com.aspar2.client"
+        applicationId mobileConfig.package_name
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 4
-        versionName "1.0"
+        versionCode mobileConfig.version_code as Integer
+        versionName mobileConfig.version_name
+
+        manifestPlaceholders = [appName: mobileConfig.game_name]
+        buildConfigField "String", "UPDATE_BASE_URL", "\"${mobileConfig.patcher_url}\""
+        buildConfigField "String", "CRCLIST_NAME", "\"${mobileConfig.crclist_name}\""
+        buildConfigField "String", "PACK_DIR_NAME", "\"${mobileConfig.pack_dir_name}\""
+        buildConfigField "String", "GAME_NAME", "\"${mobileConfig.game_name}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
@@ -68,7 +82,7 @@ android {
     sourceSets {
         main {
             jniLibs.srcDirs = ['src/main/jniLibs']
-            assets.srcDirs = ['src/main/assets']
+            assets.srcDirs = ['../../common/assets']
         }
     }
 
@@ -96,13 +110,20 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all {
             if (variant.buildType.name == "release") {
-                outputFileName = "Aspar2.apk"
+                outputFileName = "${mobileConfig.game_name}.apk"
             } else {
-                outputFileName = "Aspar2-${variant.name}.apk"
+                outputFileName = "${mobileConfig.game_name}-${variant.name}.apk"
             }
         }
     }
 }
+
+tasks.register('syncBranding', Copy) {
+    from '../../common/branding'
+    include 'bg_loading.jpg', 'logo.png'
+    into 'src/main/res/drawable-nodpi'
+}
+preBuild.dependsOn syncBranding
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

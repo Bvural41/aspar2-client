@@ -356,6 +356,7 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		mkdir((userDataDir + "/offline_shop").c_str(), 0755);
 		mkdir((userDataDir + "/leftseat").c_str(), 0755);
 		mkdir((userDataDir + "/auto_sell").c_str(), 0755);
+		mkdir((userDataDir + "/saved_accounts").c_str(), 0755);
 
 		// Migrate any legacy chat or json files in root Documents to UserData
 		for (NSString* item in contents) {

@@ -367,9 +367,8 @@ static GameViewController *s_sharedInstance = nil;
         onCompletion:^(BOOL success, NSString *errorMsg) {
             if (success) {
                 self->_otopatchProgress.progress = 1.0f;
-                self->_otopatchPercentLabel.text = @"%100";
-                self->_otopatchStatusLabel.textColor = [UIColor colorWithRed:0.94 green:0.90 blue:0.85 alpha:1.0];
-                self->_otopatchStatusLabel.text = @"Oyun başlatılıyor...";
+                NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+                self->_otopatchStatusLabel.text = [NSString stringWithFormat:@"%@ başlatılıyor...", appName];
                 self->_otopatchDetailLabel.text = @"";
                 
                 // Allow UIKit to render "%100" and "Oyun başlatılıyor..." before executing engine init
