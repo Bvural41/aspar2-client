@@ -24,25 +24,14 @@ class CDungeonModelInstance : public CGrannyModelInstance
 			}
 		}
 
-		void RenderDungeonBlockPCBlocker()
-		{
-			if (IsEmpty())
-				return;
-
-			STATEMANAGER.SetVertexDeclaration(ms_pnt2VS);
-			LPDIRECT3DVERTEXBUFFER9 lpd3dRigidPNTVtxBuf = m_pModel->GetPNTD3DVertexBuffer();
-			if (lpd3dRigidPNTVtxBuf)
-			{
-				STATEMANAGER.SetStreamSource(0, lpd3dRigidPNTVtxBuf, sizeof(TPNT2Vertex));
-				RenderMeshNodeListWithOneTexture(CGrannyMesh::TYPE_RIGID, CGrannyMaterial::TYPE_DIFFUSE_PNT);
-				RenderMeshNodeListWithOneTexture(CGrannyMesh::TYPE_RIGID, CGrannyMaterial::TYPE_BLEND_PNT);
-			}
-		}
 
 		void RenderDungeonBlockShadow()
 		{
 			if (IsEmpty())
 				return;
+
+			STATEMANAGER.SaveRenderState(D3DRS_LIGHTING, FALSE);
+			STATEMANAGER.SaveRenderState(D3DRS_FOGENABLE, FALSE);
 
 			STATEMANAGER.SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
 			STATEMANAGER.SaveTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
@@ -57,6 +46,7 @@ class CDungeonModelInstance : public CGrannyModelInstance
 			if (lpd3dRigidPNTVtxBuf)
 			{
 				STATEMANAGER.SetStreamSource(0, lpd3dRigidPNTVtxBuf, sizeof(TPNT2Vertex));
+				RenderMeshNodeListWithoutTexture(CGrannyMesh::TYPE_RIGID, CGrannyMaterial::TYPE_DIFFUSE_PNT);
 				RenderMeshNodeListWithoutTexture(CGrannyMesh::TYPE_RIGID, CGrannyMaterial::TYPE_BLEND_PNT);
 			}
 
@@ -66,6 +56,9 @@ class CDungeonModelInstance : public CGrannyModelInstance
 			STATEMANAGER.RestoreRenderState(D3DRS_ALPHABLENDENABLE);
 			STATEMANAGER.RestoreRenderState(D3DRS_SRCBLEND);
 			STATEMANAGER.RestoreRenderState(D3DRS_DESTBLEND);
+
+			STATEMANAGER.RestoreRenderState(D3DRS_FOGENABLE);
+			STATEMANAGER.RestoreRenderState(D3DRS_LIGHTING);
 		}
 };
 
@@ -102,23 +95,14 @@ struct FRender
 
 void CDungeonBlock::Render()
 {
-	if (!isShow())
-		return;
+//	if (!isShow())
+//		return;
 
 	for_each(m_ModelInstanceContainer.begin(), m_ModelInstanceContainer.end(), FRender());
 }
 
-struct FRenderDungeonPCBlocker
-{
-	void operator() (CDungeonModelInstance * pInstance)
-	{
-		pInstance->RenderDungeonBlockPCBlocker();
-	}
-};
-
 void CDungeonBlock::OnRenderPCBlocker()
 {
-	for_each(m_ModelInstanceContainer.begin(), m_ModelInstanceContainer.end(), FRenderDungeonPCBlocker());
 }
 
 struct FRenderShadow
