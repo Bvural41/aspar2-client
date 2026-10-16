@@ -7,7 +7,9 @@
 #if defined(__ANDROID__)
 #include <android/asset_manager.h>
 #include <vector>
+#include <string>
 extern AAssetManager* g_pAssetManager;
+extern std::string g_strAndroidExternalPath;
 #endif
 #include "EterPackPolicy_CSHybridCrypt.h"
 
@@ -357,11 +359,14 @@ bool CEterPackManager::GetFromFile(CMappedFile & rMappedFile, const char * c_szF
 #if defined(__ANDROID__)
 	if (szCleanPath[0] != '/')
 	{
-		// 1. Check /sdcard/aspar2/
-		char szSdPath[512];
-		snprintf(szSdPath, sizeof(szSdPath), "/sdcard/aspar2/%s", szCleanPath);
-		if (rMappedFile.Create(szSdPath, pData, 0, 0))
-			return true;
+		// 1. Check external base path
+		if (!g_strAndroidExternalPath.empty())
+		{
+			char szSdPath[512];
+			snprintf(szSdPath, sizeof(szSdPath), "%s/%s", g_strAndroidExternalPath.c_str(), szCleanPath);
+			if (rMappedFile.Create(szSdPath, pData, 0, 0))
+				return true;
+		}
 
 		// 2. Load directly from APK assets via AAssetManager
 		if (g_pAssetManager)

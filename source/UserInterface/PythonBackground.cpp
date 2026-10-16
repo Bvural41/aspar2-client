@@ -381,18 +381,25 @@ void CPythonBackground::__CreateProperty()
 		{
 			m_PropertyManager.Initialize(pPack->GetDBName());
 		}
-		else if (access("/sdcard/metin2mobile/pack/property.index", R_OK) == 0)
+#ifdef __ANDROID__
+		else
 		{
-			m_PropertyManager.Initialize("/sdcard/metin2mobile/pack/property");
+			extern std::string g_strAndroidExternalPath;
+			if (!g_strAndroidExternalPath.empty() && access((g_strAndroidExternalPath + "/pack/property.index").c_str(), R_OK) == 0)
+			{
+				m_PropertyManager.Initialize((g_strAndroidExternalPath + "/pack/property").c_str());
+			}
+			else
+			{
+				m_PropertyManager.Initialize("pack/property");
+			}
 		}
-		else if (access("/storage/emulated/0/metin2mobile/pack/property.index", R_OK) == 0)
-		{
-			m_PropertyManager.Initialize("/storage/emulated/0/metin2mobile/pack/property");
-		}
+#else
 		else
 		{
 			m_PropertyManager.Initialize("pack/property");
 		}
+#endif
 #else
 		m_PropertyManager.Initialize("pack/property");
 #endif

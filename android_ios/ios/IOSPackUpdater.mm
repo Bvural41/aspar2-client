@@ -4,19 +4,10 @@ extern "C" {
 #include "lzo1x.h"
 }
 
-#ifndef MOBILE_PATCHER_URL
-#error "MOBILE_PATCHER_URL tanimli degil! android_ios/common/config.json kontrol edin."
-#endif
-#ifndef MOBILE_CRCLIST
-#error "MOBILE_CRCLIST tanimli degil! android_ios/common/config.json kontrol edin."
-#endif
-#ifndef MOBILE_PACK_DIR
-#error "MOBILE_PACK_DIR tanimli degil! android_ios/common/config.json kontrol edin."
-#endif
-
 static NSString * const kUpdateBaseURL = @MOBILE_PATCHER_URL;
 static NSString * const kCrcListName   = @MOBILE_CRCLIST;
 static NSString * const kPackDirName   = @MOBILE_PACK_DIR;
+static NSString * const kFolderName    = @MOBILE_FOLDER_NAME;
 
 @interface PackCrcItem : NSObject
 @property (nonatomic, assign) uint32_t crc;
@@ -243,7 +234,8 @@ static NSString * const kPackDirName   = @MOBILE_PACK_DIR;
                       onProgress:(IOSPackUpdaterProgressBlock)progressBlock
                     onCompletion:(IOSPackUpdaterCompletionBlock)completionBlock {
     _isCancelled = NO;
-    _packDir = [docsPath stringByAppendingPathComponent:@"pack"];
+    NSString *folderDir = [docsPath stringByAppendingPathComponent:kFolderName];
+    _packDir = [folderDir stringByAppendingPathComponent:@"pack"];
     
     NSFileManager *fm = [NSFileManager defaultManager];
     if (![fm fileExistsAtPath:_packDir]) {

@@ -58,8 +58,6 @@ extern std::string g_strAndroidExternalPath;
 static std::string GetConfigFilePath(const char* szFileName, bool bForWrite)
 {
 	std::vector<std::string> candidateDirs;
-	candidateDirs.push_back("/sdcard/metin2mobile/");
-	candidateDirs.push_back("/storage/emulated/0/metin2mobile/");
 	if (!g_strAndroidExternalPath.empty())
 	{
 		std::string ext = g_strAndroidExternalPath;

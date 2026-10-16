@@ -30,12 +30,12 @@ bool CPropertyManager::Initialize(const char * c_pszPackFileName)
 			}
 		}
 #ifdef __ANDROID__
-		if (!bCreated)
+		extern std::string g_strAndroidExternalPath;
+		if (!bCreated && !g_strAndroidExternalPath.empty())
 		{
-			if (access("/sdcard/metin2mobile/pack/property.index", R_OK) == 0)
-				bCreated = m_pack.Create(m_fileDict, "/sdcard/metin2mobile/pack/property", "", true);
-			else if (access("/storage/emulated/0/metin2mobile/pack/property.index", R_OK) == 0)
-				bCreated = m_pack.Create(m_fileDict, "/storage/emulated/0/metin2mobile/pack/property", "", true);
+			std::string propPath = g_strAndroidExternalPath + "/pack/property";
+			if (access((propPath + ".index").c_str(), R_OK) == 0)
+				bCreated = m_pack.Create(m_fileDict, propPath.c_str(), "", true);
 		}
 #endif
 

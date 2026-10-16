@@ -241,31 +241,30 @@ void TraceError(const char* c_szFormat, ...)
 	if (!s_pSysErrFile)
 	{
 #if defined(__APPLE__) || defined(__IOS__)
-		const char* home = getenv("HOME");
-		if (home) {
-			char docPath[1024];
-			snprintf(docPath, sizeof(docPath), "%s/Documents/syserr.txt", home);
-			s_pSysErrFile = fopen(docPath, "a");
+		extern std::string g_strDocsPath;
+		if (!s_pSysErrFile && !g_strDocsPath.empty()) {
+			std::string sp = g_strDocsPath + "/syserr.txt";
+			s_pSysErrFile = fopen(sp.c_str(), "a");
+		}
+		if (!s_pSysErrFile) {
+			const char* home = getenv("HOME");
+			if (home) {
+				char docPath[1024];
+				snprintf(docPath, sizeof(docPath), "%s/Documents/syserr.txt", home);
+				s_pSysErrFile = fopen(docPath, "a");
+			}
 		}
 #endif
 #if defined(__ANDROID__)
-		static bool s_bCheckedDevMode = false;
-		static bool s_bIsDevMode = false;
-		if (!s_bCheckedDevMode)
+		extern std::string g_strAndroidExternalPath;
+		if (!s_pSysErrFile && !g_strAndroidExternalPath.empty())
 		{
-			s_bCheckedDevMode = true;
-			s_bIsDevMode = (access("/sdcard/metin2mobile", F_OK) == 0 ||
-			                access("/storage/emulated/0/metin2mobile", F_OK) == 0);
+			std::string sp = g_strAndroidExternalPath + "/syserr.txt";
+			s_pSysErrFile = fopen(sp.c_str(), "a");
 		}
-
-		if (s_bIsDevMode)
+		if (!s_pSysErrFile)
 		{
-			static const char* const c_apszSysErrPath[] = {
-				"/sdcard/metin2mobile/syserr.txt",
-				"/storage/emulated/0/metin2mobile/syserr.txt",
-			};
-			for (size_t i = 0; !s_pSysErrFile && i < sizeof(c_apszSysErrPath) / sizeof(c_apszSysErrPath[0]); ++i)
-				s_pSysErrFile = fopen(c_apszSysErrPath[i], "a");
+			s_pSysErrFile = fopen("syserr.txt", "a");
 		}
 #else
 		if (!s_pSysErrFile)

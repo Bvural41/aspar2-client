@@ -447,6 +447,7 @@ elseif(APPLE)
     string(JSON MOBILE_PACK_DIR GET "${MOBILE_CONFIG_RAW}" pack_dir_name)
     string(JSON MOBILE_GAME_NAME GET "${MOBILE_CONFIG_RAW}" game_name)
     string(JSON MOBILE_IOS_BUNDLE_ID GET "${MOBILE_CONFIG_RAW}" ios_bundle_id)
+    string(JSON MOBILE_FOLDER_NAME GET "${MOBILE_CONFIG_RAW}" folder_name)
 
     set_target_properties(Metin2Mobile PROPERTIES
         OUTPUT_NAME "${MOBILE_GAME_NAME}"
@@ -482,6 +483,7 @@ elseif(APPLE)
         MOBILE_CRCLIST="${MOBILE_CRCLIST}"
         MOBILE_PACK_DIR="${MOBILE_PACK_DIR}"
         MOBILE_GAME_NAME="${MOBILE_GAME_NAME}"
+        MOBILE_FOLDER_NAME="${MOBILE_FOLDER_NAME}"
     )
 
     add_custom_command(TARGET Metin2Mobile POST_BUILD

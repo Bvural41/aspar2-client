@@ -640,6 +640,27 @@ public class MainActivity extends Activity {
     }
 
     private void requestStoragePermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            if (!android.os.Environment.isExternalStorageManager()) {
+                try {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    try {
+                        Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                        startActivity(intent);
+                    } catch (Exception ignored) {}
+                }
+            }
+        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, 1001);
+            }
+        }
     }
 
     @Override
@@ -727,9 +748,8 @@ public class MainActivity extends Activity {
 
     private void copyAssets() {
         File filesDir = getFilesDir();
-        File extDir = getExternalFilesDir(null);
-        File extPack = (extDir != null) ? new File(extDir, "pack/root.index") : null;
-        boolean hasExternalPack = (extPack != null && extPack.exists());
+        File extPack = new File(getActiveBaseDir(), "pack/root.index");
+        boolean hasExternalPack = extPack.exists();
 
         long apkTime = new File(getPackageCodePath()).lastModified();
         File timeFile = new File(filesDir, ".apk_timestamp");
@@ -803,29 +823,45 @@ public class MainActivity extends Activity {
         return super.onTouchEvent(event);
     }
 
-    /** Elle konmus (gelistirici) pack klasorleri varsa native bunlari once kullanir; o zaman indirme atlanir. */
+    /** Eger /sdcard/metin2mobile/pack klasoru varsa otopack es gecilir ve dogrudan oradan calisir. */
     private boolean hasDevPackOverride() {
-        String[] roots = {
-            "/sdcard/metin2mobile/pack/root.index",
-            "/storage/emulated/0/metin2mobile/pack/root.index"
-        };
-        for (String p : roots) {
-            if (new File(p).canRead()) return true;
+        return new File("/sdcard/metin2mobile/pack").isDirectory();
+    }
+
+    /**
+     * Aktif calisma ana dizini:
+     * 1. /sdcard/metin2mobile/pack varsa: /sdcard/metin2mobile (otopack bypass)
+     * 2. Yoksa: Android/data/<paket>/files/<folder_name> (config.json'dan)
+     */
+    private File getActiveBaseDir() {
+        if (hasDevPackOverride()) {
+            return new File("/sdcard/metin2mobile");
         }
-        return false;
+        File ext = getExternalFilesDir(null);
+        if (ext == null) {
+            ext = getFilesDir();
+        }
+        return new File(ext, BuildConfig.FOLDER_NAME);
     }
 
     private void startPackUpdate() {
-        File extDir = getExternalFilesDir(null);
-        if (extDir == null || hasDevPackOverride()) {
-            Log.i(TAG, "Pack update skipped (extDir=" + extDir + ", devOverride=" + hasDevPackOverride() + ")");
+        if (hasDevPackOverride()) {
+            Log.i(TAG, "Dev pack override aktif (/sdcard/metin2mobile/pack bulundu). Otopack atlandi.");
+            requestStoragePermission();
             mUpdateDone = true;
             return;
         }
+
+        File packDir = new File(getActiveBaseDir(), "pack");
+        if (!packDir.exists()) {
+            packDir.mkdirs();
+        }
+        Log.i(TAG, "Otopack calisiyor. Hedef dizin: " + packDir.getAbsolutePath());
+
         mUpdateScreen = new UpdateScreen(this);
         mRootLayout.addView(mUpdateScreen, new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        runPackUpdater(new File(extDir, "pack"));
+        runPackUpdater(packDir);
     }
 
     private void runPackUpdater(final File packDir) {
@@ -903,12 +939,12 @@ public class MainActivity extends Activity {
             tryInit();
         }
 
-        // Pack guncellemesi bitmeden native motor baslatilmaz.
         private void tryInit() {
             if (mInitialized || !mUpdateDone || mSurfaceW <= 0) return;
             copyAssets();
-            File extDir = getExternalFilesDir(null);
-            String extPath = (extDir != null) ? extDir.getAbsolutePath() : "";
+            File baseDir = getActiveBaseDir();
+            String extPath = (baseDir != null) ? baseDir.getAbsolutePath() : "";
+            Log.i(TAG, "Native motor baslatiliyor (extPath=" + extPath + ")");
             NativeLib.init(MainActivity.this.getAssets(), getFilesDir().getAbsolutePath(), extPath, mSurfaceW, mSurfaceH);
             mInitialized = true;
             hideUpdateScreen();

@@ -400,7 +400,7 @@ static GameViewController *s_sharedInstance = nil;
                         self->_otopatchContinueBtn.hidden = NO;
                         
                         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Motor Hatası"
-                                                                                       message:@"Oyun motoru (system.py) başlatılamadı.\nLütfen 3uTools -> Documents/syserr.txt dosyasını kontrol edin."
+                                                                                       message:@"Oyun motoru (system.py) başlatılamadı.\nLütfen 3uTools -> Documents/aspar2/syserr.txt dosyasını kontrol edin."
                                                                                 preferredStyle:UIAlertControllerStyleAlert];
                         [alert addAction:[UIAlertAction actionWithTitle:@"Tamam" style:UIAlertActionStyleDefault handler:nil]];
                         [self presentViewController:alert animated:YES completion:nil];

@@ -401,22 +401,7 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 		size_t slashPos = baseName.find_last_of('/');
 		if (slashPos != std::string::npos) baseName = baseName.substr(slashPos + 1);
 
-		// 1. Check /sdcard/metin2mobile/pack/ and /storage/emulated/0/metin2mobile/pack/
-		std::string sdcardPath = "/sdcard/metin2mobile/pack/" + baseName;
-		if (access((sdcardPath + ".index").c_str(), R_OK) == 0) {
-			bool ok = CEterPackManager::Instance().RegisterPack(sdcardPath.c_str(), dirPrefix);
-			LOGI("RegisterPack (SDCARD) %s [%s]: %s", sdcardPath.c_str(), dirPrefix, ok ? "OK" : "FAILED");
-			if (ok) return true;
-		}
-
-		std::string emulatedPath = "/storage/emulated/0/metin2mobile/pack/" + baseName;
-		if (access((emulatedPath + ".index").c_str(), R_OK) == 0) {
-			bool ok = CEterPackManager::Instance().RegisterPack(emulatedPath.c_str(), dirPrefix);
-			LOGI("RegisterPack (EMULATED) %s [%s]: %s", emulatedPath.c_str(), dirPrefix, ok ? "OK" : "FAILED");
-			if (ok) return true;
-		}
-
-		// 2. Check external storage
+		// 1. Check external pack directory (dev metin2mobile/pack or config folder pack)
 		if (!extPackDir.empty()) {
 			std::string fullExt = extPackDir + baseName;
 			if (access((fullExt + ".index").c_str(), R_OK) == 0) {
@@ -426,20 +411,14 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 			}
 		}
 
-		// 3. Fallback to internal storage
+		// 2. Fallback to internal storage
 		bool ok = CEterPackManager::Instance().RegisterPack(name, dirPrefix);
 		LOGI("RegisterPack (INTERNAL) %s [%s]: %s", name, dirPrefix, ok ? "OK" : "FAILED");
 		return ok;
 	};
 
-	// Register root pack (check metin2mobile sdcard/emulated, external, internal)
-	if (access("/sdcard/metin2mobile/pack/root.index", R_OK) == 0) {
-		CEterPackManager::Instance().RegisterRootPack("/sdcard/metin2mobile/pack/root");
-		LOGI("RegisterRootPack (SDCARD) /sdcard/metin2mobile/pack/root: OK");
-	} else if (access("/storage/emulated/0/metin2mobile/pack/root.index", R_OK) == 0) {
-		CEterPackManager::Instance().RegisterRootPack("/storage/emulated/0/metin2mobile/pack/root");
-		LOGI("RegisterRootPack (EMULATED) /storage/emulated/0/metin2mobile/pack/root: OK");
-	} else if (!extPackDir.empty() && access((extPackDir + "root.index").c_str(), R_OK) == 0) {
+	// Register root pack
+	if (!extPackDir.empty() && access((extPackDir + "root.index").c_str(), R_OK) == 0) {
 		std::string extRoot = extPackDir + "root";
 		CEterPackManager::Instance().RegisterRootPack(extRoot.c_str());
 		LOGI("RegisterRootPack (EXTERNAL) %s: OK", extRoot.c_str());
@@ -554,11 +533,6 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 		}
 	};
 
-	if (access("/sdcard/metin2mobile/pack", R_OK) == 0) {
-		scanDir("/sdcard/metin2mobile/pack");
-	} else if (access("/storage/emulated/0/metin2mobile/pack", R_OK) == 0) {
-		scanDir("/storage/emulated/0/metin2mobile/pack");
-	}
 	if (!extPackDir.empty()) {
 		scanDir(extPackDir);
 	}

@@ -50,6 +50,7 @@ android {
         buildConfigField "String", "CRCLIST_NAME", "\"${mobileConfig.crclist_name}\""
         buildConfigField "String", "PACK_DIR_NAME", "\"${mobileConfig.pack_dir_name}\""
         buildConfigField "String", "GAME_NAME", "\"${mobileConfig.game_name}\""
+        buildConfigField "String", "FOLDER_NAME", "\"${mobileConfig.folder_name ?: 'aspar2'}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         

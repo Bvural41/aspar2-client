@@ -415,40 +415,26 @@ static bool EnsureTreeCacheLoaded()
     }
 #endif
 
-    const char* fallbackPaths[] = {
-        "/sdcard/aspar2/speedtree_cache.dat",
-        "/storage/emulated/0/aspar2/speedtree_cache.dat",
-        "/sdcard/metin2/speedtree_cache.dat",
-        "/storage/emulated/0/metin2/speedtree_cache.dat",
-        "pack/speedtree_cache.dat",
-        "speedtree_cache.dat",
-        "d:/ymir work/tree/speedtree_cache.dat",
-        "Data_Pack/tree/speedtree_cache.dat"
-    };
-
-    for (const char* path : fallbackPaths)
+    FILE* fp = fopen("speedtree_cache.dat", "rb");
+    if (fp)
     {
-        FILE* fp = fopen(path, "rb");
-        if (fp)
+        fseek(fp, 0, SEEK_END);
+        long sz = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+        if (sz > 0)
         {
-            fseek(fp, 0, SEEK_END);
-            long sz = ftell(fp);
-            fseek(fp, 0, SEEK_SET);
-            if (sz > 0)
+            std::vector<unsigned char> buf(sz);
+            fread(buf.data(), 1, sz, fp);
+            fclose(fp);
+            if (ParseTreeCacheBuffer(buf.data(), (size_t)sz))
             {
-                std::vector<unsigned char> buf(sz);
-                fread(buf.data(), 1, sz, fp);
-                fclose(fp);
-                if (ParseTreeCacheBuffer(buf.data(), (size_t)sz))
-                {
-                    LOGI("SpeedTree: Successfully loaded %zu trees from fallback file '%s'", s_treeCache.size(), path);
-                    return true;
-                }
+                LOGI("SpeedTree: Successfully loaded %zu trees from 'speedtree_cache.dat'", s_treeCache.size());
+                return true;
             }
-            else
-            {
-                fclose(fp);
-            }
+        }
+        else
+        {
+            fclose(fp);
         }
     }
 

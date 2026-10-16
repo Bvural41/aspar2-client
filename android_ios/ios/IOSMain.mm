@@ -323,7 +323,10 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	}
 
 	if (bundlePath) g_strBundlePath = bundlePath;
-	if (docsPath) g_strDocsPath = docsPath;
+	if (docsPath) {
+		g_strDocsPath = std::string(docsPath) + "/" + MOBILE_FOLDER_NAME;
+		mkdir(g_strDocsPath.c_str(), 0755);
+	}
 
 	g_nAndroidScreenWidth = width;
 	g_nAndroidScreenHeight = height;
@@ -335,10 +338,10 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		NSLog(@"[Aspar2 iOS] Working directory set to Bundle: %s", g_strBundlePath.c_str());
 	} else if (!g_strDocsPath.empty()) {
 		chdir(g_strDocsPath.c_str());
-		NSLog(@"[Aspar2 iOS] Working directory set to Documents: %s", g_strDocsPath.c_str());
+		NSLog(@"[Aspar2 iOS] Working directory set to Game Directory: %s", g_strDocsPath.c_str());
 	}
 
-	// Clean up any old symlinks in Documents
+	// Clean up any old symlinks and initialize UserData inside game directory
 	if (!g_strDocsPath.empty()) {
 		NSFileManager* fm = [NSFileManager defaultManager];
 		NSString* nsDocs = [NSString stringWithUTF8String:g_strDocsPath.c_str()];
@@ -358,16 +361,32 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		mkdir((userDataDir + "/auto_sell").c_str(), 0755);
 		mkdir((userDataDir + "/saved_accounts").c_str(), 0755);
 
-		// Migrate any legacy chat or json files in root Documents to UserData
-		for (NSString* item in contents) {
-			if ([item hasSuffix:@".chat"]) {
-				NSString* oldPath = [nsDocs stringByAppendingPathComponent:item];
-				NSString* newPath = [NSString stringWithFormat:@"%s/chatting/%@", userDataDir.c_str(), item];
-				[fm moveItemAtPath:oldPath toPath:newPath error:nil];
-			} else if ([item hasPrefix:@"visited_"] && [item hasSuffix:@".json"]) {
-				NSString* oldPath = [nsDocs stringByAppendingPathComponent:item];
-				NSString* newPath = [NSString stringWithFormat:@"%s/offline_shop/%@", userDataDir.c_str(), item];
-				[fm moveItemAtPath:oldPath toPath:newPath error:nil];
+		// Migrate any legacy root Documents/UserData or chat files to new game UserData directory
+		if (docsPath) {
+			NSString* nsRootDocs = [NSString stringWithUTF8String:docsPath];
+			NSString* oldUserData = [nsRootDocs stringByAppendingPathComponent:@"UserData"];
+			if ([fm fileExistsAtPath:oldUserData]) {
+				NSArray* oldItems = [fm contentsOfDirectoryAtPath:oldUserData error:nil];
+				for (NSString* sub in oldItems) {
+					NSString* src = [oldUserData stringByAppendingPathComponent:sub];
+					NSString* dst = [NSString stringWithFormat:@"%s/%@", userDataDir.c_str(), sub];
+					if (![fm fileExistsAtPath:dst]) {
+						[fm moveItemAtPath:src toPath:dst error:nil];
+					}
+				}
+				[fm removeItemAtPath:oldUserData error:nil];
+			}
+			NSArray* rootContents = [fm contentsOfDirectoryAtPath:nsRootDocs error:nil];
+			for (NSString* item in rootContents) {
+				if ([item hasSuffix:@".chat"]) {
+					NSString* oldPath = [nsRootDocs stringByAppendingPathComponent:item];
+					NSString* newPath = [NSString stringWithFormat:@"%s/chatting/%@", userDataDir.c_str(), item];
+					[fm moveItemAtPath:oldPath toPath:newPath error:nil];
+				} else if ([item hasPrefix:@"visited_"] && [item hasSuffix:@".json"]) {
+					NSString* oldPath = [nsRootDocs stringByAppendingPathComponent:item];
+					NSString* newPath = [NSString stringWithFormat:@"%s/offline_shop/%@", userDataDir.c_str(), item];
+					[fm moveItemAtPath:oldPath toPath:newPath error:nil];
+				}
 			}
 		}
 	}
@@ -385,25 +404,19 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 		size_t slashPos = baseName.find_last_of('/');
 		if (slashPos != std::string::npos) baseName = baseName.substr(slashPos + 1);
 
-		// 1. Check Documents directory (downloaded patches / otopatcher)
+		// 1. Check game directory (downloaded patches from otopack)
 		if (!g_strDocsPath.empty()) {
-			std::string docPack = g_strDocsPath + "/pack/" + baseName;
-			if (access((docPack + ".index").c_str(), R_OK) == 0) {
-				bool ok = CEterPackManager::Instance().RegisterPack(docPack.c_str(), dirPrefix);
-				NSLog(@"[Aspar2 iOS] RegisterPack (DOCS) %s: %s", docPack.c_str(), ok ? "OK" : "FAILED");
-				if (ok) return true;
-			}
-			std::string docAspar2Pack = g_strDocsPath + "/aspar2/pack/" + baseName;
-			if (access((docAspar2Pack + ".index").c_str(), R_OK) == 0) {
-				bool ok = CEterPackManager::Instance().RegisterPack(docAspar2Pack.c_str(), dirPrefix);
-				NSLog(@"[Aspar2 iOS] RegisterPack (ASPAR2 DOCS) %s: %s", docAspar2Pack.c_str(), ok ? "OK" : "FAILED");
+			std::string docFolderPack = g_strDocsPath + "/pack/" + baseName;
+			if (access((docFolderPack + ".index").c_str(), R_OK) == 0) {
+				bool ok = CEterPackManager::Instance().RegisterPack(docFolderPack.c_str(), dirPrefix);
+				NSLog(@"[iOS] RegisterPack %s: %s", docFolderPack.c_str(), ok ? "OK" : "FAILED");
 				if (ok) return true;
 			}
 		}
 
 		// 2. Fallback to app bundle
 		bool ok = CEterPackManager::Instance().RegisterPack(name, dirPrefix);
-		NSLog(@"[Aspar2 iOS] RegisterPack (BUNDLE) %s: %s", name, ok ? "OK" : "FAILED");
+		NSLog(@"[iOS] RegisterPack (BUNDLE) %s: %s", name, ok ? "OK" : "FAILED");
 		return ok;
 	};
 
@@ -411,14 +424,10 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 	if (!g_strDocsPath.empty() && access((g_strDocsPath + "/pack/root.index").c_str(), R_OK) == 0) {
 		std::string docRoot = g_strDocsPath + "/pack/root";
 		CEterPackManager::Instance().RegisterRootPack(docRoot.c_str());
-		NSLog(@"[Aspar2 iOS] RegisterRootPack (DOCS): OK");
-	} else if (!g_strDocsPath.empty() && access((g_strDocsPath + "/aspar2/pack/root.index").c_str(), R_OK) == 0) {
-		std::string docRoot = g_strDocsPath + "/aspar2/pack/root";
-		CEterPackManager::Instance().RegisterRootPack(docRoot.c_str());
-		NSLog(@"[Aspar2 iOS] RegisterRootPack (ASPAR2 DOCS): OK");
+		NSLog(@"[iOS] RegisterRootPack: OK");
 	} else {
 		CEterPackManager::Instance().RegisterRootPack("pack/root");
-		NSLog(@"[Aspar2 iOS] RegisterRootPack (BUNDLE): OK");
+		NSLog(@"[iOS] RegisterRootPack (BUNDLE): OK");
 	}
 
 	struct PackEntry { const char* dir; const char* name; };
@@ -550,7 +559,6 @@ bool IOS_Init(const char* bundlePath, const char* docsPath, int width, int heigh
 
 	if (!g_strDocsPath.empty()) {
 		scanDir(g_strDocsPath + "/pack");
-		scanDir(g_strDocsPath + "/aspar2/pack");
 	}
 	if (!g_strBundlePath.empty()) {
 		scanDir(g_strBundlePath + "/pack");
