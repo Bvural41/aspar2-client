@@ -1505,7 +1505,8 @@ void CPythonSystem::SaveInterfaceStatus()
 	if (!m_poInterfaceHandler)
 		return;
 
-	PyCallClassMemberFunc(m_poInterfaceHandler, "OnSaveInterfaceStatus", Py_BuildValue("()"));
+	if (PyObject_HasAttrString(m_poInterfaceHandler, "OnSaveInterfaceStatus"))
+		PyCallClassMemberFunc(m_poInterfaceHandler, "OnSaveInterfaceStatus", Py_BuildValue("()"));
 
 	FILE * File;
 
