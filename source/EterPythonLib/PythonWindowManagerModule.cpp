@@ -2962,13 +2962,6 @@ PyObject * wndMgrSetStartCoolTimeImageBox(PyObject * poSelf, PyObject * poArgs)
 }
 #endif
 
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-PyObject * wndMgrGetTextFromMousePos(PyObject * poSelf, PyObject * poArgs)
-{
-	return Py_BuildValue("s", CGraphicTextInstance::GetTextFromMousePos().c_str());
-}
-#endif
-
 PyObject* wndSetAniImgScale(PyObject* poSelf, PyObject* poArgs)
 {
 	UI::CWindow* pWindow;
@@ -3595,9 +3588,6 @@ void initwndMgr()
 #ifdef ENABLE_12ZI
 		{ "SetCoolTimeImageBox",		wndMgrSetCoolTimeImageBox,			METH_VARARGS},
 		{ "SetStartCoolTimeImageBox",	wndMgrSetStartCoolTimeImageBox,		METH_VARARGS},
-#endif
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-		{ "GetTextFromMousePos",		wndMgrGetTextFromMousePos,			METH_VARARGS },
 #endif
 #ifdef ENABLE_BUTTON_FLASH
 		{ "EnableFlash",				wndButtonEnableFlash,				METH_VARARGS },

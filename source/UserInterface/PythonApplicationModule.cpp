@@ -1679,9 +1679,6 @@ void initapp()
 	PyModule_AddIntConstant(poModule, "HSIZE",			CPythonApplication::CURSOR_SHAPE_HSIZE);
 	PyModule_AddIntConstant(poModule, "VSIZE",			CPythonApplication::CURSOR_SHAPE_VSIZE);
 	PyModule_AddIntConstant(poModule, "HVSIZE",			CPythonApplication::CURSOR_SHAPE_HVSIZE);
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-	PyModule_AddIntConstant(poModule, "TRANS",			CPythonApplication::CURSOR_SHAPE_TRANS);
-#endif
 #ifdef ENABLE_FISHING_RENEWAL
 	PyModule_AddIntConstant(poModule, "FISH",			CPythonApplication::CURSOR_SHAPE_FISH);
 #endif
@@ -2314,16 +2311,6 @@ void initapp()
 	PyModule_AddIntConstant(poModule, "ENABLE_PET_ATTR_DETERMINE", 1);
 #else
 	PyModule_AddIntConstant(poModule, "ENABLE_PET_ATTR_DETERMINE", 0);
-#endif
-
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-#ifdef __ANDROID__
-	PyModule_AddIntConstant(poModule, "ENABLE_TRANSLATOR_GOOGLE_SYSTEM", 0);
-#else
-	PyModule_AddIntConstant(poModule, "ENABLE_TRANSLATOR_GOOGLE_SYSTEM", 1);
-#endif
-#else
-	PyModule_AddIntConstant(poModule, "ENABLE_TRANSLATOR_GOOGLE_SYSTEM", 0);
 #endif
 
 #ifdef ENABLE_QUEST_RENEWAL

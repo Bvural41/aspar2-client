@@ -370,6 +370,7 @@ JNIEXPORT void JNICALL Java_com_metin2_client_NativeLib_init(JNIEnv* env, jobjec
 			mkdir("UserData/offline_shop", 0777);
 			mkdir("UserData/leftseat", 0777);
 			mkdir("UserData/auto_sell", 0777);
+			mkdir("UserData/auto_shout", 0777);
 			env->ReleaseStringUTFChars(internalPath, pathStr);
 		}
 	}

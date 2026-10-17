@@ -138,9 +138,6 @@ class CPythonApplication : public CMSApplication, public CInputKeyboard, public 
 			CURSOR_SHAPE_HSIZE,				// Horizontal Size
 			CURSOR_SHAPE_VSIZE,				// Vertical Size
 			CURSOR_SHAPE_HVSIZE,			// Horizontal & Vertical Size
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-			CURSOR_SHAPE_TRANS,				// Translator Size
-#endif
 #ifdef ENABLE_FISHING_RENEWAL
 			CURSOR_SHAPE_FISH,
 #endif

@@ -31,9 +31,6 @@ bool CPythonApplication::CreateCursors()
 		IDC_CURSOR_HSIZE,			// Horizontal Size
 		IDC_CURSOR_VSIZE,			// Vertical Size
 		IDC_CURSOR_HVSIZE,			// Horizontal & Vertical Size
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-		IDC_CURSOR_TRANS,			// Translate Cussor
-#endif
 #ifdef ENABLE_FISHING_RENEWAL
 		IDC_CURSOR_FISH,
 #endif

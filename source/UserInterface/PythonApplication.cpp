@@ -335,10 +335,6 @@ void CPythonApplication::UpdateGame()
 
 	CGraphicTextInstance::Hyperlink_UpdateMousePos(ptUIMouse.x, ptUIMouse.y);
 
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-	CGraphicTextInstance::UpdateMousePos(ptUIMouse.x, ptUIMouse.y);
-#endif
-
 	DWORD t2 = ELTimer_GetMSec();
 
 	// !@# Alt+Tab Áß SetTransfor ¿¡¼­ Æ¨±è Çö»ó ÇØ°áÀ» À§ÇØ - [levites]
@@ -1904,8 +1900,20 @@ void CPythonApplication::Destroy()
 #ifdef ENABLE_MULTI_FARM_BLOCK
 void CPythonApplication::MultiFarmBlockIcon(BYTE bStatus)
 {
-	HICON exeIcon = bStatus ? LoadIcon(ms_hInstance, MAKEINTRESOURCE(IDI_METIN2)) : LoadIcon(ms_hInstance, MAKEINTRESOURCE(BLOCK_METIN2));
-	SendMessage(GetWindowHandle(), WM_SETICON, ICON_BIG, (LPARAM)exeIcon);
+#if defined(__ANDROID__) || defined(__APPLE__) || defined(__IOS__)
+	// Mobilde pencere/gorev cubugu ikonu yok; yalnizca PC icin gecerli
+	(void)bStatus;
+#else
+	const WORD wIconId = bStatus ? IDI_METIN2 : BLOCK_METIN2;
+	HICON hIconBig = (HICON)LoadImage(ms_hInstance, MAKEINTRESOURCE(wIconId), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_DEFAULTCOLOR);
+	HICON hIconSmall = (HICON)LoadImage(ms_hInstance, MAKEINTRESOURCE(wIconId), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
+	HWND hWnd = GetWindowHandle();
+	// Gorev cubugu kucuk ikonu (ICON_SMALL), Alt+Tab buyuk ikonu (ICON_BIG) kullanir; ikisini de guncelle
+	if (hIconBig)
+		SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconBig);
+	if (hIconSmall)
+		SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
+#endif
 }
 #endif
 

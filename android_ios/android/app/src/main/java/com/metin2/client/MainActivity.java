@@ -911,8 +911,16 @@ public class MainActivity extends Activity {
     private void hideUpdateScreen() {
         runOnUiThread(() -> {
             if (mUpdateScreen != null && mRootLayout != null) {
-                mRootLayout.removeView(mUpdateScreen);
+                // iOS ile ayni gecis: 0.4 sn solarak kaybol, sonra kaldir
+                final UpdateScreen screen = mUpdateScreen;
                 mUpdateScreen = null;
+                screen.animate()
+                    .alpha(0f)
+                    .setDuration(400)
+                    .withEndAction(() -> {
+                        if (mRootLayout != null) mRootLayout.removeView(screen);
+                    })
+                    .start();
             }
         });
     }

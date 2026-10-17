@@ -74,10 +74,6 @@ class CPythonSystem : public CSingleton<CPythonSystem>
 			int				isSaveID;
 			char			SaveID[20];
 
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-			char			TransLangKey[5];
-#endif
-
 			bool			bWindowed;
 			bool			bDecompressDDS;
 			bool			bNoSoundCard;
@@ -313,11 +309,6 @@ class CPythonSystem : public CSingleton<CPythonSystem>
 		int								IsSaveID();
 		const char *					GetSaveID();
 		void							SetSaveID(int iValue, const char * c_szSaveID);
-
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-		const char *					GetTransLangKey();
-		void							SetTransLangKey(const char * c_szTransLangKey);
-#endif
 
 		/// Display
 		void							GetDisplaySettings();

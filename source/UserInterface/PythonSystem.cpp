@@ -487,18 +487,6 @@ void CPythonSystem::SetSaveID(int iValue, const char * c_szSaveID)
 	strncpy(m_Config.SaveID, c_szSaveID, sizeof(m_Config.SaveID) - 1);
 }
 
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-const char * CPythonSystem::GetTransLangKey()
-{
-	return m_Config.TransLangKey;
-}
-
-void CPythonSystem::SetTransLangKey(const char * c_szTransLangKey)
-{
-	strncpy(m_Config.TransLangKey, c_szTransLangKey, sizeof(m_Config.TransLangKey) - 1);
-}
-#endif
-
 CPythonSystem::TConfig * CPythonSystem::GetConfig()
 {
 	return &m_Config;
@@ -1167,10 +1155,6 @@ bool CPythonSystem::LoadConfig()
 			m_Config.bShowDamage = atoi(value) == 1 ? true : false;
 		else if (!stricmp(command, "SHOW_SALESTEXT"))
 			m_Config.bShowSalesText = atoi(value) == 1 ? true : false;
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-		else if (!stricmp(command, "TRANS_LANG_KEY"))
-			strncpy(m_Config.TransLangKey, value, 5);
-#endif
 #ifdef ENABLE_AUTO_SYSTEM
 				else if (!stricmp(command, "AUTO_HUNT_STONE"))
 		{
@@ -1365,9 +1349,6 @@ bool CPythonSystem::SaveConfig()
 				"GAMMA						%d\n"
 				"IS_SAVE_ID					%d\n"
 				"SAVE_ID					%s\n"
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-				"TRANS_LANG_KEY				%s\n"
-#endif
 				"PRE_LOADING_DELAY_TIME		%d\n"
 				"DECOMPRESSED_TEXTURE		%d\n",
 				saveWidth,
@@ -1382,9 +1363,6 @@ bool CPythonSystem::SaveConfig()
 				m_Config.gamma,
 				m_Config.isSaveID,
 				m_Config.SaveID,
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-				m_Config.TransLangKey,
-#endif
 				g_iLoadingDelayTime,
 				m_Config.bDecompressDDS);
 

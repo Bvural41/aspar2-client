@@ -203,10 +203,6 @@
 #define ENABLE_CHAT_STOP_SYSTEM						//Sohbet Durdurma Sistemi
 #define ENABLE_RENDER_TARGET						//Mob Önizleme Sistemi
 #define ENABLE_ATTRACT_RANGER_SYSYTEM				//Okçuları Yanına Çekme Sistemi
-#if !defined(__ANDROID__) && !defined(__APPLE__)
-#define ENABLE_TRANSLATOR_GOOGLE_SYSTEM				//Otomatik Çeviri Sistemi
-#endif
-
 #define ENABLE_KILL_STATISTICS						//Oyuncu İstatistik Sistemi
 #define ENABLE_COINS_SYSTEM							//Ep Sistemi
 #define ENABLE_SALES_SYSTEM							//Fırsatı Yakala Sistemi

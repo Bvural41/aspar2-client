@@ -367,6 +367,7 @@ static GameViewController *s_sharedInstance = nil;
         onCompletion:^(BOOL success, NSString *errorMsg) {
             if (success) {
                 self->_otopatchProgress.progress = 1.0f;
+                self->_otopatchPercentLabel.text = @"%100";
                 NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
                 self->_otopatchStatusLabel.text = [NSString stringWithFormat:@"%@ başlatılıyor...", appName];
                 self->_otopatchDetailLabel.text = @"";

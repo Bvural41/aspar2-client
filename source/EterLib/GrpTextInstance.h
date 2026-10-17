@@ -31,10 +31,6 @@ class CGraphicTextInstance
 	public:
 		static void Hyperlink_UpdateMousePos(int x, int y);
 		static int  Hyperlink_GetText(char* buf, int len);
-// #ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-		static void UpdateMousePos(int x, int y);
-		static std::string & GetTextFromMousePos();
-// #endif
 	public:
 		CGraphicTextInstance();
 		virtual ~CGraphicTextInstance();

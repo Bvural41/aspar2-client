@@ -889,24 +889,6 @@ PyObject * systemIsShowFlag(PyObject * poSelf, PyObject * poArgs)
 }
 #endif
 
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-PyObject * systemSetTransLangKey(PyObject * poSelf, PyObject * poArgs)
-{
-	char * szTransLangKey;
-	if (!PyTuple_GetString(poArgs, 0, &szTransLangKey))
-		return Py_BuildException();
-
-	CPythonSystem::Instance().SetTransLangKey(szTransLangKey);
-	return Py_BuildNone();
-}
-
-PyObject * systemGetTransLangKey(PyObject * poSelf, PyObject * poArgs)
-{
-	const char * c_szTransLangKey = CPythonSystem::Instance().GetTransLangKey();
-	return Py_BuildValue("s", c_szTransLangKey);
-}
-#endif
-
 #ifdef ENABLE_DICE_SYSTEM
 PyObject* systemSetDiceChatShow(PyObject* poSelf, PyObject* poArgs)
 {
@@ -1141,10 +1123,6 @@ void initsystem()
 #ifdef ENABLE_MULTI_LANGUAGE_SYSTEM
 		{ "IsShowFlag",					systemIsShowFlag,				METH_VARARGS },
 		{ "SetShowFlag",				systemSetShowFlag,				METH_VARARGS },
-#endif
-#ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-		{ "SetTransLangKey",			systemSetTransLangKey,			METH_VARARGS },
-		{ "GetTransLangKey",			systemGetTransLangKey,			METH_VARARGS },
 #endif
 #ifdef ENABLE_DICE_SYSTEM
 		{ "SetDiceChatShow",			systemSetDiceChatShow,			METH_VARARGS },

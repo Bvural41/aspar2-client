@@ -28,9 +28,6 @@ static int gs_mx = 0;
 static int gs_my = 0;
 
 static std::wstring gs_hyperlinkText;
-// #ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-static std::string gs_text;
-// #endif
 
 #ifdef ENABLE_MULTI_TEXTLINE
 #include <regex>
@@ -82,20 +79,6 @@ int CGraphicTextInstance::Hyperlink_GetText(char* buf, int len)
 
 	return Ymir_WideCharToMultiByte(codePage, 0, gs_hyperlinkText.c_str(), gs_hyperlinkText.length(), buf, len, NULL, NULL);
 }
-
-// #ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-void CGraphicTextInstance::UpdateMousePos(int x, int y)
-{
-	gs_mx = x;
-	gs_my = y;
-	gs_text = "";
-}
-
-std::string & CGraphicTextInstance::GetTextFromMousePos()
-{
-	return gs_text;
-}
-// #endif
 
 int CGraphicTextInstance::__DrawCharacter(CGraphicFontTexture * pFontTexture, WORD codePage, wchar_t text, DWORD dwColor)
 {
@@ -1360,22 +1343,6 @@ void CGraphicTextInstance::Render(RECT * pClipRect)
 
 	STATEMANAGER.SetRenderState(D3DRS_FOGENABLE, dwFogEnable);
 	STATEMANAGER.SetRenderState(D3DRS_LIGHTING, dwLighting);
-
-// #ifdef ENABLE_TRANSLATOR_GOOGLE_SYSTEM
-	int lx = gs_mx - m_v3Position.x;
-	int ly = gs_my - m_v3Position.y;
-
-	//븘엻 醫뚰몴 遺샇瑜 諛붽퓭以떎.
-	if (GetDefaultCodePage() == CP_ARABIC) {
-		lx = -lx;
-		ly = -ly + m_textHeight;
-	}
-
-	if (lx >= 0 && ly >= 0 && lx < m_textWidth && ly < m_textHeight)
-	{
-		gs_text = m_stText;
-	}
-// #endif
 
 	//湲덇컯寃 留곹겕 쓣썙二쇰뒗 遺遺.
 	if (m_hyperlinkVector.size() != 0)
